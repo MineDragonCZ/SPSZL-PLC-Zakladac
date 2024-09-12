@@ -1,4 +1,4 @@
-PROGRAM prgZakladacNew
+PROGRAM prgZakladac
   VAR
      zakladac_state : INT := 0;
      zakladac_substate : INT := 0;
@@ -15,7 +15,6 @@ PROGRAM prgZakladacNew
               8: vybrat patro podle barvy a dojet k nìmu
               9: najít volnou pozici -> pokud není: opakovat cyklicky
              10: pložit kus do pozice
-             11: 1 a znovu
      *)
      
      current_slot : INT := 0;

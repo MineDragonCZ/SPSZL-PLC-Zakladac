@@ -3,11 +3,11 @@
 ;**********************************************************************
 ;**********************************************************************
 ;**********************************************************************
-#def _SESTAK_ZAKLADAC	0
-#if _ProgName_ == _SESTAK_ZAKLADAC
-  #def _ProgName__SESTAK_ZAKLADAC 1
+#def _SIN_ZAKLADAC	0
+#if _ProgName_ == _SIN_ZAKLADAC
+  #def _ProgName__SIN_ZAKLADAC 1
 #else
-  #def _ProgName__SESTAK_ZAKLADAC 0
+  #def _ProgName__SIN_ZAKLADAC 0
 #endif
 
 

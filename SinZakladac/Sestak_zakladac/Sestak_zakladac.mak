@@ -1,7 +1,7 @@
 ; Warning: This file is managed by Mosaic development environment.
 ; It is not recommended to change it manualy!
 
-#program Sestak_zakladac , V1.0
+#program Sin_Zakladac , V1.0
 ;**************************************
 ;<ActionName/>
 ;<Programmer/>
