@@ -1,0 +1,5063 @@
+{LIBFILE="LOCALLIB\STDLIB_V22_20180619.MLB"}
+(* Mosaic IDE library *)
+(* File name : C:\TecoLib\StdLib_V22_20180619.mlb *)
+(* Library : StdLib 2.2 *)
+(* Author : Teco a.s. *)
+(* Copyright : (c) 2006-2018 Teco a.s. *)
+(* IEC compiler version : 4.1.4.0 *)
+(* Assembler version : 4.3.00 *)
+
+//{Knihovna : StdLib 2.2  }
+(* History: *)
+(*
+v1.0 2004-06-30 Nem  First edition
+                     Blocks : R_TRIG, F_TRIG, SR, RS, TON, TOF, CTU, CTD, TP
+v1.1 2004-08-09	Nem  Function block TOF corrected
+v1.2 2004-09-06	Nem  New version of comments
+v1.3 2005-05-16	Nem  New code for restart of TON/TOF/TP in the case
+                     when timers are in retain area
+v1.4            Nem  not used
+v1.5 2005-11-01	Nem  Final version of hot restart TON/TOF/TP
+                     Function blocks R_TRIG, F_TRIG, SR a RS rewritten in asm
+v1.6 2005-11-07	Nem  Functions ADD_TIME, SUB_TIME, ADD_TOD_TIME,
+                     ADD_DT_TIME, SUB_DATE_DATE, SUB_TOD_TIME, SUB_TOD_TOD,
+                     SUB_DT_TIME, SUB_DT_DT a CONCAT_DATE_TOD added
+v1.7 2006-03-17	Nem  Mask for TON/TOF/PT repaired
+                     Function SUB_DT_DT repaired
+v1.8 2006-04-04	Nem  Comments of TON, .... cutted (it is better for FBD)
+v1.9 2008-09-29	Nem  Function block TOF completelly rewritten
+v2.0 2009-02-25	Nem  When preset of TP is zero than there is no output puls
+     2010-05-19	Nem  Czech comments added (Mosaic v2.0.23 and more)
+     2010-10-27 Nem  English history version added
+v2.1 2014-05-14	Nem  Rising edge of IN input is detected permanently
+v2.2 2018-06-19	Nem  Added function IS_INVALID_REAL
+*)
+
+(*----------------------------------------------------------------------------*)
+
+__DECL FUNCTION_BLOCK R_TRIG
+(*Rising Edge Detector*)
+  VAR_INPUT
+    CLK              : bool;
+  END_VAR
+  VAR_OUTPUT
+    Q                : bool;
+  END_VAR
+  VAR
+    M                : bool;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK F_TRIG
+(*Falling Edge Detector*)
+  VAR_INPUT
+    CLK              : bool;
+  END_VAR
+  VAR_OUTPUT
+    Q                : bool;
+  END_VAR
+  VAR
+    M                : bool :=  TRUE;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK SR
+(*Flip-Flop (Set Dominant)*)
+  VAR_INPUT
+    S1               : bool;
+    R                : bool;
+  END_VAR
+  VAR_OUTPUT
+    Q1               : bool;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK RS
+(*Flip-Flop (Reset Dominant)*)
+  VAR_INPUT
+    S                : bool;
+    R1               : bool;
+  END_VAR
+  VAR_OUTPUT
+    Q1               : bool;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK CTU
+(*Up Counter*)
+  VAR_INPUT
+    CU               : bool R_EDGE;  (*up*)
+    R                : bool;  (*reset*)
+    PV               : int;  (*preset*)
+  END_VAR
+  VAR_OUTPUT
+    Q                : bool;  (*output*)
+    CV               : int;  (*value*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK CTD
+(*Down Counter*)
+  VAR_INPUT
+    CD               : bool R_EDGE;  (*down*)
+    LD               : bool;  (*load*)
+    PV               : int;  (*preset*)
+  END_VAR
+  VAR_OUTPUT
+    Q                : bool;  (*output*)
+    CV               : int;  (*value*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK CTUD
+(*Up-Down Counter*)
+  VAR_INPUT
+    CU               : bool R_EDGE;  (*up*)
+    CD               : bool R_EDGE;  (*down*)
+    R                : bool;  (*reset*)
+    LD               : bool;  (*load*)
+    PV               : int;  (*preset*)
+  END_VAR
+  VAR_OUTPUT
+    QU               : bool;  (*up output*)
+    QD               : bool;  (*down output*)
+    CV               : int;  (*value*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK TON
+(*On-delay Timer*)
+  VAR_INPUT
+    IN               : bool;  (*input*)
+    PT               : time;  (*preset*)
+  END_VAR
+  VAR_OUTPUT
+    Q                : bool;  (*output*)
+    ET               : time;  (*value*)
+  END_VAR
+  VAR
+    IN_r_edge        : R_TRIG;
+    LT               : time;  (*last tick value ( 1ms resolution)*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK TOF
+(*Off-delay Timer*)
+  VAR_INPUT
+    IN               : bool;  (*input*)
+    PT               : time;  (*preset*)
+  END_VAR
+  VAR_OUTPUT
+    Q                : bool;  (*output*)
+    ET               : time;  (*value*)
+  END_VAR
+  VAR
+    IN_f_edge        : F_TRIG;
+    LT               : time;  (*last tick value ( 1ms resolution)*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK TP
+(*Pulse Timer*)
+  VAR_INPUT
+    IN               : bool;  (*input*)
+    PT               : time;  (*preset*)
+  END_VAR
+  VAR_OUTPUT
+    Q                : bool;  (*output*)
+    ET               : time;  (*value*)
+  END_VAR
+  VAR
+    IN_r_edge        : R_TRIG;
+    LT               : time;  (*last tick value ( 1ms resolution)*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION IS_INVALID_REAL : bool
+(*Returns TRUE if the value of num is NaN, +INF or -INF*)
+  VAR_INPUT
+    num              : real;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ADD_TIME : time
+(*------------------------------------------------------------------------------
+  TIME := TIME + TIME;*)
+  VAR_INPUT
+    IN1              : time;
+    IN2              : time;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SUB_TIME : time
+(*------------------------------------------------------------------------------
+  TIME := TIME - TIME;*)
+  VAR_INPUT
+    IN1              : time;
+    IN2              : time;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ADD_TOD_TIME : tod
+(*------------------------------------------------------------------------------
+  TIME_OF_DAY := TIME_OF_DAY + TIME;*)
+  VAR_INPUT
+    IN1              : tod;
+    IN2              : time;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ADD_DT_TIME : dt
+(*------------------------------------------------------------------------------
+  DATE_AND_TIME := DATE_AND_TIME + TIME;*)
+  VAR_INPUT
+    IN1              : dt;
+    IN2              : time;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SUB_DATE_DATE : time
+(*------------------------------------------------------------------------------
+  TIME := DATE - DATE;*)
+  VAR_INPUT
+    IN1              : date;
+    IN2              : date;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SUB_TOD_TIME : tod
+(*------------------------------------------------------------------------------
+  TIME_OF_DAY := TIME_OF_DAY - TIME;*)
+  VAR_INPUT
+    IN1              : tod;
+    IN2              : time;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SUB_TOD_TOD : time
+(*------------------------------------------------------------------------------
+  TIME := TIME_OF_DAY - TIME_OF_DAY;*)
+  VAR_INPUT
+    IN1              : tod;
+    IN2              : tod;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SUB_DT_TIME : dt
+(*------------------------------------------------------------------------------
+  DATE_AND_TIME := DATE_AND_TIME - TIME;*)
+  VAR_INPUT
+    IN1              : dt;
+    IN2              : time;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SUB_DT_DT : time
+(*------------------------------------------------------------------------------
+  TIME := DATE_AND_TIME - DATE_AND_TIME;*)
+  VAR_INPUT
+    IN1              : dt;
+    IN2              : dt;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CONCAT_DATE_TOD : dt
+(*------------------------------------------------------------------------------
+  DATE_AND_TIME := DATE + TIME_OF_DAY;*)
+  VAR_INPUT
+    IN1              : date;
+    IN2              : tod;
+  END_VAR
+END_FUNCTION
+
+
+
+{LIBFILE="LOCALLIB\SYSLIB_V50_20230202.MLB"}
+(* Mosaic IDE library *)
+(* File name : C:\TecoLibSrc\Syslib\SysLib_V50_20230202.mlb *)
+(* Library : SysLib 5.0 *)
+(* Author : Teco a.s. Kolin *)
+(* Copyright : (c) 2004-2023 Teco a.s. *)
+(* IEC compiler version : 4.2.18.0 *)
+(* Assembler version : 4.3.00 *)
+
+//{Knihovna : SysLib 5.0  }
+(* History: *)
+(*
+v1.0 2004-09-01 Nem First edition
+v1.1 2004-09-16 Nem New funtions : memcpy(),
+                    SetSummerTime(), IsSummerTime(), SetWinterTime(), IsWinterTime()
+v1.2 2005-05-16 Nem New funtions : GetDate(), GetTime(), GetDateTime(), GetRTC(), 
+                    SetRTC()
+                    System registers declared as a structure
+v1.3 2005-11-10 Nem New funtions : TecoDT_TO_DT() and DT_TO_TecoDT()
+v1.4 2007-11-17 Nem New funtion : Memset()
+v1.5 2008-01-17 Nem New funtions : IncreaseMaxCycleTime()
+v1.6 2008-08-18 Nem Change parameters order VAR_INPUT and VAR_IN_OUT
+                    in functions Memset() and Memcpy() - it is better for LD 
+                    language
+v1.7 2009-02-20 Nem New functions : Get_IP_address() and Set_IP_address() for Eth1
+v1.8 2009-03-10 Nem Funtion Get_IP_address() replaced by function GetIPaddress() and 
+                    moved to ComLib
+                    Funtion Set_IP_address() replaced by function SetIPaddress() and 
+                    moved to ComLib
+v1.9 2009-10-22 Nem New funtions : CIBunitInfo() and SetCIBunitAddress()
+                    and new data types TCIBunitState a TCIBunitInfo
+v2.0 2009-11-20 Nem New funtion : ProgramLock()
+v2.1 2009-12-16 Nem New funtions : function block fbTick() and function Memcmp()
+v2.2 2010-01-18 Nem Corrected coding of CIB master and new code for master 0 
+                   (MI0_CIB1 a MI0_CIB2)
+v2.3 2010-05-06 Nem New funtions : SetWebPSW() and VerifyWebPSW()
+v2.4 2010-08-16 Nem New funtions : SystemDisplayBacklightOn() and 
+                    SystemDisplayBacklightOff()
+v2.5 2010-09-02 Nem Dependency on the libraries added
+     2010-09-15 Nem Function SetRTC returns TRUE when date and time is succesfully 
+                    written to RTC device
+v2.6 2011-01-19 Nem New functions : RFunitInfo() and SetRFunitAddress()
+v2.7 2011-06-30 Nem New function block : fbBondRFunit()
+v2.8 2011-11-02 Nem New function blocks : memcpyEx(), memsetEx() and memcmpEx()
+v2.9 2011-12-02 Nem New functions : SetWebMAC() and VerifyWebMAC()
+v3.0 2012-04-27 Nem New function block TPR() and completed declaration of SystemS
+v3.1 2012-06-21 Nem Block TPR replaced by block fbTPR() - RESET input has high 
+                    priority
+                    Corrected declaration of structure SystemS 
+                    (added CPU_DI and CPU_DO)
+v3.2 2013-03-22 Nem Restored block TPR from version 3.0 (backward compatibility)
+                    New funtion : ProgramIsChanged()
+v3.3 2013-06-21 Nem Fixed bug in ProgramIsChanged() in case of on-line change
+                    New funtions :  ReInitPLC_hotRestart(), ReInitPLC_coldRestart()
+                    and ReInitPLC_noRestart() - it requires Foxtrot FW v7.8 
+                    minimally
+v3.4 2014-10-03 Nem New function : GetModuleID() and type T_RGB_COLOR
+v3.5 2015-04-16 Nem New function : MemcpyPtr()
+v3.6 2015-12-14 Nem New function : GetVarValueByName() a SetVarValueByName()
+v3.7 2016-06-27 Nem New function : GetVarNameByAdr()
+v3.8 2016-11-21 Nem Added funtions ReInitPLC_hotRestartX(), ReInitPLC_coldRestartX()
+                    ReInitPLC_noRestartX() and function block fbIOSystemDiag
+                    (it requires Foxtrot FW v9.9 minimally)
+     2017-09-07 Nem Added funtions SetWebLevel() and VerifyWebLevel() 
+v3.9 2018-06-01 Nem Added function blocks fbLoadRemFromFile() a fbSaveRemToFile()
+                    (for Foxtrot CP-2xxx only)
+v4.0 2018-12-04 Nem Added function MemcpyPtr0()
+v4.1 2019-07-10 Nem Added functions CIBunitInfo2() and SetAddressCIBunit2() for Foxtrot 2
+v4.2 2019-10-17 Nem Added items in TSYSTEM_S
+v4.3 2019-12-19 Nem Added functions GetProgramInfo2() a GetPlcInfo2() and ResetLTE2()
+                    (for Foxtrot CP-2xxx only)
+v4.4 2020-02-03 Nem Funtions SetWebPSW(), VerifyWebPSW(), SetWebMAC(), VerifyWebMAC(), 
+                    SetWebLevel() a VerifyWebLevel() corrected for Foxtrot CP-2xxx  
+v4.5 2020-09-14 Nem New function : LoadNewPackage2() (for Foxtrot CP-2xxx only)
+     2021-04-30 Nem New function block : fbStopwatch100us()
+     2021-05-17 Byd Fixed detection of a raising edge in TPR and fbTPR function blocks
+v4.6 2021-08-13 Nem Added definitions DISABLE_WEB_DEL_BUTTONS, USE_USER_LOGIN_PAGE, 
+                    ENABLE_WEB_CORS and ENABLE_API_CORS (Foxtrot CP-2xxx only)
+v4.7 2021-09-16 Nem Added functions GetVarAbsLoc() a GetVarAbsLocBool()
+v4.8 2022-06-08 Nem Added function blocks fbSetConfigWebPsw2(), fbSetAvahiHostName2()
+                    and function GetAvahiHostName2() 
+v4.9 2022-12-19 Nem Added function TestHotRestartFailed2() and function block fbFlashRem2()
+v5.0 2023-02-02 Byd Added function RandomU
+*)
+
+(*----------------------------------------------------------------------------*)
+
+TYPE T_RGB_COLOR :
+  STRUCT
+    red              : usint;  (*red color <0..255>*)
+    green            : usint;  (*green color <0..255>*)
+    blue             : usint;  (*blue color <0..255>*)
+    opacity          : usint;  (*opacity (0 = opaque, 255 = transparent)*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TSYSTEM_S :
+  STRUCT
+    S0               : byte;  (*%S0 flags of the results of arithmetic operations*)
+    S1               : byte;  (*%S1 flags of the results of logical operations*)
+    S2_0             : bool;  (*%S2.0 reserved*)
+    S2_1             : bool;  (*%S2.1 reserved*)
+    S2_2             : bool;  (*%S2.2 PLC is running*)
+    S2_3             : bool;  (*%S2.3 HOT restart*)
+    S2_4             : bool;  (*%S2.4 COLD restart*)
+    OUTPUTS_ARE_ENABLED : bool;  (*%S2.5 PLC outputs are enabled*)
+    S2_6             : bool;  (*%S2.6 RUN without restart*)
+    CYCLE_TIME_WARNING : bool;  (*%S2.7 cycle time warning*)
+    LAST_CYCLE_TIME_10MS : usint;  (*%S3 last cycle time [x10 milisecond]*)
+    CYCLE_COUNTER    : usint;  (*%S4 cycle counter*)
+    COUNTER_10MS     : usint;  (*%S5 10 miliseconds counter*)
+    COUNTER_SECONDS  : usint;  (*%S6 second counter*)
+    COUNTER_MINUTES  : usint;  (*%S7 minute counter*)
+    COUNTER_HOURS    : usint;  (*%S8 hour counter*)
+    COUNTER_DAYS_OF_WEEK : usint;  (*%S9 day of week counter*)
+    COUNTER_DAYS_OF_MONTH : usint;  (*%S10 day counter*)
+    COUNTER_MONTHS   : usint;  (*%S11 month counter*)
+    COUNTER_YEARS    : usint;  (*%S12 year counter*)
+    PERIOD_PULSE_100MS : bool;  (*%S13.0 100 ms periodic pulse*)
+    PERIOD_PULSE_500MS : bool;  (*%S13.1 500 ms periodic pulse*)
+    PERIOD_PULSE_1SEC : bool;  (*%S13.2 1 s periodic pulse*)
+    PERIOD_PULSE_10SEC : bool;  (*%S13.3 10 s periodic pulse*)
+    PERIOD_PULSE_1MIN : bool;  (*%S13.4 1 min periodic pulse*)
+    PERIOD_PULSE_10MIN : bool;  (*%S13.5 10 min periodic pulse*)
+    PERIOD_PULSE_1HOUR : bool;  (*%S13.6 1 hour periodic pulse*)
+    PERIOD_PULSE_1DAY : bool;  (*%S13.7 1 day periodic pulse*)
+    COUNTER_100MS    : uint;  (*%SW14 100 ms counter*)
+    COUNTER_1SEC     : uint;  (*%SW16 1 sec counter*)
+    COUNTER_10SEC    : uint;  (*%SW18 10 sec counter*)
+    R_EDGE_100MS     : bool;  (*%S21.0 rising edge 100 ms*)
+    R_EDGE_500MS     : bool;  (*%S21.1 rising edge 500 ms*)
+    R_EDGE_1SEC      : bool;  (*%S21.2 rising edge 1 sec*)
+    R_EDGE_10SEC     : bool;  (*%S21.3 rising edge 10 sec*)
+    R_EDGE_1MIN      : bool;  (*%S21.4 rising edge 1 min*)
+    R_EDGE_10MIN     : bool;  (*%S21.5 rising edge 10 min*)
+    R_EDGE_1HOUR     : bool;  (*%S21.6 rising edge 1 hour*)
+    R_EDGE_1DAY      : bool;  (*%S21.7 rising edge 1 day*)
+    F_EDGE_100MS     : bool;  (*%S21.0 falling edge 100 ms*)
+    F_EDGE_500MS     : bool;  (*%S21.1 falling edge 500 ms*)
+    F_EDGE_1SEC      : bool;  (*%S21.2 falling edge 1 sec*)
+    F_EDGE_10SEC     : bool;  (*%S21.3 falling edge 10 sec*)
+    F_EDGE_1MIN      : bool;  (*%S21.4 falling edge 1 min*)
+    F_EDGE_10MIN     : bool;  (*%S21.5 falling edge 10 min*)
+    F_EDGE_1HOUR     : bool;  (*%S21.6 falling edge 1 hour*)
+    F_EDGE_1DAY      : bool;  (*%S21.7 falling edge 1 day*)
+    LAST_CYCLE_TIME_100US : uint;  (*%SW22 last cycle time [x100 microsecond]*)
+    S24              : byte;  (*%S24 control masks for PLC processes*)
+    S25              : byte;  (*%S25 control masks for PLC processes*)
+    S26              : byte;  (*%S26 control masks for PLC processes*)
+    S27              : byte;  (*%S27 control masks for PLC processes*)
+    S28              : byte;  (*%S28 control masks for PLC processes*)
+    S29              : byte;  (*%S29 control masks for PLC processes*)
+    SL30             : udint;  (*%SL30 reserved*)
+    S34              : byte;  (*%S34 main code of PLC error*)
+    BAT_ERR          : bool;  (*%S35.0 backup baterry error*)
+    S35_1            : bool;  (*%S35.1 reserved*)
+    S35_2            : bool;  (*%S35.2 state of button MODE*)
+    S35_3            : bool;  (*%S35.3 state of button SET*)
+    S35_4            : bool;  (*%S35.4 reserved*)
+    S35_5            : bool;  (*%S35.5 reserved*)
+    IS_SUMMER_TIME   : bool;  (*%S35.6 summer time indication*)
+    SUMMER_TIME_REQUEST : bool;  (*%S35.7 reserved*)
+    CPU_TEMPERATURE  : usint;  (*%S36  CPU temperature [Celsius degree]*)
+    MOSAIC_IS_CONNECTED : bool;  (*%S37.0 Mosaic is connected*)
+    S37_1            : bool;  (*%S37.1 reserved*)
+    S37_2            : bool;  (*%S37.2 reserved*)
+    IO_IS_FIXED      : bool;  (*%S37.3 any I/O is fixed*)
+    S37_4            : bool;  (*%S37.4 reserved*)
+    USB_DISK_READY   : bool;  (*%S37.5 USB Flash Disk is ready to use (only for Foxtrot 2 or TC800)*)
+    IS_USB_DISK      : bool;  (*%S37.6 USB Flash Disk inserted (only for Foxtrot 2 or TC800)*)
+    EEPROM_IS_ON     : bool;  (*%S37.7 EEPROM is on (Foxtrot 1 only)*)
+    S38              : byte;  (*%S38 version of user program PLC*)
+    S39              : byte;  (*%S39 version of user program PLC*)
+    S40              : byte;  (*%S40 version of system program of CPU*)
+    S41              : byte;  (*%S41 version of system program of CPU*)
+    S42              : byte;  (*%S42 PLC line  (C=16#43, G=16#47, K=16#4B, L=16#4C, I=16#49)*)
+    S43              : byte;  (*%S43 behavior flags of PLC*)
+    S44              : byte;  (*%S44 compiler sign*)
+    S45              : byte;  (*%S45 compiler sign*)
+    S46              : byte;  (*%S46 limit for warning cycle time  [10ms]*)
+    S47              : byte;  (*%S47 limit for max cycle time  [10ms]*)
+    SW48             : word;  (*%SW48 detail PLC error code*)
+    S50              : byte;  (*%S50 PLC error code*)
+    S51              : byte;  (*%S51 main PLC error code*)
+    COUNTER_1MS      : udint;  (*%SL52 1 ms counter*)
+    SW56             : word;  (*%SW56 reserved*)
+    CPU_DI           : byte;  (*%S58 inputs serviced by CPU*)
+    CPU_DO           : byte;  (*%S59 outputs serviced by CPU*)
+    SL60             : udint;  (*%SL70 reserved*)
+    SIZE_OF_RETAIN_ZONE : udint;  (*%SL64 size of retain zone (number of bytes)*)
+    UTC_OFFSET       : int;  (*%SW68 UTC offset*)
+    CRC_OF_USER_PROGRAM : word;  (*%SW70 CRC of user program*)
+    CRC_OF_HEADER_PROGRAM : word;  (*%SW72 CRC of header of user program*)
+    S74              : byte;  (*%S74 reserved*)
+    S75              : byte;  (*%S75 reserved*)
+    S76              : byte;  (*%S76 reserved*)
+    S77              : byte;  (*%S77 reserved*)
+    COUNTER_MILLISECONDS : uint;  (*%SW78 decimal part of system time [ms]*)
+    PLC_PRIVATE_AREA : ARRAY [0..19] OF byte;  (*%S80,...,%S99 this area is private for central unit of PLC*)
+  END_STRUCT;
+END_TYPE
+
+VAR_GLOBAL
+ System_S AT %S0 : TSYSTEM_S;
+ IS_HOT_RESTART_PLC AT System_S.S2_3 : bool;  (*%S2.3 HOT restart*)
+ IS_COLD_RESTART_PLC AT System_S.S2_4 : bool;  (*%S2.4 COLD restart*)
+ IS_RESTART_PLC AT System_S.S2_6 : bool;  (*%S2.6 RUN without restart*)
+ CRC_OF_APLIC_PROGRAM AT System_S.CRC_OF_USER_PROGRAM : dword;  (*%SL70 CRC of aplic program*)
+ DISABLE_WEB_DEL_BUTTONS AT %S355.0 : bool;  (*%S355.0 disable DEL buttons in list of files*)
+ USE_USER_LOGIN_PAGE AT %S355.1 : bool;  (*%S355.1 use user login page instead of system login page*)
+ ENABLE_WEB_CORS AT %S355.2 : bool;  (*%S355.2 enable CORS for web server*)
+ ENABLE_API_CORS AT %S355.3 : bool;  (*%S355.3 enable CORS for TecoApi*)
+
+END_VAR
+
+TYPE TModuleInfo :
+  STRUCT
+    ECOM             : bool;  (*communication module <=> CPU : 0 ... communication is OK, 1 ... ERROR*)
+    DATA             : bool;  (*data validity                : 0 ... module data are not valid, 1 ... OK*)
+    DUMMY1           : bool;  (*not used*)
+    DUMMY2           : bool;  (*not used*)
+    ERR              : bool;  (*I/O module error             : 0 ... module is OK, 1 ... module has a problem*)
+    DEC              : bool;  (*module declaration           : 0 ... module is not declared in user program*)
+    OTH              : bool;  (*check module type            : 0 ... declared and exist module is the same*)
+    POS              : bool;  (*position                     : 0 ... position is free, 1 ... module is present*)
+    STAT             : usint;  (*collection all previous bits*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TIOSystemInfo :
+  STRUCT
+    err              : bool;  (*0 ... all I/O modules are OK, 1 ... any module has error*)
+    rackNumber       : usint;  (*if err=1 then rack number where module is plugged*)
+    position         : usint;  (*if err=1 then position number where module is plugged*)
+  END_STRUCT;
+END_TYPE
+
+VAR_GLOBAL CONSTANT
+ MODULE_AND_DATA_OK : usint := 16#A2;
+
+END_VAR
+
+__DECL FUNCTION ModuleInfo : TModuleInfo
+(*Get information about I/O module (Foxtrot 1 only)
+   Function returns info about one I/O module.
+   You can use this function if module can be removed on time*)
+  VAR_INPUT
+    rackNumber       : usint;  (*rack number where module is plugged*)
+    position         : usint;  (*position number where module is plugged*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ModuleInfo2 : TModuleInfo
+(*Get information about I/O module (only for Foxtrot 2 or TC800)
+   Function returns info about one I/O module.
+   You can use this function if module can be removed on time*)
+  VAR_INPUT
+    Bus_ID           : udint;  (*bus ID number (TCL2 = 16#1020, ...)*)
+    Unit_ID          : usint;  (*address of unit on the bus (0,...,63)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION IOSystemInfo : TIOSystemInfo
+(*Get state of PLC I/O system on TCL2 bus (Foxtrot 1 only)
+
+   Function returns info about I/O system on TCL2 bus
+   Function is designed for monitoring of modules that can be removed online
+
+   If any module on TCL2 bus has an error,
+   err flag is true and position and rack number are set*)
+END_FUNCTION
+
+__DECL FUNCTION Memcpy : uint
+(*Copy memory
+  Function copies a block of n bytes from source to dest
+  Function returns number of copied bytes*)
+  VAR_INPUT
+    length           : uint;  (*number of bytes*)
+  END_VAR
+  VAR_IN_OUT
+    source           : usint;  (*source*)
+    dest             : usint;  (*destination*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION MemcpyEx : uint
+(*Copy memory
+  Function copies a block of n bytes from source+offsetSource to dest+offsetDest
+  Function returns number of copied bytes*)
+  VAR_INPUT
+    length           : udint;  (*number of bytes*)
+    offSource        : udint;  (*offset in source*)
+    offDest          : udint;  (*offset in destination*)
+  END_VAR
+  VAR_IN_OUT
+    source           : usint;  (*source*)
+    dest             : usint;  (*destination*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION MemcpyPtr : udint
+(*Function MemcpyPtr copies a block of n bytes from source to dest.
+  Function returns number of copied bytes.*)
+  VAR_INPUT
+    source           : PTR_TO usint;  (*pointer to source*)
+    dest             : PTR_TO usint;  (*pointer to  destination*)
+    length           : udint;  (*number of bytes*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION MemcpyPtr0 : udint
+(*Function MemcpyPtr0 copies a block of n bytes from source to dest.
+  Function returns number of copied bytes.
+  One byte with value with binary zero is written behind the copied block
+  (end of string).*)
+  VAR_INPUT
+    source           : PTR_TO usint;  (*pointer to source*)
+    dest             : PTR_TO usint;  (*pointer to  destination*)
+    length           : udint;  (*number of bytes*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION Memset : bool
+(*Set memory
+  This function fills the first length bytes of the array pointed to by dest to the value
+  Function returns true if succesfull*)
+  VAR_INPUT
+    val              : udint;  (*filling value*)
+    length           : uint;  (*number of bytes to be filled*)
+  END_VAR
+  VAR_IN_OUT
+    dest             : usint;  (*destination*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION MemsetEx : bool
+(*Set memory
+  This function fills the first length bytes of the array pointed to by dest+offDest to the value
+  Function returns true if succesfull*)
+  VAR_INPUT
+    val              : udint;  (*filling value*)
+    length           : udint;  (*number of bytes to be filled*)
+    offDest          : udint;  (*offset in destination*)
+  END_VAR
+  VAR_IN_OUT
+    dest             : usint;  (*destination*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION Memcmp : bool
+(*Compare memory
+  Function compares a block of n bytes between in1 and in2
+  Function returns TRUE if in1 is equal in2*)
+  VAR_INPUT
+    length           : uint;  (*number of bytes*)
+  END_VAR
+  VAR_IN_OUT
+    in1              : usint;  (*first data block*)
+    in2              : usint;  (*second data block*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION MemcmpEx : bool
+(*Compare memory
+  Function compares a block of n bytes between in1+offIn1 and in2+offIn2
+  Function returns TRUE if blocks are equal*)
+  VAR_INPUT
+    length           : udint;  (*number of bytes*)
+    offIn1           : udint;  (*offset in first data block*)
+    offIn2           : udint;  (*offset in second data block*)
+  END_VAR
+  VAR_IN_OUT
+    in1              : usint;  (*first data block*)
+    in2              : usint;  (*second data block*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION IncreaseMaxCycleTime : bool
+(*Increase max limit for PLC scan time
+
+   Use IncreaseMaxCycleTime to increase max limit for PLC scan time in current scan*)
+  VAR_INPUT
+    addTime          : uint;  (*milisec*)
+  END_VAR
+END_FUNCTION
+
+TYPE TTecoDateTime :
+  STRUCT
+    year             : usint;  (*last two numbers*)
+    month            : usint;  (*1 .. 12*)
+    day              : usint;  (*1 .. 28/29/30/31*)
+    hour             : usint;  (*0 .. 23*)
+    min              : usint;  (*0 .. 59*)
+    sec              : usint;  (*0 .. 59*)
+    dayOfWeek        : usint;  (*1 = Monday .. 7 = Sunday*)
+    milisec          : uint;  (*0 .. 999*)
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION SetSummerTime : bool
+(*Set Automatic Daylight Saving Time
+  Set request for automatic changing between summer and winter time*)
+END_FUNCTION
+
+__DECL FUNCTION IsSummerTime : bool
+(*Test of summer time
+  Test if is summer time now*)
+END_FUNCTION
+
+__DECL FUNCTION SetWinterTime : bool
+(*Disable Automatic Daylight Saving Time
+  Reset request for automatic changing between summer and winter time*)
+END_FUNCTION
+
+__DECL FUNCTION IsWinterTime : bool
+(*Test of winter time
+  Test if is winter time now*)
+END_FUNCTION
+
+__DECL FUNCTION GetDate : date
+(*Get actual system date*)
+  VAR
+    tmp              : TTecoDateTime;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetTime : time
+(*Get actual system time*)
+  VAR
+    milisec          : uint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetDateTime : dt
+(*Get actual system date and time*)
+  VAR
+    tmp              : TTecoDateTime;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetRTC : dt
+(*Get actual date and time from RTC device directly*)
+  VAR
+    tmp              : TTecoDateTime;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetRTC : bool
+(*Set new date and time of PLC
+  Function sets new actual date and time to RTC device*)
+  VAR_INPUT
+    PDT              : dt;  (*new date and time*)
+  END_VAR
+  VAR
+    tmp              : TTecoDateTime;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION TecoDT_TO_DT : dt
+(*Convert structure TTecoDateTime to type DATE_AND_TIME*)
+  VAR_INPUT
+    Teco_DT          : TTecoDateTime;  (*date and time*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DT_TO_TecoDT : TTecoDateTime
+(*Convert DATE_AND_TIME to structure TTecoDateTime*)
+  VAR_INPUT
+    IEC_DT           : dt;  (*date and time*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION memory_for_ProgramIsChanged {HIDDEN} : bool
+  VAR_INPUT
+    saveSL70         : bool;
+    memSL70          : udint;
+    memS4            : usint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ProgramIsChanged : bool
+(*Function returns TRUE in case of restart of PLC program or
+        when program is changed on-line*)
+  VAR
+    saveSL70         : bool;
+    memSL70          : udint;
+    memS4            : usint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ReInitPLC_hotRestart : bool
+(*Function for initialization the PLC
+  As a first step PLC goes to HALT mode. PLC outputs are blocked.
+  Processing of application program is stopped.
+  After that warm restart is executed and PLC goes to RUN mode.
+  IO system is completely reinitialized.
+  Values of RETAIN variables are unchanged,
+  all others variables are initialized*)
+  VAR_INPUT
+    rq               : bool;  (*1 = request for reinitialization of PLC*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ReInitPLC_coldRestart : bool
+(*Function for initialization the PLC
+  As a first step PLC goes to HALT mode. PLC outputs are blocked.
+  Processing of application program is stopped.
+  After that cold restart is executed and PLC goes to RUN mode.
+  IO system is completely reinitialized.
+  All variables are initialized.*)
+  VAR_INPUT
+    rq               : bool;  (*request for reinitialization of PLC*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ReInitPLC_noRestart : bool
+(*Function for initialization the PLC
+  As a first step PLC goes to HALT mode. PLC outputs are blocked.
+  Processing of application program is stopped.
+  After that PLC goes to RUN mode.
+  IO system is completely reinitialized.
+  All variables are unchanged.*)
+  VAR_INPUT
+    rq               : bool;  (*request for reinitialization of PLC*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ReInitPLC_hotRestartX : bool
+(*Function for initialization the PLC with loading of new code from file
+  The function first confirm that there are files whose names are listed
+  in the table and code parameters. If so, the function returns TRUE and
+  PLC completes the currently executing program cycle.
+  Then PLC goes into HALT mode and PLC outputs are disabled.
+  Processing of application program is stopped!
+  Then downloads the new program code from the file (including tables)
+  and PLC makes all the necessary checks of the new code.
+  When checks reveal a problem, the PLC reads back the original code from EEPROM.
+  If the code is ok and input EEPROM = TRUE so new code is programmed into the EEPROM.
+  After that warm restart is executed and PLC goes to RUN mode.
+  IO system is completely reinitialized.
+  Values of RETAIN variables are unchanged,
+  all others variables are initialized*)
+  VAR_INPUT
+    rq               : bool;  (*1 = request for reinitialization of PLC*)
+    eeprom           : bool;  (*1 = request for programming of new code into EEPROM*)
+    code             : string [80];  (*file name of program code (including path)*)
+    table            : string [80];  (*file name of program tables (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ReInitPLC_coldRestartX : bool
+(*Function for initialization the PLC with loading of new code from file
+  The function first confirm that there are files whose names are listed
+  in the table and code parameters. If so, the function returns TRUE and
+  PLC completes the currently executing program cycle.
+  Then PLC goes into HALT mode and PLC outputs are disabled.
+  Processing of application program is stopped!
+  Then downloads the new program code from the file (including tables)
+  and PLC makes all the necessary checks of the new code.
+  When checks reveal a problem, the PLC reads back the original code from EEPROM.
+  If the code is ok and input EEPROM = TRUE so new code is programmed into the EEPROM.
+  After that cold restart is executed and PLC goes to RUN mode.
+  IO system is completely reinitialized.
+  All variables are initialized.*)
+  VAR_INPUT
+    rq               : bool;  (*request for reinitialization of PLC*)
+    eeprom           : bool;  (*1 = request for programming of new code into EEPROM*)
+    code             : string [80];  (*file name of program code (including path)*)
+    table            : string [80];  (*file name of program tables (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ReInitPLC_noRestartX : bool
+(*Function for initialization the PLC with loading of new code from file
+  The function first confirm that there are files whose names are listed
+  in the table and code parameters. If so, the function returns TRUE and
+  PLC completes the currently executing program cycle.
+  Then PLC goes into HALT mode and PLC outputs are disabled.
+  Processing of application program is stopped!
+  Then downloads the new program code from the file (including tables)
+  and PLC makes all the necessary checks of the new code.
+  When checks reveal a problem, the PLC reads back the original code from EEPROM.
+  If the code is ok and input EEPROM = TRUE so new code is programmed into the EEPROM.
+  After that PLC goes to RUN mode. IO system is completely reinitialized.
+  All variables are unchanged.*)
+  VAR_INPUT
+    rq               : bool;  (*request for reinitialization of PLC*)
+    eeprom           : bool;  (*1 = request for programming of new code into EEPROM*)
+    code             : string [80];  (*file name of program code (including path)*)
+    table            : string [80];  (*file name of program tables (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION TestHotRestartFailed2 : bool
+END_FUNCTION
+
+__DECL FUNCTION GetModuleID : string [40]
+(*Returns identification string from 32 to 36 characters according to module type (for Foxtrot 1 only)*)
+  VAR_INPUT
+    rackNumber       : usint;  (*rack number where module is plugged*)
+    position         : usint;  (*position number where module is plugged*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetVarValueByName : string [255]
+(*Returns value of variable according to name of variable*)
+  VAR_INPUT
+    varName          : string [255];  (*full name of variable (name of instance)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetVarNameByAdr : string [255]
+(*Returns name of variable according to address of variable*)
+  VAR_IN_OUT
+    varAdr           : byte;  (*variable (name of instance)*)
+  END_VAR
+  VAR_INPUT
+    varSize          : udint;  (*size of variable (number of bytes)*)
+  END_VAR
+END_FUNCTION
+
+TYPE T_VAR_DESC :
+  STRUCT
+    addr             : udint;
+    size             : udint;
+    typ              : usint;
+    isArray          : bool;
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION GetVarDescByName : T_VAR_DESC
+(*Returns description of variable according to name of variable*)
+  VAR_INPUT
+    varName          : string [255];  (*full name of variable (name of instance)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetVarValueByName : bool
+(*Set value of variable according to name of variable*)
+  VAR_INPUT
+    varName          : string [255];  (*full name of variable (name of instance)*)
+    varValue         : string [255];  (*new value of variable*)
+  END_VAR
+END_FUNCTION
+
+TYPE TProgramInfo2 :
+  STRUCT
+    progName         : string [32];  (*user program name*)
+    progVersion      : string [16];  (*version of program*)
+    compiled         : string [32];  (*date of compilation*)
+    stamp            : dword;  (*CRC stamp*)
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION GetProgramInfo2 : TProgramInfo2
+(*Get information about user program (only for Foxtrot 2 or TC800)*)
+END_FUNCTION
+
+TYPE TPlcInfo2 :
+  STRUCT
+    family           : string [4];  (*family of PLC*)
+    plcType          : string [16];  (*PLC type*)
+    specif           : string [12];  (*specification*)
+    version          : string [12];  (*PLC version*)
+    serialNum        : string [8];  (*PLC serial number*)
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION GetPlcInfo2 : TPlcInfo2
+(*Get information PLC system (only for Foxtrot 2 or TC800)*)
+END_FUNCTION
+
+__DECL FUNCTION ResetLTE2 : bool
+(*Reset LTE modem (only for Foxtrot 2)*)
+END_FUNCTION
+
+__DECL FUNCTION LoadNewPackage2 : bool
+(*PLC restart with loading new program from package
+  As a first step PLC goes to HALT mode. PLC outputs are blocked.
+  Processing of application program is stopped.
+  New program is loaded from package (which is created by Mosaic
+  and it is saved in PLC storage as a file)
+  After that PLC goes to RUN mode.
+  IO system is completely reinitialized.
+  Type of restart is selected automaticaly according package.*)
+  VAR_INPUT
+    rq               : bool;  (*request for reinitialization of PLC*)
+    pckg             : string [80];  (*name of package with new PLC program*)
+  END_VAR
+END_FUNCTION
+
+TYPE T_VAR_ABS_LOC :
+  STRUCT
+    zone             : usint;  (*zone: 0=%X, 1=%Y, 2=%S, 3=%R*)
+    offset           : udint;  (*offset inside zone*)
+    inf              : string [15];  (*string info (for example '%R356')*)
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION GetVarAbsLoc : T_VAR_ABS_LOC
+(*The function returns information about the absolute location of the variable (cannot be used for BOOL variables!)*)
+  VAR_INPUT
+    adrVar           : PTR_TO usint;  (*pointer to variable*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetVarAbsLocBool : T_VAR_ABS_LOC
+(*The function returns information about the absolute location of the BOOL variable (can be used for BOOL variables only!)*)
+  VAR_INPUT
+    adrVar           : PTR_TO bool;  (*pointer to BOOL variable*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION RandomU : real
+(*Returns a pseudorandom  number from 0 to 1. The output is given by the value of "seed", which determines the position in the pseudorandom sequence of numbers.
+  The seed value is updated for each call.
+  If the "init" input is set, the "seed" value is initialized by current date and time.
+  The function is implemented on the basis of the R4_UNIFORM_01 algorithm by John Burkardt.*)
+  VAR_INPUT
+    init             : bool;  (*Initialize seed by current date and time.*)
+  END_VAR
+  VAR_IN_OUT
+    seed             : dint;  (*Value determining the position in the pseudorandom sequence of numbers.*)
+  END_VAR
+END_FUNCTION
+
+VAR_GLOBAL CONSTANT
+ MI_CIB1 : usint := 1;  (*internal Foxtrot CIB line*)
+ MI_CIB2 : usint := 2;
+ MI0_CIB1 : usint := 3;  (*external CIB master, address 0, CIB line 1*)
+ MI0_CIB2 : usint := 4;  (*external CIB master, address 0, CIB line 2*)
+ MI2_CIB1 : usint := 5;  (*external CIB master, address 2, CIB line 1*)
+ MI2_CIB2 : usint := 6;  (*external CIB master, address 2, CIB line 2*)
+ MI4_CIB1 : usint := 7;  (*external CIB master, address 4, CIB line 1*)
+ MI4_CIB2 : usint := 8;  (*external CIB master, address 4, CIB line 2*)
+ MI6_CIB1 : usint := 9;  (*external CIB master, address 6, CIB line 1*)
+ MI6_CIB2 : usint := 10;  (*external CIB master, address 6, CIB line 2*)
+ MI_RF : usint := 100;  (*internal Foxtrot RF line*)
+ RF0_RF : usint := 101;  (*external RF master, address 0*)
+ RF2_RF : usint := 102;  (*external RF master, address 2*)
+ RF4_RF : usint := 103;  (*external RF master, address 4*)
+ RF6_RF : usint := 104;  (*external RF master, address 6*)
+
+END_VAR
+
+TYPE TCIBunitState :
+  STRUCT
+    INI              : bool;  (*CIB unit is initialized*)
+    COM              : bool;  (*communication with CIB unit is OK*)
+    ADDR             : bool;  (*CIB unit address was accepted*)
+    DUMMY3 {HIDDEN}  : bool;
+    REI              : bool;  (*reinitialization of CIB unit*)
+    DUMMY5 {HIDDEN}  : bool;
+    ALT              : bool;  (*changed when new data is available (only for Foxtrot 2)*)
+    NET              : bool;  (*CIB unit is defined and served by CPU*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TCIBunitInfo :
+  STRUCT
+    line_defined     : bool;  (*CIB line defined*)
+    unit_defined     : bool;  (*CIB unit defined*)
+    state            : TCIBunitState;  (*CIB unit state*)
+    address          : word;  (*CIB unit address*)
+    code             : word;  (*CIB unit code*)
+    unit_type        : string [17];  (*CIB unit type*)
+    description      : string [31];  (*CIB unit description*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TRFunitState :
+  STRUCT
+    INI              : bool;  (*RF unit is initialized*)
+    COM              : bool;  (*communication with RF unit is OK*)
+    DUMMY2 {HIDDEN}  : bool;
+    DUMMY3 {HIDDEN}  : bool;
+    DUMMY4 {HIDDEN}  : bool;
+    SLP              : bool;  (*sleep mode is available*)
+    BND              : bool;  (*unit is paired*)
+    NET              : bool;  (*RF unit is defined and served by CPU*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TRFunitInfo :
+  STRUCT
+    line_defined     : bool;  (*RF line defined*)
+    unit_defined     : bool;  (*RF unit defined*)
+    state            : TRFunitState;  (*RF unit state*)
+    address          : word;  (*RF unit address*)
+    code             : word;  (*RF unit code*)
+    unit_type        : string [17];  (*RF unit type*)
+    description      : string [31];  (*RF unit description*)
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION CIBunitInfo : bool
+(*Get state of CIB unit (Foxtrot 1 only)
+
+  Function returns information about CIB unit
+  When function is succesful, return value is TRUE*)
+  VAR_INPUT
+    CIB_line         : usint;  (*CIB line number (see constant MI_CIB1,...,MI6_CIB2)*)
+    CIB_unitID       : usint;  (*CIB position number (1,...,32)*)
+  END_VAR
+  VAR_IN_OUT
+    unitInfo         : TCIBunitInfo;  (*variable with information about CIB unit*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CIBunitInfo2 : bool
+(*Get state of CIB unit (only for Foxtrot 2)
+
+  Function returns information about CIB unit
+  When function is succesful, return value is TRUE*)
+  VAR_INPUT
+    Bus_ID           : udint;  (*bus ID number*)
+    CIB_unitID       : usint;  (*logical address of CIB unit (0,...,31)*)
+  END_VAR
+  VAR_IN_OUT
+    unitInfo         : TCIBunitInfo;  (*variable with information about CIB unit*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION RFunitInfo : bool
+(*Get state of RF unit (Foxtrot 1 only)
+
+  Function returns information about RF unit
+  When function is succesful, return value is TRUE*)
+  VAR_INPUT
+    RF_line          : usint;  (*RF line number (see constant MI_RF, RF0_RF,...,RF6_RF)*)
+    RF_unitID        : usint;  (*RF position number (1,...,64)*)
+  END_VAR
+  VAR_IN_OUT
+    unitInfo         : TRFunitInfo;  (*variable with information about RF unit*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetAddressCIBunit : bool
+(*Set new address of CIB unit (Foxtrot 1 only)
+  Function sets new address of CIB unit
+  When function is succesful, return value is TRUE*)
+  VAR_INPUT
+    CIB_line         : usint;  (*CIB line number (see constant MI_CIB1,...,MI6_CIB2)*)
+    CIB_unitID       : usint;  (*CIB position number (1,...,32)*)
+    CIB_addr         : word;  (*new address of CIB unit*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetAddressCIBunit2 : bool
+(*Set new address of CIB unit (only for Foxtrot 2)
+  Function sets new address of CIB unit
+  When function is succesful, return value is TRUE*)
+  VAR_INPUT
+    Bus_ID           : udint;  (*bus ID number*)
+    CIB_unitID       : usint;  (*logical address of CIB unit (0,...,31)*)
+    CIB_addr         : word;  (*new HW address of CIB unit*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetAddressRFunit : bool
+(*Set new address of RF unit (Foxtrot 1 only)
+  Function sets new address of RF unit
+  When function is succesful, return value is TRUE*)
+  VAR_INPUT
+    RF_line          : usint;  (*RF line number (see constant MI_RF, RF0_RF,...,RF6_RF)*)
+    RF_unitID        : usint;  (*RF position number (1,...,64)*)
+    RF_addr          : word;  (*new address of RF unit*)
+  END_VAR
+END_FUNCTION
+
+TYPE TBondStat {HIDDEN} :
+  STRUCT  (*status bondovani*)
+    disconnect       : bool;  (*probiha odbondovani*)
+    connect          : bool;  (*probiha bondovani*)
+    bondMap          : bool;  (*probiha cteni bondovaci mapy*)
+    dummy3           : bool;
+    dummy4           : bool;
+    error            : bool;  (*doslo k chybe*)
+    done             : bool;  (*hotovo*)
+    busy             : bool;  (*master zaneprazdnen*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TBondInfo {HIDDEN} :
+  STRUCT  (*informace, kterou vraci instrukce SYS 79*)
+    bondStat         : TBondStat;
+    bondID           : usint;  (*cislo pozice pribondovane jednotky (je-li bondovani uspesne)*)
+    bondType         : word;  (*typ pribondovane jednotky (je-li bondovani uspesne)*)
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION_BLOCK fbBondRFunit
+(*Bond RF unit with RF master  (Foxtrot 1 only)
+  Function block establish relation between RF unit and RF master
+  This operation may take some time. During the action variable busy is set.
+  If you can pair RF unit output variable done has the value TRUE
+  and variable unitType contains string with type of unit and serial number.
+  In other case variable err has value TRUE and variable errID contains error number.*)
+  VAR_INPUT
+    exec             : bool R_EDGE;  (*request to initiate action (rising edge)*)
+    RF_line          : usint;  (*RF line number (see constant MI_RF, RF0_RF,...,RF6_RF)*)
+    RF_unitID        : usint;  (*RF position number (1,...,64)*)
+    bondRq           : bool;  (*0 = unbond unit only, 1 = bond new unit*)
+    useRouter        : bool;  (*1 = after bonding communicate with unit through router*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*action is done*)
+    busy             : bool;  (*action in progress*)
+    err              : bool;  (*error flag*)
+    errID            : udint;  (*error number*)
+    unitType         : string [40];  (*unit type when action is successful*)
+  END_VAR
+  VAR
+    result           : TBondInfo;
+    timIN            : bool;
+    timPT            : time :=  T#2s;
+    tim              : TON;  (*odbondovat 2+2 s, pribondovat 12+2 s*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION ProgramLock : bool
+(*Lock the application program  (for Foxtrot 1 only)
+  Lock the user program (it can not be decompiled)*)
+END_FUNCTION
+
+__DECL FUNCTION_BLOCK TPR
+(*Pulse Timer with RESET. Obsolete version! Please use fbTPR.*)
+  VAR_INPUT
+    IN               : bool;  (*input*)
+    R                : bool;  (*reset*)
+    PT               : time;  (*preset*)
+  END_VAR
+  VAR_OUTPUT
+    Q                : bool;  (*output*)
+    ET               : time;  (*value*)
+  END_VAR
+  VAR
+    IN_r_edge        : R_TRIG;
+    LT               : time;  (*last tick value ( 1ms resolution)*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbTPR
+(*Pulse Timer with RESET*)
+  VAR_INPUT
+    IN               : bool;  (*input*)
+    R                : bool;  (*reset*)
+    PT               : time;  (*preset*)
+  END_VAR
+  VAR_OUTPUT
+    Q                : bool;  (*output*)
+    ET               : time;  (*value*)
+  END_VAR
+  VAR
+    IN_r_edge        : R_TRIG;
+    LT               : time;  (*last tick value ( 1ms resolution)*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbSaveRemToFile
+(*At the leading edge of the input exec stores the contents of all RETAIN variables into the file.
+   The file name is passed as an input parameter. Storing values may take several PLC cycles.
+   The output busy is set during storage. The output done is set for one cycle at a time,
+   when all variables are stored. If an error occurred while saving, the output err is set,
+   the output errId contains the error code and the output errTxt contains a description of the error.
+   ATTENTION !!! The block can be used only for central units of Foxtrot II*)
+  VAR_INPUT
+    exec             : bool R_EDGE;  (*save content of RETAIN variables into file*)
+    fileName         : string [80];  (*file name*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*done*)
+    busy             : bool;  (*busy*)
+    err              : bool;  (*error*)
+    errId            : int;  (*error code*)
+    errTxt           : string [80];  (*error description*)
+    percent          : real;  (*how many percent is processed*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbLoadRemFromFile
+(*At the leading edge of the input exec retrieves the contents of all RETAIN variables from the file.
+   The filename is passed as an input parameter, the file created by the function block fbSaveRemToFile() is expected.
+   While loading is set the output busy, loading may take several PLC cycles.
+   The output done is set for one cycle at the time all RETAIN variables are loaded.
+   If an error occurred while loading, the output err is set,
+   the output errId contains the error code and the output errTxt contains a description of the error.
+   ATTENTION !!! The block can be used only for central units of Foxtrot II*)
+  VAR_INPUT
+    exec             : bool R_EDGE;  (*load content of RETAIN variables from file*)
+    fileName         : string [80];  (*file name*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*done*)
+    busy             : bool;  (*busy*)
+    err              : bool;  (*error*)
+    errId            : int;  (*error code*)
+    errTxt           : string [80];  (*error description*)
+    percent          : real;  (*how many percent is processed*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbSysLib_FifoDt10 {HIDDEN}
+(*FIFO memory: max. 10 items DATE_AND_TIME*)
+  VAR_INPUT
+    in               : dt;  (*DATE_AND_TIME*)
+    rd               : bool;  (*read*)
+    wr               : bool;  (*write*)
+    tst              : bool;  (*test (first out)*)
+    rst              : bool;  (*reset*)
+  END_VAR
+  VAR_OUTPUT
+    out              : dt;
+    empty            : bool :=  TRUE;
+    full             : bool;
+  END_VAR
+  VAR CONSTANT
+    n                : int :=  10;  (*number of stored elements in the fifo*)
+  END_VAR
+  VAR
+    fifo             : ARRAY [0..9] OF dt;
+    pr               : int;
+    pw               : int;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbFlashRem2
+(*Save the state of RETAIN variables to a file (only for Foxtrot 2 or TC800)
+  If the rqFlash input is TRUE, the request to store RETAIN variables is set. It will be stored when the current PLC cycle is finished. Variable values are stored in a file from which they are automatically restored on a warm restart. In this way, RETAIN variables can be saved up to 10 times in the last hour. Any other requests are then ignored by fbFlashRem2 until the number of storing of RETAIN variables to the file in the last hour drops below 10.*)
+  VAR_INPUT
+    rqFlash          : bool;  (*request to store RETAIN variables*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*done, request accepted*)
+    busy             : bool;  (*too high a frequency of requests (the maximum is 10/hour)*)
+    err              : bool;  (*error (there are no RETAIN variables in the program)*)
+  END_VAR
+  VAR
+    FifoDt10         : fbSysLib_FifoDt10;
+    tmpDT            : dt;
+    stop             : bool;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbStopwatch100us
+(*Stopwatch.
+   Block measures the time between two fbStopwatch100us calls. The measurement is started by calling a block with the parameter start = 1. Another call to the block with the parameter start = 0 returns the time that has elapsed since the first call to the block. The block returns time with an accuracy of 100 microseconds. Max value is 4d 23h 18m 16s 729,6ms.*)
+  VAR_INPUT
+    start            : bool;  (*1= start measurement, 0= return time from start of measurement*)
+  END_VAR
+  VAR_OUTPUT
+    tim_100us        : udint;  (*time in hundreds of microseconds*)
+    tim_ms           : real;  (*time in milliseconds*)
+  END_VAR
+  VAR
+    startTim         : udint;
+    actTim           : udint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbSetAvahiParam2
+(*Set new parameters of Avahi service (only for Foxtrot 2 or TC800, v2.2.053 or higher)*)
+  VAR_INPUT
+    rqSet            : bool R_EDGE;  (*request for set new parameters of Avahi service*)
+    avahiEnable      : bool;  (*enable or disable Avahi service*)
+  END_VAR
+  VAR_IN_OUT
+    hostName         : string [80];  (*new Avahi hostname*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*new name is set*)
+    busy             : bool;  (*block is busy*)
+    err              : bool;  (*error flag*)
+    errTxt           : string [80];  (*error description*)
+  END_VAR
+  VAR
+    delay            : TON;
+    tim              : TON;
+    tmpEnable        : bool;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION GetAvahiHostName2 : string
+(*Returns hostname of Avahi service. When Avahi service is disabled function returns empty string. (only for Foxtrot 2 or TC800, v2.2.053 or higher)*)
+END_FUNCTION
+
+__DECL FUNCTION SetWebPSW : bool
+(*Set password for web access. Function sets new username and password for PLC web pages*)
+  VAR_INPUT
+    user             : usint;  (*line number in table of users (0...9)*)
+  END_VAR
+  VAR_IN_OUT
+    name             : string [80];  (*new user name*)
+    password         : string [80];  (*new password*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION VerifyWebPSW : bool
+(*Verify password for the website PLC. Function verifies username and password for PLC web pages*)
+  VAR_INPUT
+    user             : usint;  (*line number in table of users (0...9)*)
+  END_VAR
+  VAR_IN_OUT
+    name             : string [80];  (*user name*)
+    password         : string [80];  (*password*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetWebMAC : bool
+(*Set MAC for web access. Function sets new MAC address for PLC web pages*)
+  VAR_INPUT
+    user             : usint;  (*line number in table of users (0...9)*)
+  END_VAR
+  VAR_IN_OUT
+    MAC              : string [80];  (*new MAC address ('00:11:22:33:44:55')*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION VerifyWebMAC : bool
+(*Verify MAC for the website PLC. Function verifies MAC address for PLC web pages access*)
+  VAR_INPUT
+    user             : usint;  (*line number in table of users (0...9)*)
+  END_VAR
+  VAR_IN_OUT
+    MAC              : string [80];  (*MAC address ('00:11:22:33:44:55')*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetWebLevel : bool
+(*Set level for web access. Function sets new level for PLC web pages*)
+  VAR_INPUT
+    user             : usint;  (*line number in table of users (0...9)*)
+    level            : sint;  (*new level (-1,0,...,9)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION VerifyWebLevel : bool
+(*Verify level for the website PLC. Function verifies level for PLC web pages access*)
+  VAR_INPUT
+    user             : usint;  (*line number in table of users (0...9)*)
+    level            : sint;  (*verified level (-1,0,...,9)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION_BLOCK fbSetConfigWebPsw2
+(*Set name and password for PLC config web pages (only for Foxtrot 2 or TC800, v2.2.053 or higher, Merecat web server)*)
+  VAR_INPUT
+    rqSet            : bool R_EDGE;  (*request for set new name and password*)
+    clrAndSet        : bool;  (*delete all old names and passwords and set new ones or only add new one*)
+  END_VAR
+  VAR_IN_OUT
+    name             : string [80];  (*new user name*)
+    password         : string [80];  (*new password*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*new name and password set*)
+    busy             : bool;  (*block is busy*)
+    err              : bool;  (*error flag*)
+    errTxt           : string [80];  (*error description*)
+  END_VAR
+  VAR
+    tim              : TON;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION SystemDisplayBacklightOn : bool
+(*Switch on the display backlight  system
+   Function switch ON backlight of system LCD display.
+   Function returns TRUE if LCD display is available.
+   In other cases function returns FALSE.*)
+  VAR
+    tmp              : udint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SystemDisplayBacklightOff : bool
+(*Switch off the display backlight  system
+   Function switch OFF backlight of system LCD display.
+   Function returns TRUE if LCD display is available.
+   In other cases function returns FALSE.*)
+  VAR
+    tmp              : udint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION_BLOCK fbTick
+(*Periodic Timer*)
+  VAR_INPUT
+    IN               : bool;  (*ticks enabled*)
+    PT               : time;  (*period of ticks*)
+  END_VAR
+  VAR_OUTPUT
+    Q                : bool;  (*tick impulse*)
+    ET               : time;  (*elapsed time*)
+  END_VAR
+  VAR
+    WasRun           : bool;
+    RunTime          : time;
+  END_VAR
+END_FUNCTION_BLOCK
+
+
+
+{LIBFILE="LOCALLIB\TOSTRINGLIB_V13_20110203.MLB"}
+(* Mosaic IDE library *)
+(* File name : c:\Program Files\Common Files\Mosaic\Lib\ToStringLib_V13_20110203.mlb *)
+(* Library : ToStringLib 1.3 *)
+(* Author : Teco a.s. Kolin *)
+(* Copyright : (c) 2004..2009 Teco a.s. *)
+(* IEC compiler version : 3.8.13.3 *)
+(* Assembler version : 4.3.00 *)
+
+//{Knihovna : ToStringLib 1.3  }
+(* History: *)
+(*
+v1.0 2009-02-04 Nem  first edition
+v1.1 2010-10-27 Nem  czech comments added
+v1.2 2010-12-06 Nem  english comments added
+v1.3 2011-02-03 Nem  added function BOOL_TO_STRINGF
+*)
+
+(*----------------------------------------------------------------------------*)
+
+__DECL FUNCTION USINT_TO_STRINGF : string
+(*
+  Conversion USINT to formatted STRING
+  Format example : '%4u'
+*)
+  VAR_INPUT
+    in               : usint;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SINT_TO_STRINGF : string
+(*
+  Conversion SINT to formatted STRING
+  Format example : '%4d'
+*)
+  VAR_INPUT
+    in               : sint;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION UINT_TO_STRINGF : string
+(*
+  Conversion UINT to formatted STRING
+  Format example : '%5u'
+*)
+  VAR_INPUT
+    in               : uint;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION INT_TO_STRINGF : string
+(*
+  Conversion INT to formatted STRING
+  Format example : '%5d'
+*)
+  VAR_INPUT
+    in               : int;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION UDINT_TO_STRINGF : string
+(*
+  Conversion UDINT to formatted STRING
+  Format example : '%6u'
+*)
+  VAR_INPUT
+    in               : udint;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DINT_TO_STRINGF : string
+(*
+  Conversion DINT to formatted STRING
+  Format example : '%6d'
+*)
+  VAR_INPUT
+    in               : dint;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION REAL_TO_STRINGF : string
+(*
+  Conversion REAL to formatted STRING
+  Format example : '%6.1f'
+*)
+  VAR_INPUT
+    in               : real;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION LREAL_TO_STRINGF : string
+(*
+  Conversion LREAL to formatted STRING
+  Format example : '%6.1f'
+*)
+  VAR_INPUT
+    in               : lreal;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION BYTE_TO_STRINGF : string
+(*
+  Conversion BYTE to formatted STRING
+  Format example : '%02X'
+*)
+  VAR_INPUT
+    in               : byte;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION WORD_TO_STRINGF : string
+(*
+  Conversion WORD to formatted STRING
+  Format example : '%04X'
+*)
+  VAR_INPUT
+    in               : word;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DWORD_TO_STRINGF : string
+(*
+  Conversion DWORD to formatted STRING
+  Format example : '%08X'
+*)
+  VAR_INPUT
+    in               : dword;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DATE_TO_STRINGF : string
+(*
+  Conversion DATE to formatted STRING
+  Format example : '%TYYYY-MM-DD'
+*)
+  VAR_INPUT
+    in               : date;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DT_TO_STRINGF : string
+(*
+  Conversion DATE_AND_TIME to formatted STRING
+  Format example : '%TYYYY-MM-DD-hh:mm:ss'
+*)
+  VAR_INPUT
+    in               : dt;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION TIME_TO_STRINGF : string
+(*
+  Conversion TIME to formatted STRING
+  Format example : '%Thh:mm:ss.zzz'
+*)
+  VAR_INPUT
+    in               : time;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION TOD_TO_STRINGF : string
+(*
+  Conversion TIME_OF_DAY to formatted STRING
+  Format example : '%Thh:mm:ss.zzz'
+*)
+  VAR_INPUT
+    in               : tod;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION BOOL_TO_STRINGF : string
+(*
+  Conversion BOOL to formatted STRING
+  Format example : '%b'
+*)
+  VAR_INPUT
+    in               : bool;
+    format           : string [80];  (* format string*)
+  END_VAR
+END_FUNCTION
+
+
+
+{LIBFILE="LOCALLIB\FILELIB_V29_20220201.MLB"}
+(* Mosaic IDE library *)
+(* File name : D:\TecoLibSrc\FileLib\FileLib_V29_20220201.mlb *)
+(* Library : FileLib 2.9 *)
+(* Author : Teco a.s. *)
+(* Copyright : (c) 2010 - 2022 Teco a.s. *)
+(* IEC compiler version : 4.2.13.0 *)
+(* Assembler version : 4.3.00 *)
+
+//{Knihovna : FileLib 2.9  }
+(* History: *)
+(*
+v1.0            nem   first version
+v1.1            nem   added function DiskInfo()
+v1.2            nem   added function FindFreeCluster() and
+                      added new function block CreatePath()
+                      function FindFreeCluster() used in CreatePath()
+                      and WriteFile() too
+v1.3            nem   clearing idle time in WriteToFile() when busy is FALSE
+                      new function block WriteDbxToFile()
+                      new function block ReadDbxFromFile()
+v1.4            nem   help of function DirCreate() was corrected
+v1.5            nem   switch parameters order of FileOpen()
+                      new function block WriteToFileSeq ()
+v1.6            nem   max cycle time was automatically increased in functions
+                      DirCreate() and FileClose() (because these functions can
+                      spend more time depends on SD card)
+v1.7 2010-10-26 nem   library dependency added
+v1.8 2011-06-14 nem   added function FileInfo()
+v1.9 2012-12-11 nem   added functions CloseAllFiles() a OpenFilesCount()
+                      (FW v7.5 is required)
+                      better test end of file in function blocks
+                      ReadFromFile() and ReadDbxFromFile()
+v2.0 2013-12-03 nem   added function block DeleteDirectories()
+v2.1 2015-10-02 byd   added function block fbReadLineFromFile()
+v2.2 2016-03-16 byd   WriteToFile() and WriteDbxToFile() was modified -
+                      before opening new file actual opened file is closed
+v2.3 2018-01-16 nem   added function SetFileAttr()
+v2.4 2019-04-10 nem   new functions FileMove(), FileRename()
+                      and ForceDirs() (for CP-2xxx only)
+v2.5 2019-06-05 nem   new function DisconnectUsb() (for CP-2xxx only)
+v2.6 2020-01-03 nem   added function blocks ListDirectories() and ListDirectoriesLog(),
+                      DeleteSurplusFiles() and DeleteSurplusFilesLog(),
+                      DeleteOldFiles() and DeleteOldFilesLog(),
+v2.7 2020-02-19 nem   added function blocks ZipArchive() and UnzipArchive()
+                      (for CP-2xxx only, version v3.1 or higher)
+                byd   added function block ReadLastLines()
+v2.8 09.07.2020 byd   added file size check to function block ReadFromFile(suppressing false error message that could occur in specific cases)
+v2.9 01.02.2022 nem   for CP-2xxx omitted delay 32 cycles after file opening (WriteToFile(), WriteDbxToFile(), CreatePath())
+*)
+
+(*----------------------------------------------------------------------------*)
+
+TYPE  HANDLE : udint;  (*file identificator*)
+END_TYPE
+
+TYPE TDirStack {HIDDEN} :
+  STRUCT
+    hDir             : HANDLE;
+    sDir             : string [12];
+  END_STRUCT;
+END_TYPE
+
+VAR_GLOBAL CONSTANT
+ INVALID_HANDLE_VALUE : HANDLE := 0;  (*invalid handle value*)
+ MAX_PATH : uint := 65;  (*max size of path (number of bytes)*)
+ MAX_COUNT_OPEN_FILES : uint := 16;  (*max count of concurrently open files*)
+ DIR_STACK_MAX_LEVEL : usint := 8;  (*max number of subdirectories for deletting*)
+
+END_VAR
+
+TYPE TFileInfo :
+  STRUCT
+    creationTime     : dt;  (*file creation time*)
+    modifyTime       : dt;  (*time of last modification*)
+    fileSize         : udint;  (*size of file (number of bytes)*)
+    attrib           : dword;  (*file attributes*)
+    fileName         : string [80];  (*name of file*)
+    empty {HIDDEN}   : byte;
+  END_STRUCT;
+END_TYPE
+
+TYPE TFileInfo2 :
+  STRUCT
+    creationTime     : dt;  (*file creation time*)
+    modifyTime       : dt;  (*time of last modification*)
+    fileSize         : udint;  (*size of file (number of bytes)*)
+    attrib           : dword;  (*file attributes*)
+    fileName         : string [80];  (*name of file*)
+    pathName         : string [160];  (*name of path*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TDiskInfo :
+  STRUCT
+    TotalNumberOfKBytes : udint;  (*disc size (number of kilobytes)*)
+    TotalNumberOfFreeKBytes : udint;  (*free space (number of kilobytes)*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TF_MODE : 
+  (F_READ,
+   F_WRITE,
+   F_APPEND,
+   F_READ_PLUS 
+  );
+END_TYPE
+
+__DECL FUNCTION FileOpen : HANDLE
+(*Open file
+
+   FileOpen initializes the data structures needed to read or write a file.
+   Specify the file's name as the string at file,
+   and the kind of access you need to the file with mode parameter.
+   Three fundamental kinds of access are available: read, write, and append.
+   mode must be one of the constant: F_READ, F_WRITE or F_APPEND, to select one of these:
+
+   F_READ        Open the file for reading. The operation will fail if the file
+                 does not exist, or if the host system does not permit you to read it.
+   F_WRITE       Open the file for writing from the beginning of the file ( effectively,
+                 this always creates a new file). If the file whose name you specified
+                 already existed, its old contents are discarded.
+   F_APPEND      Open the file for appending data, that is writing from the end of file.
+                 When you open a file this way, all data always goes to the current
+                 end of file. It mens you cannot change this using FileSetPos.
+
+   FileOpen returns a file indicator which you can use for other file operations,
+   unless the file you requested could not be opened. In that situation, the result
+   is INVALID_HANDLE_VALUE.*)
+  VAR_INPUT
+    mode             : TF_MODE;  (*kinds of access (F_READ / F_WRITE / F_APPEND)*)
+  END_VAR
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION FileClose : bool
+(*Closing file
+
+   If the file identified by hFile is open,
+   FileClose closes it.
+
+   FileClose returns TRUE if successful otherwise,
+   it returns FALSE.*)
+  VAR_INPUT
+    hFile            : HANDLE;  (*file identificator*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION FileDelete : bool
+(*Deleting a file
+
+   Use FileDelete to delete the file specified by fileName.
+   You can use this function to delete directory as well,
+   but only in case when the directory is empty.
+
+   FileDelete returns TRUE if it succeeds, FALSE if it fails.*)
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION FileRead : udint
+(*Read file
+
+   FileRead attempts to copy, from the file identified by hFile,
+   count elements (each of size size) into memory, starting at adrBuf.
+   FileRead may copy fewer elements than count if an error, or end of file, intervenes.
+   FileRead also advances the file position indicator (if any) for hFile
+   by the number of characters actually read.
+
+   The result of FileRead is the number of elements it succeeded in reading.*)
+  VAR_INPUT
+    hFile            : HANDLE;  (*file identificator*)
+    adrBuf           : udint;  (*destination variable*)
+    size             : udint;  (*data length (number of bytes)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION FileWrite : udint
+(*Write to a file
+
+   FileWrite attempts to copy, starting from the memory location adrBuf,
+   count elements (each of size size) into the file identified by hFile.
+   FileWrite may copy fewer elements than count if an error intervenes.
+   FileWrite also advances the file position indicator (if any) for hFile
+   by the number of characters actually written.
+
+   If FileWrite succeeds in writing all the elements you specify,
+   the result is the same as the argument count.
+   In any event, the result is the number of complete elements
+   that FileWrite copied to the file.*)
+  VAR_INPUT
+    hFile            : HANDLE;  (*file identificator*)
+    adrBuf           : udint;  (*variable address*)
+    size             : udint;  (*data length (number of bytes)*)
+  END_VAR
+END_FUNCTION
+
+VAR_GLOBAL CONSTANT
+ BEGIN_POS : udint := 0;  (*begin position in file*)
+ END_POS : udint := 16#FFFF_FFFF;  (*end position in file*)
+
+END_VAR
+
+__DECL FUNCTION FileSetPos : bool
+(*Set file position
+
+   Objects of type FILE can have a "position" that records
+   how much of the file your program has already read.
+   You can use FileSetPos to set the position for the file identified by hFile.
+   BEGIN_POS and END_POS are constants to set position at begin or end of file.
+
+   FileSetPos returns TRUE when successful.
+   If FileSetPos fails, the result is FALSE.*)
+  VAR_INPUT
+    hFile            : HANDLE;  (*file identificator*)
+    offset           : udint;  (*data offset in file*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION FileExists : bool
+(*Test for existence of file
+
+   Use FileExist to test if file or directory identified by fileName exists.
+
+   FileExist returns TRUE if file exists otherwise, it returns FALSE.*)
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+  END_VAR
+END_FUNCTION
+
+VAR_GLOBAL CONSTANT
+ UNKNOWN_SIZE : udint := 16#FFFF_FFFF;  (*unknown size*)
+
+END_VAR
+
+__DECL FUNCTION FileSize : udint
+(*Find file size
+
+   Use FileSize to test size of file identified by hFile.
+
+   FileSize returns size of file if successful otherwise,
+   it returns 16#FFFF_FFFF.*)
+  VAR_INPUT
+    hFile            : HANDLE;  (*file identificator*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DirOpen : HANDLE
+(*Open Directory
+
+   Use DirOpen to open the directory specified by dirName.
+   Then function find out information about first file in dir
+   and these information are saved to variable dirInfo.
+   For information about next file use function DirRead
+
+   DirOpen returns identificator of directory when operation is succefull,
+   otherwise invalid identificator (INVALID_HANDLE_VALUE).
+   Function DirOpen sets all items in variable dirInfo
+   which have to be type of TFileInfo*)
+  VAR_IN_OUT
+    dirName          : string [80];  (*dir name (including path)*)
+    dirInfo          : TFileInfo;  (*structure contains information about first file in dir*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DirClose : bool
+(*Closing directory
+
+   If the directory identified by hDir is open, DirClose closes it.
+
+   DirClose returns TRUE if successful otherwise, it returns FALSE.*)
+  VAR_INPUT
+    hDir             : HANDLE;  (*file identificator*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DirRead : bool
+(*Read from directory
+
+   Use DirRead to read next item in the directory specified by hDdir.
+   Directory have to be open by function DirOpen.
+
+   DirRead returns TRUE if it succeeds, FALSE if it fails.
+   Function DirRead sets all items in variable dirInfo
+   which have to be type of TFileInfo*)
+  VAR_INPUT
+    hDir             : HANDLE;  (*file identificator*)
+  END_VAR
+  VAR_IN_OUT
+    dirInfo          : TFileInfo;  (*structure contains information about next file in dir*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DirCreate : bool
+(*Create a directory
+
+   If the directory specified by dirName does not exist,
+   DirCreate creates it.
+
+   DirCreate returns TRUE if successful otherwise,
+   it returns FALSE.*)
+  VAR_IN_OUT
+    dirName          : string [80];  (*directory name (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DirDelete : bool
+(*Delete directory
+
+   Use DirDelete to delete the directory specified by dirName.
+   You have to be sure the directory is empty.
+
+   DirDelete returns TRUE if it succeeds, FALSE if it fails.*)
+  VAR_IN_OUT
+    dirName          : string [80];  (*directory name (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetLastErr : udint
+(*Get the last error code
+
+   The file functions maintain an global error indicator,
+   to record last read or write errors have occurred.
+   Use GetLastErr to query this indicator.
+
+   GetLastErr returns 0 if no errors have occurred.
+   It returns a nonzero value otherwise.*)
+END_FUNCTION
+
+__DECL FUNCTION GetLastErrTxt : bool
+(*Description
+   Use GetLastErrTxt to get description of error specified by errCode.
+
+   Returns
+   GetLastErr returns description of error as a string.*)
+  VAR_INPUT
+    errCode          : udint;  (*error code*)
+  END_VAR
+  VAR_IN_OUT
+    errMessage       : string [80];  (*error description*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DiskInfo : bool
+(*Get information about disk
+
+   Use DiskInfo to find out size of disk specified by diskName.
+   If the diskName is empty, default disk is selected.
+
+   DiskInfo returns TRUE if it succeeds, FALSE if it fails.
+   Function DiskInfo sets items TotalNumberOfKBytes and
+   TotalNumberOfFreeKBytes in variable diskDesc*)
+  VAR_IN_OUT
+    diskName         : string [80];  (*disk name (empty string for default disk)*)
+    diskDesc         : TDiskInfo;  (*disk description*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION FindFreeCluster : byte
+(*Find free disk space
+
+   Use FindFreeCluster to find free space to accelerate disk write.
+
+   FindFreeCluster returns 0 if free cluster found,
+   13 if function still not finished, otherwise error.*)
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION FileInfo : bool
+(*Get information about file
+
+   Use DirRead to read following information about specified file:
+   file creation time, time of last modification,
+   size of file (number of bytes) and file attributes
+   This information is stored to fileDesc variable.
+   DirRead returns TRUE if it succeeds, FALSE if it fails.*)
+  VAR_IN_OUT
+    fileName         : string [80];  (*dir name (including path)*)
+    fileDesc         : TFileInfo;  (*structure contains information about file*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CloseAllFiles : bool
+(*Closing all open files*)
+END_FUNCTION
+
+__DECL FUNCTION OpenFilesCount : uint
+(*Number of open files
+
+   OpenFilesCount returns Number of open files.*)
+END_FUNCTION
+
+__DECL FUNCTION FileMove : bool
+(*Move/rename file
+
+   FileMove changes the name of the file specified by oldName to newName.
+   If oldName and newName specify different paths the file is moved to the new location.
+   This function is supported in system Foxtrot CP-2xxx only.
+
+   The result of FileMove is true if the file is successfully renamed.*)
+  VAR_IN_OUT
+    oldName          : string [80];  (*old file name (including path)*)
+    newName          : string [80];  (*new file name (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION FileRename : bool
+(*Move/rename file
+
+   FileMove changes the name of the file specified by oldName to newName.
+   If oldName and newName specify different paths the file is moved to the new location.
+   This function is supported in system Foxtrot CP-2xxx only.
+
+   The result of FileMove is true if the file is successfully renamed.*)
+  VAR_IN_OUT
+    oldName          : string [80];  (*old file name (including path)*)
+    newName          : string [80];  (*new file name (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetFileAttr : bool
+(*Set file attributes
+   FAT FILE SYTEM :
+   AM_RDO	16#01	 Read Only
+   AM_HID	16#02	 Hidden
+   AM_SYS	16#04	 System
+   AM_VOL	16#08	 Volume Label
+   AM_DIR	16#10	 Directory
+   AM_ARC	16#20	 Archive*)
+  VAR_INPUT
+    attrib           : dword;  (*attributes*)
+  END_VAR
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ForceDirs : bool
+(*Create full path (CP-2xxx only)
+   DirCreate returns TRUE if successful otherwise,
+   it returns FALSE.*)
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION_BLOCK ReadFromFile
+(*Copy data from file to variable
+
+   Returns
+   Busy is TRUE during file reading.
+   Done is TRUE when reading is finished.
+   If reading failed, err output is TRUE
+   and errID output contains code of error*)
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+    dstVar           : udint;  (*address of destination variable*)
+  END_VAR
+  VAR_INPUT
+    exec             : bool;  (*read request (rising edge)*)
+    seek             : udint;  (*data offset in file*)
+    size             : udint;  (*data length <= size of variable (number of bytes)*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*action is done*)
+    busy             : bool;  (*action in progress*)
+    err              : bool;  (*error flag*)
+    errID            : udint;  (*error number (0 = no error)*)
+    actSize          : udint;  (*number of bytes really read*)
+  END_VAR
+  VAR
+    execTrig         : R_TRIG;
+    errTrig          : R_TRIG;
+    hnd              : HANDLE;
+    adrVar           : udint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK WriteToFile
+(*Copy data from variable to file
+   
+   If file does not exist new file is created.
+   If file exists file content is overwitten.
+
+   Returns
+   Busy is TRUE during file writing.
+   Done is TRUE when writing is finished.
+   If writing failed, err output is TRUE
+   and errID output contains code of error*)
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+    srcVar           : udint;  (*address of source variable*)
+  END_VAR
+  VAR_INPUT
+    exec             : bool;  (*write request (rising edge)*)
+    seek             : udint;  (*data offset in file*)
+    size             : udint;  (*data length (number of bytes)*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*action is done*)
+    busy             : bool;  (*action in progress*)
+    err              : bool;  (*error flag*)
+    errID            : udint;  (*error number (0 = no error)*)
+    actSize          : udint;  (*number of bytes really written*)
+  END_VAR
+  VAR
+    eTrig            : R_TRIG;
+    errTrig          : R_TRIG;
+    hnd              : HANDLE;
+    adrVar           : udint;
+    idle             : uint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK CreatePath
+(*Create a directory (including path)
+
+   Check path and create it if does not exist
+   
+   Returns
+   Busy is TRUE during path creating.
+   Done is TRUE when path creating is finished.
+   If path creating failed, err output is TRUE
+   and errID output contains code of error*)
+  VAR_INPUT
+    exec             : bool;  (*request (rising edge)*)
+  END_VAR
+  VAR_IN_OUT
+    fileName         : string [80];  (*dir name including path (e.g. WWW/NEW_DIR/)*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*action is done*)
+    busy             : bool;  (*action in progress*)
+    err              : bool;  (*error flag*)
+    errID            : udint;  (*error number (0 = no error)*)
+  END_VAR
+  VAR
+    eTrig            : R_TRIG;  (*rising edge of exec*)
+    errTrig          : R_TRIG;  (*rising edge of err*)
+    createDir        : bool;
+    path             : string [80];
+    copy             : string [80];
+    idle             : uint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK WriteDbxToFile
+(*Copy data from databox to file
+   
+   If file does not exist new file is created.
+   If file exists file content is overwitten.
+   Supported on CPM type K version 4.5 and higher
+
+   Returns
+   Busy is TRUE during file writing.
+   Done is TRUE when writing is finished.
+   If writing failed, err output is TRUE
+   and errID output contains code of error*)
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+  END_VAR
+  VAR_INPUT
+    exec             : bool;  (*request (rising edge)*)
+    seek             : udint;  (*data offset in file*)
+    srcAdr           : udint;  (*databox address*)
+    size             : udint;  (*data length (number of bytes)*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*action is done*)
+    busy             : bool;  (*action in progress*)
+    err              : bool;  (*error flag*)
+    errID            : udint;  (*error number (0 = no error)*)
+    actSize          : udint;  (*number of bytes really written*)
+  END_VAR
+  VAR
+    eTrig            : R_TRIG;
+    errTrig          : R_TRIG;
+    hnd              : HANDLE;
+    adrVar           : udint;
+    idle             : uint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK ReadDbxFromFile
+(*Copy data from a file to DataBox memory
+
+   Copy data from file to databox
+   Supported on CPM type K version 4.5 and higher
+
+   Returns
+   Busy is TRUE during file reading.
+   Done is TRUE when reading is finished.
+   If reading failed, err output is TRUE
+   and errID output contains code of error*)
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+  END_VAR
+  VAR_INPUT
+    exec             : bool;  (*request (rising edge)*)
+    seek             : udint;  (*data offset in file*)
+    dstAdr           : udint;  (*databox address*)
+    size             : udint;  (*data length <= size of variable (number of bytes)*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*action is done*)
+    busy             : bool;  (*action in progress*)
+    err              : bool;  (*error flag*)
+    errID            : udint;  (*error number (0 = no error)*)
+    actSize          : udint;  (*number of bytes really read*)
+  END_VAR
+  VAR
+    execTrig         : R_TRIG;
+    errTrig          : R_TRIG;
+    hnd              : HANDLE;
+    adrVar           : udint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK WriteToFileSeq
+(*Sequential write data to file
+
+   Copy data from variable to file sequentaly each time
+   the write variable is set to true.
+   If file does not exist new file is created.
+   If file exists file content is overwitten.
+
+   Returns
+   Open is TRUE whyn file is open.
+   If writing failed, err output is TRUE
+   and errID output contains code of error*)
+  VAR_IN_OUT
+    fileName         : string [80];  (*file name (including path)*)
+    srcVar           : udint;  (*address of source variable*)
+  END_VAR
+  VAR_INPUT
+    write            : bool;  (*request*)
+    close            : bool;  (*close opened file*)
+    size             : udint;  (*data length (number of bytes)*)
+  END_VAR
+  VAR_OUTPUT
+    open             : bool;  (*file is open, next data will be appended to rest*)
+    err              : bool;  (*error flag*)
+    errID            : udint;  (*error number (0 = no error)*)
+    actSize          : udint;  (*actual file size (number of bytes)*)
+  END_VAR
+  VAR
+    errTrig          : R_TRIG;
+    wrSize           : udint;
+    hnd              : HANDLE;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK DeleteDirectories
+(*Delete content of directory including content of nested directories
+
+   Delete all files in directory.
+   Max. number of nested directories = 4*)
+  VAR_INPUT
+    exec             : bool R_EDGE;  (*request (rising edge)*)
+  END_VAR
+  VAR_IN_OUT
+    dirName          : string [80];  (*dir name (including path)*)
+  END_VAR
+  VAR
+    dirStack         : ARRAY [0..8] OF TDirStack;
+    CurrFile         : string [80];
+    dirStackLev      : usint;
+    i                : usint;
+    lLocalFileInfo   : TFileInfo;
+  END_VAR
+  VAR_OUTPUT
+    Done             : bool;
+    Busy             : bool;
+    Err              : bool;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK ReadLine
+(*Read line from file
+        Number of desired line is defined by input line.
+        First line in file has number 1.
+        Desired line is stored in variable txtLine including characters CR and LF.
+        Variable txtLine have to be of type STRING with lenght equal or greater than maxLen.
+        Finding of line in file may take more than one PLC cycle.
+        Output busy is set to TRUE during searching.
+        When line is found, outpud done is set to TRUE (for one cycle of PLC).
+        If the line is longer than maxLen, output lineContinues is set and line is passed in multiple parts.
+        Every PLC cycle one part of line is passed, last part is passed with lineContinues set to FALSE.
+        (Output done is set to TRUE during passing of all parts).
+        If there is any error, output errID contains error code and output errTxt description of error.
+        Function block ReadLine assume that lines ends with characters CRLF (16#0D,16#0A).*)
+  VAR_INPUT
+    line             : udint;  (*Number of requested line (1..n)*)
+    maxLen           : udint;  (*Maximal length of line*)
+  END_VAR
+  VAR_IN_OUT
+    fileName         : string [80];  (*Filename (including path)*)
+    txtLine          : string [255];  (*Line from file*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*Reading from a file is closed*)
+    busy             : bool;  (*Busy reading from a file*)
+    err              : bool;  (*Error flag*)
+    lineContinues    : bool;  (*Line was longer than maximum lenght and will continue*)
+    actLine          : udint;  (*Actual line number*)
+    errID            : udint;  (*Error code (0 = no error)*)
+    errTxt           : string [80];  (*The last error text*)
+  END_VAR
+  VAR
+    lastLine         : udint;  (*cislo naposled hledaneho radku*)
+    lastFile         : string [80];  (*jmeno souboru, se kterym se naposledy pracovalo*)
+    actPos           : udint;  (*aktualni pozice v souboru (offset od zacatku)*)
+    actSize          : udint;  (*pocet znaku nactenych ze souboru*)
+    i                : int;
+    index            : int;
+    outidx           : uint;
+    bufTxtReady      : bool;
+    newFile          : bool;
+    newFileTest      : bool;
+    fileInf          : TFileInfo;  (*struktura s informacemi o souboru*)
+    empty            : word;
+    ReadFile         : ReadFromFile;
+  END_VAR
+  VAR CONSTANT
+    SEPARATOR        : ARRAY [0..1] OF byte :=  [ 16#0A, 0];
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION DisconnectUsbDisk : bool
+(*Unmounting USB Flash disk (CP-2xxx only)*)
+END_FUNCTION
+
+TYPE TListDirStackItem {HIDDEN} :
+  STRUCT
+    hd               : HANDLE;  (*handle pro ReadDir*)
+    ls               : uint;  (*delka subName*)
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION_BLOCK ListDirectories
+(*Examines the contents of the directory and returns information about all entries (including the contents of all subdirectories)*)
+  VAR_INPUT
+    exec             : bool R_EDGE;  (*Request to explore directory*)
+    noSubDir         : bool;  (*Not to explore subdirectories*)
+    cancel           : bool R_EDGE;  (*Cancel exploring the directory and release any handle used*)
+    dirName          : string [80];  (*Directory name*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*Directory examination complete*)
+    busy             : bool;  (*Directory search continues*)
+    err              : bool;  (*Error flag*)
+    found            : bool;  (*Item (file or directory) found*)
+    isDir            : bool;  (*The found item is a directory*)
+    isDirEmpty       : bool;  (*The item is an empty directory*)
+    fileInfo         : TFileInfo2;  (*Information about the found item*)
+  END_VAR
+  VAR CONSTANT
+    MAX_STACK_SIZE   : uint :=  32;
+    AM_DIR           : dword := 16#10;  (*attribute == Directory*)
+  END_VAR
+  VAR
+    subName          : string [80];
+    lastDir          : string [80];
+    hd               : HANDLE;
+    hdStack          : ARRAY [0..32] OF TListDirStackItem;
+    i                : uint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK ListDirectoriesLog
+(*Records activity of function block ListDirectories() into log file*)
+  VAR_INPUT
+    logName          : string [80];  (*Log file name (including path)*)
+  END_VAR
+  VAR_IN_OUT
+    fbListDir        : ListDirectories;  (*Function block ListDirectories() whose activity is logged in the file*)
+  END_VAR
+  VAR_OUTPUT
+    cnt              : uint;  (*Total count of items in directory*)
+    usedSpace        : udint;  (*Total occupied space*)
+  END_VAR
+  VAR
+    hf               : HANDLE;
+    line             : string [255];
+    startDT          : dt;
+    stopDT           : dt;
+    TrgBusy          : R_TRIG;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK ReadLastLines
+(*Function retrieves a given number of lines from the end of the file (or from the specified offset)*)
+  VAR_INPUT
+    read             : bool R_EDGE;  (*start lines reading*)
+    lineNum          : udint;  (*number of lines to be read*)
+    sizeOfArray      : udint;  (*size of array of STRING in bytes used to store read lines*)
+    offset           : udint;  (*offset from end of file in bytes (linesOffset output can be assigned to retrieve additional lines)*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*lines successfully loaded*)
+    busy             : bool;  (*reading in progress*)
+    err              : bool;  (*error flag when reading from file*)
+    linesOffset      : udint;  (*the beginning of the read lines from the end of the file*)
+    linesRead        : udint;  (*the number of lines actually read*)
+    errID            : udint;  (*error number (0 = no error)*)
+    errTxt           : string [80];  (*description of error*)
+  END_VAR
+  VAR_IN_OUT
+    fileName         : string [80];  (*filename (including path)*)
+    txtLines         : string [255];  (*array of STRING for read lines*)
+  END_VAR
+  VAR
+    fSize            : udint;
+    rSize            : udint;
+    fPos             : udint;
+    lineCnt          : udint;  (*pocet napocitanych strane*)
+    buffer           : ARRAY [0..255] OF usint;  (*pracovni pole*)
+    h                : HANDLE;
+    state            : udint;
+    p                : PTR_TO usint;
+    pb               : PTR_TO usint;
+    start            : udint;
+    lEndOffset       : udint;
+    endOfFile        : bool;
+    maxLineLen       : udint;
+    pString          : PTR_TO string [255];
+  END_VAR
+  VAR CONSTANT
+    SEPARATOR        : string [2] :=  '$0A';
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK DeleteOldFiles
+(*Examines the contents of the directory (including the contents of all subdirectories) and deletes all files that are older than the specified number of days and whose extension matches the specified mask*)
+  VAR_INPUT
+    exec             : bool R_EDGE;  (*Request to delete old files from directory*)
+    delEmptyDir      : bool;  (*Delete empty directories too*)
+    noSubDir         : bool;  (*Not to explore subdirectories*)
+    testOnly         : bool;  (*Without deleting old files and empty directories*)
+    dirName          : string [80];  (*Directory name (case sensitive)*)
+    fileMask         : string [80];  (*Mask for selection of files to be deleted (wildcard is '*')*)
+    lifeTime         : udint;  (*File life time (number of days)*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*Deleting old files from the directory is complete*)
+    busy             : bool;  (*Deleting old files continues*)
+    err              : bool;  (*Error flag*)
+    isDeleted        : bool;  (*Old file is deleted*)
+    fileInfo         : TFileInfo2;  (*Information about the deleted file*)
+  END_VAR
+  VAR
+    actDate          : dt;
+    ListDir          : ListDirectories;
+    fileDays         : udint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK DeleteOldFilesLog
+(*Records activity of function block DeleteOldFilesLog() into log file*)
+  VAR_INPUT
+    append           : bool;  (*Add the log to the end of the log file*)
+    logName          : string [80];  (*Log file name (including path)*)
+  END_VAR
+  VAR_IN_OUT
+    fbDeleteOldFiles : DeleteOldFiles;  (*Function block DeleteOldFiles() whose activity is logged in the file*)
+  END_VAR
+  VAR_OUTPUT
+    cnt              : uint;  (*Total count of deleted items*)
+    deletedSpace     : udint;  (*Total size of deleted files*)
+  END_VAR
+  VAR
+    hf               : HANDLE;
+    line             : string [255];
+    startDT          : dt;
+    stopDT           : dt;
+    TrgBusy          : R_TRIG;
+  END_VAR
+  VAR CONSTANT
+    AM_DIR           : dword := 16#10;  (*attribute == Directory*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK DeleteSurplusFiles
+(*Examines the contents of the directory (including the contents of all subdirectories) and calculates the occupied space. If more than the specified maximum is occupied, it gradually deletes the oldest files (with the name corresponding to the specified mask) until the occupied space falls below the specified limit*)
+  VAR_INPUT
+    exec             : bool R_EDGE;  (*Request to delete surplus files from directory*)
+    delEmptyDir      : bool;  (*Delete empty directories too*)
+    noSubDir         : bool;  (*Not to explore subdirectories*)
+    dirName          : string [80];  (*Directory name (case sensitive)*)
+    fileMask         : string [80];  (*Mask for selection of files to be deleted (wildcard is '*')*)
+    maxSpace         : udint;  (*Max used space (number of bytes)*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*Deleting surplus files from the directory is complete*)
+    busy             : bool;  (*Deleting surplus files continues*)
+    err              : bool;  (*Error flag*)
+    isDeleted        : bool;  (*Surplus file is deleted*)
+    fileInfo         : TFileInfo2;  (*Information about the deleted file*)
+  END_VAR
+  VAR
+    TrgRqCheck       : R_TRIG;
+    ListDir          : ListDirectories;
+    oldestFile       : TFileInfo2;
+    usedSpace        : udint;
+    nextRound        : bool;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK DeleteSurplusFilesLog
+(*Records activity of function block DeleteSurplusFiles() into log file*)
+  VAR_INPUT
+    append           : bool;  (*Add the log to the end of the log file*)
+    logName          : string [80];  (*Log file name (including path)*)
+  END_VAR
+  VAR_IN_OUT
+    fbDeleteSurplusFiles : DeleteSurplusFiles;  (*Function block DeleteSurplusFiles() whose activity is logged in the file*)
+  END_VAR
+  VAR_OUTPUT
+    cnt              : uint;  (*Total count of deleted items*)
+    deletedSpace     : udint;  (*Total size of deleted files*)
+  END_VAR
+  VAR
+    hf               : HANDLE;
+    line             : string [255];
+    startDT          : dt;
+    stopDT           : dt;
+    TrgBusy          : R_TRIG;
+  END_VAR
+  VAR CONSTANT
+    AM_DIR           : dword := 16#10;  (*attribute == Directory*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+TYPE T_ZIP_LIST_TYPE : 
+  (LIST_OF_INCLUDE_FILES,
+   LIST_OF_EXCLUDE_FILES 
+  );
+END_TYPE
+
+__DECL FUNCTION_BLOCK ZipArchive
+(*ZipArchive stores files in zip archives.*)
+  VAR_INPUT
+    exec             : bool R_EDGE;  (*request to create zip archive*)
+    incSubDir        : bool;  (*recurse into directories*)
+    delOrigFiles     : bool;  (*after archive created, delete original files (move into archive)*)
+    junkDirNames     : bool;  (*junk directory names (store just file names)*)
+    createNewArch    : bool;  (*create new zip archive (TRUE) or update existing archive (FALSE)*)
+    createLog        : bool;  (*create log file*)
+    zipName          : string [80];  (*archive name*)
+    dirName          : string [80];  (*directory name*)
+    listType         : T_ZIP_LIST_TYPE;  (*fileList consists included files (LIST_OF_INCLUDE_FILES) or fileList consists excluded files (LIST_OF_EXCLUDE_FILES)*)
+    fileList         : string [255];  (*list of files (wildcards '?' and '*' can be used)*)
+    timeout          : time :=  T#30s;  (*timeout for processing one file (default value 30 sec)*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*zip archive was successfully created*)
+    busy             : bool;  (*creating archive continues*)
+    err              : bool;  (*error flag*)
+    errTx            : string [128];  (*error description*)
+    numItems         : udint;  (*number of processed items*)
+  END_VAR
+  VAR
+    zipTim           : TON;
+    hf               : HANDLE;
+    zipLog           : string [80];
+    line             : string [255];
+    lastCyc          : usint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK UnzipArchive
+(*UnzipArchive extracts files from zip archive.*)
+  VAR_INPUT
+    exec             : bool R_EDGE;  (*request to extract zip archive*)
+    overwrite        : bool;  (*overwrite files*)
+    createLog        : bool;  (*create log file*)
+    zipName          : string [80];  (*archive name*)
+    extractIntoDir   : string [255];  (*extract files into directory*)
+    timeout          : time :=  T#30s;  (*timeout for processing one file (default value 30 sec)*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*zip archive was successfully extracted*)
+    busy             : bool;  (*extracting archive continues*)
+    err              : bool;  (*error flag*)
+    errTx            : string [128];  (*error description*)
+    numItems         : udint;  (*number of processed items*)
+  END_VAR
+  VAR
+    zipTim           : TON;
+    hf               : HANDLE;
+    lastCyc          : usint;
+    zipLog           : string [80];
+    line             : string [255];
+  END_VAR
+END_FUNCTION_BLOCK
+
+
+
+{LIBFILE="LOCALLIB\COMLIB_V38_20230420.MLB"}
+(* Mosaic IDE library *)
+(* File name : D:\TecoLibSrc\ComLib\ComLib_V38_20230420.mlb *)
+(* Library : ComLib 3.8 *)
+(* Author : Teco a.s. *)
+(* Copyright : (c) 2009 - 2023 Teco a.s. *)
+(* IEC compiler version : 4.2.20.0 *)
+(* Assembler version : 4.3.00 *)
+
+//{Knihovna : ComLib 3.8  }
+(* History: *)
+(*
+v1.0 2009-03-23 Nem first edition
+v1.1 2009-03-27 Nem corrected error when length of sending data is zero
+v1.2 2009-06-24 Nem fbSendTo() and fbReceivedFrom() extended for ETH2
+v1.3 2009-09-24 Nem function GetMACaddress is available for ETH2, added functions 
+                    SetDHCPsupport(), STRING_TO_IPADR() a IPADR_TO_STRING() 
+v1.4 2010-02-08 Nem added function GetChanStat() 18.02.2010 Nem added functions 
+                    GetChanSettings() and SetChanSettings()
+v1.5 2010-08-02 Nem all comments are in Czech and English version
+v1.6 2011-08-08 Nem corrected TCP buffer overflow in fbSenfTo() 
+v1.7 2012-01-23 Nem added functions SetDNS_IP(), GetDNS_IP() and fbRecvTxt()
+v1.8 2012-04-18 Nem error output added to function block fbRecvTxt()
+v1.9 2012-06-14 Nem added constants ETH3_uni0,...,ETH4_uni7 
+		Byd added function block fbRecvTxtChar()
+v2.0 2013-03-14 Nem added item link in structure TEthStat
+                    (network cable connected)
+v2.1 2013-05-28 Nem added global variables ETH3_STAT and ETH4_STAT
+                    added function GetWebServerAccess()
+                    and function block fbKeepAliveTCP() - required
+                    version of firmware CPU is 7.7 or higher
+     2013-08-22 Nem in block fb SendTo() max. length of sending data is checked 
+                    correctly
+v2.2 2015-07-03 Nem added functions SetRTS() and GetRTS()
+v2.3 2016-10-19 Nem added function CheckGatewayIP()
+v2.4 2016-12-12 Nem added function MACADR_TO_STRING()
+v3.0 2018-12-20 Nem added support for communication of CP-2xxx
+                    added constants for WLAN1, WLAN2 a LTE1 (CP-2xxx only) 
+v3.1 2019-05-07 Nem added functions SetUniLog() and SetUniChanHostName()
+v3.2 2019-08-02 Nem added constants COM_ERR198 a COM_ERR201
+                    added functions SetIPaddress2() and GetIPaddress2()
+                Byd when TRF flag is set there is no COM_ERR5 error and it's possible to send next message
+                    added COM_ERR9 when receiving buffers are full (RCF flag)
+                    added COM_ERR10 when message longer than channel's receiving zone is received (ROV flag)				
+v3.3 2020-03-27 Nem fixed the function OpenUniChannel()
+                    added function ResetWebServerAccess()
+v3.4 2020-05-18 Nem added functions GetWiFiParam(), SetWiFiParam() and GetLastIcomingMsgInf()
+                    (CP-2xxx only)
+v3.5 2021-05-14 Nem function block fbKeepAliveTCP() adapted for CP-2xxx (required version of firmware CPU is 4.5 or higher)
+v3.6 2021-11-10 Nem added function block fbScanWiFi() (only CP-2xxx width FW v4.8 or higher)
+v3.7 2022-10-06 Nem added constant LOCALHOST_IP
+                    added the option to open a communication channel on the localhost interface with the OpenUniChannel() function
+v3.8 2023-04-20 Nem added function FlushEthUniTxData()
+*)
+
+(*----------------------------------------------------------------------------*)
+
+TYPE TUniDesc :
+  STRUCT  (*description of channel in uni mode*)
+    modeChan         : byte;  (*channel mode*)
+    res              : byte;  (*if ETHx then res = protocol (UNI_TCP_CLIENT, UNI_TCP_SERVER, ...) else res= 0*)
+    adrUniStat       : udint;  (*address of status*)
+    lenUniStat       : uint;  (*length of status*)
+    adrUniCont       : udint;  (*address of control*)
+    lenUniCont       : uint;  (*length of control*)
+    adrUniIn         : udint;  (*address of receiving buffer*)
+    lenUniIn         : uint;  (*length of receiving buffer*)
+    adrUniOut        : udint;  (*address of sending buffer*)
+    lenUniOut        : uint;  (*length of sending buffer*)
+  END_STRUCT;
+END_TYPE
+
+TYPE  TIPadr : ARRAY [0..3] OF usint;  (*IP address*)
+END_TYPE
+
+TYPE TLocalEthAdr :
+  STRUCT  (*structure of local IP address*)
+    IP               : TIPadr;  (*IP address*)
+    IM               : TIPadr;  (*subnet mask*)
+    GW               : TIPadr;  (*gateway address*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TRemoteEthAdr :
+  STRUCT  (*structure of remote IP address*)
+    remoteIP         : TIPadr;  (*remote IP address*)
+    remotePort       : uint;  (*remote port*)
+    localPort        : uint;  (*local port*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TIncomingMsgInf :
+  STRUCT  (*information about the last message received via the network interface*)
+    itfChan          : usint;  (*number of network interface (see constants ETH1, ETH2, ...)*)
+    itfName          : string [8];  (*interface name ('ETH1', 'ETH2', ...)*)
+    itfIP            : TIPadr;  (*IP address of interface*)
+    ethAdr           : TRemoteEthAdr;  (*remote IP address*)
+  END_STRUCT;
+END_TYPE
+
+TYPE  TMacAdr : ARRAY [0..5] OF byte;  (*MAC address*)
+END_TYPE
+
+TYPE TSocketAdr {HIDDEN} :
+  STRUCT
+    IP               : TIPadr;  (*IP address*)
+    port             : uint;  (*port number*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TSetIpAdr2 :
+  STRUCT
+    IP               : TIPadr;  (*IP address*)
+    IM               : TIPadr;  (*subnet mask*)
+    GW               : TIPadr;  (*gateway address*)
+    DNS1             : TIPadr;  (*primary DNS server address*)
+    DNS2             : TIPadr;  (*secondary DNS server address*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TChanSettings :
+  STRUCT  (*structure of parameters for serial channel (uni mode only!)*)
+    modeChan         : usint;  (*channel mode*)
+    address          : usint;  (*address*)
+    speed            : usint;  (*speed*)
+    rxTimeout        : usint;  (*receiver timeout*)
+    txTimeout        : usint;  (*transmitter timeout*)
+    lineControl      : usint;  (*parity control*)
+    modemControl     : usint;  (*modem control*)
+    rez              : usint;  (*reserved*)
+  END_STRUCT;
+END_TYPE
+
+VAR_GLOBAL CONSTANT
+ MODE_OFF : usint := 16#00;  (*channel is off*)
+ MODE_PC : usint := 16#02;  (*EPSNET slave*)
+ MODE_UNI : usint := 16#05;  (*universal mode*)
+ MODE_MPC : usint := 16#06;  (*EPSNET multimaster*)
+ MODE_MDB : usint := 16#07;  (*MODBUS slave*)
+ MODE_PFB : usint := 16#08;  (*PROFIBUS DP master*)
+ BAUD_50 : usint := 16#01;  (*50 Baud*)
+ BAUD_100 : usint := 16#02;  (*100 Baud*)
+ BAUD_200 : usint := 16#03;  (*200 Baud*)
+ BAUD_300 : usint := 16#04;  (*300 Baud*)
+ BAUD_600 : usint := 16#05;  (*600 Baud*)
+ BAUD_1200 : usint := 16#06;  (*1200 Baud*)
+ BAUD_2400 : usint := 16#07;  (*2400 Baud*)
+ BAUD_4800 : usint := 16#08;  (*4800 Baud*)
+ BAUD_9600 : usint := 16#0A;  (*9600 Baud*)
+ BAUD_14400 : usint := 16#0B;  (*14400 Baud*)
+ BAUD_19200 : usint := 16#0C;  (*19200 Baud*)
+ BAUD_28800 : usint := 16#0D;  (*28800 Baud*)
+ BAUD_38400 : usint := 16#0E;  (*38400 Baud*)
+ BAUD_57600 : usint := 16#10;  (*57600 Baud*)
+ BAUD_76800 : usint := 16#12;  (*76800 Baud*)
+ BAUD_93750 : usint := 16#13;  (*937500 Baud*)
+ BAUD_115200 : usint := 16#14;  (*115200 Baud*)
+ NO_PARITY : usint := 16#00;  (*no parity (lineControl code)*)
+ PARITY_ODD : usint := 16#08;  (*odd parity (lineControl code)*)
+ PARITY_EVEN : usint := 16#18;  (*even parity (lineControl code)*)
+ PARITY_0 : usint := 16#28;  (*fixed parity 0 (lineControl code)*)
+ PARITY_1 : usint := 16#38;  (*fixed parity 1 (lineControl code)*)
+ SEVEN_BITS : usint := 16#40;  (*7 bits in byte (lineControl code)*)
+ EIGHT_BITS : usint := 16#00;  (*8 bits in byte (lineControl code)*)
+ ONE_STOP_BIT : usint := 16#00;  (*1 stop bit (lineControl code)*)
+ TWO_STOP_BITS : usint := 16#80;  (*2 stop bits (lineControl code)*)
+ RTS_0 : usint := 16#00;  (*RTS fixed 0 (modemControl code)*)
+ RTS_1 : usint := 16#02;  (*RTS fixed 1 (modemControl code)*)
+ RTS_MAN : usint := 16#40;  (*RTS manual from user program (modemControl code)*)
+ RTS_AUTO : usint := 16#80;  (*RTS auto (modemControl code)*)
+ RTS_CTS_AUTO : usint := 16#C0;  (*RTS auto + condition CTS (modemControl code)*)
+ HALF_DUPLEX : usint := 16#08;  (*receiver is disabled during transmitting (modemControl code)*)
+
+END_VAR
+
+TYPE TCHxStatistic {HIDDEN} :
+  STRUCT
+    STAT             : usint;
+    ERR              : usint;
+    trueMes          : udint;
+    falseMes         : udint;
+  END_STRUCT;
+END_TYPE
+
+TYPE TCHxControl {HIDDEN} :
+  STRUCT
+    CONTROL          : uint;
+  END_STRUCT;
+END_TYPE
+
+TYPE TUni_STAT :
+  STRUCT
+    DSR              : bool;
+    CTS              : bool;
+    dummy1           : bool;
+    TRO              : bool;
+    RCF              : bool;
+    ROV              : bool;
+    TRF              : bool;
+    ARC              : bool;
+  END_STRUCT;
+END_TYPE
+
+TYPE TUni_CONT {HIDDEN} :
+  STRUCT
+    dummy0           : bool;
+    dummy1           : bool;
+    dummy2           : bool;
+    dummy3           : bool;
+    dummy4           : bool;
+    TRG              : bool;
+    CLR              : bool;
+    ACN              : bool;
+  END_STRUCT;
+END_TYPE
+
+TYPE TUni_SIGN {HIDDEN} :
+  STRUCT
+    DTR              : bool;
+    RTS              : bool;
+  END_STRUCT;
+END_TYPE
+
+TYPE TUni_IN_STATUS :
+  STRUCT  (*receiving data structure of channel in uni mode*)
+    STAT             : TUni_STAT;  (*status of receving*)
+    ERR              : usint;  (*error code*)
+    NUMR             : uint;  (*number of received bytes*)
+  END_STRUCT;
+END_TYPE
+
+TYPE  TUni_BUFF : ARRAY [0..1400] OF usint;
+END_TYPE
+
+TYPE TUni_IN {HIDDEN} :
+  STRUCT  (*receiving data structure of channel in uni mode*)
+    STAT             : TUni_STAT;  (*status of receving*)
+    ERR              : usint;  (*error code*)
+    NUMR             : uint;  (*number of received bytes*)
+    DATA             : TUni_BUFF;  (*received data*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TUni_OUT_CONT :
+  STRUCT  (*sending data structure of channel in uni mode*)
+    CONT             : TUni_CONT;  (*control of transmitting*)
+    SIGN             : TUni_SIGN;  (*control of modem signals*)
+    NUMT             : uint;  (*mumber of transmitted bytes*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TUni_OUT {HIDDEN} :
+  STRUCT  (*sending data structure of channel in uni mode*)
+    CONT             : TUni_CONT;  (*control of transmitting*)
+    SIGN             : TUni_SIGN;  (*control of modem signals*)
+    NUMT             : uint;  (*mumber of transmitted bytes*)
+    DATA             : TUni_BUFF;  (*transmitted data*)
+  END_STRUCT;
+END_TYPE
+
+TYPE TEthStat :
+  STRUCT  (*status of Ethernet channel*)
+    chan_present     : bool;  (*channel is present*)
+    DHCP_enabled     : bool;  (*DHCP on*)
+    IP_obtained      : bool;  (*IP address obtained from DHCP server*)
+    IP_expired       : bool;  (*IP address expired*)
+    link             : bool;  (*network cable connected*)
+    reserved         : usint;  (*reserved*)
+    trueMes          : udint;  (*suma of good messages*)
+    falseMes         : udint;  (*suma of bad messages*)
+  END_STRUCT;
+END_TYPE
+
+VAR_GLOBAL
+ ETH1_STAT AT %S356 : TEthStat;  (*status of Ethernet channel ETH1*)
+ ETH2_STAT AT %S368 : TEthStat;  (*status of Ethernet channel ETH2*)
+ ETH3_STAT AT %S380 : TEthStat;  (*status of Ethernet channel ETH3*)
+ ETH4_STAT AT %S392 : TEthStat;  (*status of Ethernet channel ETH4*)
+ WLAN1_STAT AT %S440 : TEthStat;  (*status of Ethernet channel WLAN1*)
+ WLAN2_STAT AT %S452 : TEthStat;  (*status of Ethernet channel WLAN2*)
+ LTE1_STAT AT %S464 : TEthStat;  (*status of Ethernet channel LTE1*)
+
+END_VAR
+
+VAR_GLOBAL CONSTANT
+ ANY_IP : TIPadr := [0];  (*IP address 0.0.0.0*)
+ LOCALHOST_IP : TIPadr := [127,0,0,1];  (*IP address 127.0.0.1*)
+ ANY_uni : uint := 16#00E0;  (*Any Interface, mode uni*)
+ ETH1_uni : uint := 16#00E1;  (*Ethernet ETH1, mode uni*)
+ ETH2_uni : uint := 16#00E2;  (*Ethernet ETH2, mode uni*)
+ ETH3_uni : uint := 16#00E3;  (*Ethernet ETH3, mode uni*)
+ ETH4_uni : uint := 16#00E4;  (*Ethernet ETH4, mode uni*)
+ WLAN1_uni : uint := 16#00E8;  (*WiFi WLAN1,    mode uni*)
+ WLAN2_uni : uint := 16#00E9;  (*WiFi WLAN2,    mode uni*)
+ LTE1_uni : uint := 16#00EA;  (*modem LTE1,    mode uni*)
+ LOCALHOST_uni : uint := 16#00EF;  (*localhost,     mode uni*)
+ ETH1_uni0 : uint := 16#07E1;  (*Ethernet ETH1, mode uni, connection uni0*)
+ ETH1_uni1 : uint := 16#17E1;  (*Ethernet ETH1, mode uni, connection uni1*)
+ ETH1_uni2 : uint := 16#27E1;  (*Ethernet ETH1, mode uni, connection uni2*)
+ ETH1_uni3 : uint := 16#37E1;  (*Ethernet ETH1, mode uni, connection uni3*)
+ ETH1_uni4 : uint := 16#47E1;  (*Ethernet ETH1, mode uni, connection uni4*)
+ ETH1_uni5 : uint := 16#57E1;  (*Ethernet ETH1, mode uni, connection uni5*)
+ ETH1_uni6 : uint := 16#67E1;  (*Ethernet ETH1, mode uni, connection uni6*)
+ ETH1_uni7 : uint := 16#77E1;  (*Ethernet ETH1, mode uni, connection uni7*)
+ ETH2_uni0 : uint := 16#07E2;  (*Ethernet ETH2, mode uni, connection uni0*)
+ ETH2_uni1 : uint := 16#17E2;  (*Ethernet ETH2, mode uni, connection uni1*)
+ ETH2_uni2 : uint := 16#27E2;  (*Ethernet ETH2, mode uni, connection uni2*)
+ ETH2_uni3 : uint := 16#37E2;  (*Ethernet ETH2, mode uni, connection uni3*)
+ ETH2_uni4 : uint := 16#47E2;  (*Ethernet ETH2, mode uni, connection uni4*)
+ ETH2_uni5 : uint := 16#57E2;  (*Ethernet ETH2, mode uni, connection uni5*)
+ ETH2_uni6 : uint := 16#67E2;  (*Ethernet ETH2, mode uni, connection uni6*)
+ ETH2_uni7 : uint := 16#77E2;  (*Ethernet ETH2, mode uni, connection uni7*)
+ ETH3_uni0 : uint := 16#07E3;  (*Ethernet ETH3, mode uni, connection uni0*)
+ ETH3_uni1 : uint := 16#17E3;  (*Ethernet ETH3, mode uni, connection uni1*)
+ ETH3_uni2 : uint := 16#27E3;  (*Ethernet ETH3, mode uni, connection uni2*)
+ ETH3_uni3 : uint := 16#37E3;  (*Ethernet ETH3, mode uni, connection uni3*)
+ ETH3_uni4 : uint := 16#47E3;  (*Ethernet ETH3, mode uni, connection uni4*)
+ ETH3_uni5 : uint := 16#57E3;  (*Ethernet ETH3, mode uni, connection uni5*)
+ ETH3_uni6 : uint := 16#67E3;  (*Ethernet ETH3, mode uni, connection uni6*)
+ ETH3_uni7 : uint := 16#77E3;  (*Ethernet ETH3, mode uni, connection uni7*)
+ ETH4_uni0 : uint := 16#07E4;  (*Ethernet ETH4, mode uni, connection uni0*)
+ ETH4_uni1 : uint := 16#17E4;  (*Ethernet ETH4, mode uni, connection uni1*)
+ ETH4_uni2 : uint := 16#27E4;  (*Ethernet ETH4, mode uni, connection uni2*)
+ ETH4_uni3 : uint := 16#37E4;  (*Ethernet ETH4, mode uni, connection uni3*)
+ ETH4_uni4 : uint := 16#47E4;  (*Ethernet ETH4, mode uni, connection uni4*)
+ ETH4_uni5 : uint := 16#57E4;  (*Ethernet ETH4, mode uni, connection uni5*)
+ ETH4_uni6 : uint := 16#67E4;  (*Ethernet ETH4, mode uni, connection uni6*)
+ ETH4_uni7 : uint := 16#77E4;  (*Ethernet ETH4, mode uni, connection uni7*)
+ WLAN1_uni0 : uint := 16#07E8;  (*WiFi WLAN1, mode uni, connection uni0*)
+ WLAN1_uni1 : uint := 16#17E8;  (*WiFi WLAN1, mode uni, connection uni1*)
+ WLAN1_uni2 : uint := 16#27E8;  (*WiFi WLAN1, mode uni, connection uni2*)
+ WLAN1_uni3 : uint := 16#37E8;  (*WiFi WLAN1, mode uni, connection uni3*)
+ WLAN1_uni4 : uint := 16#47E8;  (*WiFi WLAN1, mode uni, connection uni4*)
+ WLAN1_uni5 : uint := 16#57E8;  (*WiFi WLAN1, mode uni, connection uni5*)
+ WLAN1_uni6 : uint := 16#67E8;  (*WiFi WLAN1, mode uni, connection uni6*)
+ WLAN1_uni7 : uint := 16#77E8;  (*WiFi WLAN1, mode uni, connection uni7*)
+ WLAN2_uni0 : uint := 16#07E9;  (*WiFi WLAN2, mode uni, connection uni0*)
+ WLAN2_uni1 : uint := 16#17E9;  (*WiFi WLAN2, mode uni, connection uni1*)
+ WLAN2_uni2 : uint := 16#27E9;  (*WiFi WLAN2, mode uni, connection uni2*)
+ WLAN2_uni3 : uint := 16#37E9;  (*WiFi WLAN2, mode uni, connection uni3*)
+ WLAN2_uni4 : uint := 16#47E9;  (*WiFi WLAN2, mode uni, connection uni4*)
+ WLAN2_uni5 : uint := 16#57E9;  (*WiFi WLAN2, mode uni, connection uni5*)
+ WLAN2_uni6 : uint := 16#67E9;  (*WiFi WLAN2, mode uni, connection uni6*)
+ WLAN2_uni7 : uint := 16#77E9;  (*WiFi WLAN2, mode uni, connection uni7*)
+ LTE1_uni0 : uint := 16#07EA;  (*modem LTE1, mode uni, connection uni0*)
+ LTE1_uni1 : uint := 16#17EA;  (*modem LTE1, mode uni, connection uni1*)
+ LTE1_uni2 : uint := 16#27EA;  (*modem LTE1, mode uni, connection uni2*)
+ LTE1_uni3 : uint := 16#37EA;  (*modem LTE1, mode uni, connection uni3*)
+ LTE1_uni4 : uint := 16#47EA;  (*modem LTE1, mode uni, connection uni4*)
+ LTE1_uni5 : uint := 16#57EA;  (*modem LTE1, mode uni, connection uni5*)
+ LTE1_uni6 : uint := 16#67EA;  (*modem LTE1, mode uni, connection uni6*)
+ LTE1_uni7 : uint := 16#77EA;  (*modem LTE1, mode uni, connection uni7*)
+ CH1_uni : uint := 16#0101;  (*Serial channel CH1, mode uni*)
+ CH2_uni : uint := 16#0202;  (*Serial channel CH2, mode uni*)
+ CH3_uni : uint := 16#0103;  (*Serial channel CH3, mode uni*)
+ CH4_uni : uint := 16#0204;  (*Serial channel CH4, mode uni*)
+ CH5_uni : uint := 16#0105;  (*Serial channel CH5, mode uni*)
+ CH6_uni : uint := 16#0206;  (*Serial channel CH6, mode uni*)
+ CH7_uni : uint := 16#0107;  (*Serial channel CH7, mode uni*)
+ CH8_uni : uint := 16#0208;  (*Serial channel CH8, mode uni*)
+ CH9_uni : uint := 16#0109;  (*Serial channel CH9, mode uni*)
+ CH10_uni : uint := 16#020A;  (*Serial channel CH10, mode uni*)
+ ETH1 : usint := 16#E1;  (*Ethernet ETH1*)
+ ETH2 : usint := 16#E2;  (*Ethernet ETH2*)
+ ETH3 : usint := 16#E3;  (*Ethernet ETH3*)
+ ETH4 : usint := 16#E4;  (*Ethernet ETH4*)
+ WLAN1 : usint := 16#E8;  (*WiFi WLAN1*)
+ WLAN2 : usint := 16#E9;  (*WiFi WLAN2*)
+ LTE1 : usint := 16#EA;  (*Modem LTE1*)
+ SCH1 : usint := 16#01;  (*serial channel CH1*)
+ SCH2 : usint := 16#02;  (*serial channel CH2*)
+ SCH3 : usint := 16#03;  (*serial channel CH3*)
+ SCH4 : usint := 16#04;  (*serial channel CH4*)
+ SCH5 : usint := 16#05;  (*serial channel CH5*)
+ SCH6 : usint := 16#06;  (*serial channel CH6*)
+ SCH7 : usint := 16#07;  (*serial channel CH7*)
+ SCH8 : usint := 16#08;  (*serial channel CH8*)
+ SCH9 : usint := 16#09;  (*serial channel CH9*)
+ SCH10 : usint := 16#0A;  (*serial channel CH10*)
+ ONE_TIME_LOG : uint := 16#0000;  (**)
+ CYCLIC_LOG : uint := 16#4000;  (**)
+ HEX_LOG_ONLY : uint := 16#2000;  (**)
+ TEXT_LOG_ONLY : uint := 16#1000;  (**)
+ COM_OK : usint := 0;  (*no error*)
+ COM_ERR1 : usint := 1;  (*channel is not in uni mode*)
+ COM_ERR2 : usint := 2;  (*sending data are too long*)
+ COM_ERR3 : usint := 3;  (*received data are too long*)
+ COM_ERR4 : usint := 4;  (*channel is not supported (wrong channel code)*)
+ COM_ERR5 : usint := 5;  (*previous message is not sent yet*)
+ COM_ERR6 : usint := 6;  (*no data for sending*)
+ COM_ERR7 : usint := 7;  (*invalid communication speed*)
+ COM_ERR8 : usint := 8;  (*channel is disabled*)
+ COM_ERR9 : usint := 9;  (*receiving buffers are full*)
+ COM_ERR10 : usint := 10;  (*received message is longer that channel's receiving zone*)
+ COM_ERR16 : usint := 16#10;  (*Invalid start delimiter*)
+ COM_ERR17 : usint := 16#11;  (*Parity error*)
+ COM_ERR18 : usint := 16#12;  (*Maximum message length exceeded*)
+ COM_ERR19 : usint := 16#13;  (*Invalid second byte of acknowledgment*)
+ COM_ERR20 : usint := 16#14;  (*Invalid second byte of end delimiter*)
+ COM_ERR24 : usint := 16#18;  (*Check sum error*)
+ COM_ERR25 : usint := 16#19;  (*Invalid end delimiter*)
+ COM_ERR49 : usint := 16#31;  (*Invalid length of sent data*)
+ COM_ERR50 : usint := 16#32;  (*Sent data zero length*)
+ COM_ERR64 : usint := 16#40;  (*Timeout not held*)
+ COM_ERRc6 : usint := 16#C6;  (*Invalid channel mode*)
+ COM_ERR198 : usint := 16#C6;  (*Invalid channel mode*)
+ COM_ERR201 : usint := 16#C9;  (*SSL/TLS handshake error*)
+
+END_VAR
+
+VAR_GLOBAL CONSTANT
+ UNI_UDP : usint := 16#10;  (*protocol type = UDP*)
+ UNI_TCP_CLIENT : usint := 16#21;  (*protocol type = TCP client*)
+ UNI_TCP_SERVER : usint := 16#22;  (*protocol type = TCP server*)
+ UNI_SSL_CLIENT : usint := 16#23;  (*protocol type = TLS/SSL client*)
+ UNI_SSL_SERVER : usint := 16#24;  (*protocol type = TLS/SSL server*)
+
+END_VAR
+
+__DECL FUNCTION OpenUniSocket : uint
+(*Open UDP or TCP socket (for Foxtrot CP-2xxx only)
+ Returns handle of socket (0 means there is no free socket).
+ Handle can be used as chanCode parameter for fbRecvFrom and fbSendTo*)
+  VAR_INPUT
+    myIP             : TIPadr;  (*local IP address*)
+    myPort           : uint;  (*local port*)
+    hisIP            : TIPadr;  (*remote IP address*)
+    hisPort          : uint;  (*remote port*)
+    protocol         : usint;  (*protocol : UNI_UDP, UNI_TCP_CLIENT, ...*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CloseUniSocket : bool
+(*Close socket (which is opened by OpenUniSocket) and clear chanHandle*)
+  VAR_IN_OUT
+    chanHandle       : uint;  (*channel handle*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetUniSocketStatistic {HIDDEN} : bool
+(*Get statistic of uni socket (which is opened by OpenUniSocket)*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+  END_VAR
+  VAR_IN_OUT
+    uniEthStat       : TCHxStatistic;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetUniSocketControl {HIDDEN} : bool
+(*Get control word of uni socket (which is opened by OpenUniSocket)*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+  END_VAR
+  VAR_IN_OUT
+    uniEthCont       : TCHxControl;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetUniSocketControl {HIDDEN} : bool
+(*Set control word of uni socket (which is opened by OpenUniSocket)*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+  END_VAR
+  VAR_IN_OUT
+    uniEthCont       : TCHxControl;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetUniChanStatus {HIDDEN} : bool
+(*Get status of uni channel (which is opened by OpenUniSocket)*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+  END_VAR
+  VAR_IN_OUT
+    uniInStat        : TUni_IN_STATUS;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetUniChanStatusEx {HIDDEN} : bool
+(*Get status of uni channel (which is opened by OpenUniSocket)*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+    dataMaxLen       : uint;  (*max length of rx buffer*)
+  END_VAR
+  VAR_IN_OUT
+    uniInStat        : TUni_IN_STATUS;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetUniChanRxData {HIDDEN} : bool
+(*Get data from rx buffer of uni channel (which is opened by OpenUniSocket)*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+    dataLen          : uint;
+  END_VAR
+  VAR_IN_OUT
+    uniRxData        : usint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetUniChanControl {HIDDEN} : bool
+(*Get control of uni channel (which is opened by OpenUniSocket)*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+  END_VAR
+  VAR_IN_OUT
+    uniOutCont       : TUni_OUT_CONT;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetUniChanControl {HIDDEN} : bool
+(*Set control of uni channel (which is opened by OpenUniSocket)*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+  END_VAR
+  VAR_IN_OUT
+    uniOutCont       : TUni_OUT_CONT;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetUniChanTxData {HIDDEN} : bool
+(*Set data to tx buffer of uni channel (which is opened by OpenUniSocket)*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+    dataLen          : uint;
+  END_VAR
+  VAR_IN_OUT
+    uniTxData        : usint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetUniChanTxData {HIDDEN} : bool
+(*Get data from tx buffer of uni channel (which is opened by OpenUniSocket)*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+    dataLen          : uint;
+  END_VAR
+  VAR_IN_OUT
+    uniTxData        : usint;
+  END_VAR
+END_FUNCTION
+
+TYPE TUniSocketsInfo :
+  STRUCT
+    numUniMdl        : uint;  (*max. poèet uni kanálù, které lze založit pomocí IOconfigurátoru (#module)*)
+    freeUniMdl       : uint;  (*poèet volných uni kanálù, které lze založit pomocí IOconfigurátoru*)
+    numUniChan       : uint;  (*max. poèet uni kanálù, které lze založit pomocí OpenUniSocket*)
+    freeUniChan      : uint;  (*poèet volných uni kanálù, které lze založit pomocí OpenUniSocket*)
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION GetUniSocketsInfo : bool
+(*Function returns information about ethernet channels*)
+  VAR_IN_OUT
+    uniInfo          : TUniSocketsInfo;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetUniLog : bool
+(*Record of communication to the file*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+    logMode          : uint;  (*log mode: ONE_TIME_LOG or CYCLIC_LOG + HEX_LOG_ONLY or TEXT_LOG_ONLY*)
+    logSizeKB        : udint;  (*max log size [kB]*)
+    logName          : string [80];  (*name of log file [kB]*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetUniChanHostName : bool
+(*Function sets the server name indication ClientHello extension to contain the value hostName.
+ Using for uni SSL/TLS client only*)
+  VAR_INPUT
+    chanHandle       : uint;  (*channel handle*)
+    hostName         : string [80];  (*server host name*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION FlushEthUniTxData : bool
+(*Send data immediately from ETH UNI channel (data must be prepared by fbSendTo block)*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel handle obtained by OpenUniSocket function or channel code ETH1_uni0, ETH1_uni1, ...*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetChanDesc {HIDDEN} : TUniDesc
+(*Get a descriptor of the communication channel
+     For channels which are opened by OpenUniSocket function
+     returns items .modeChan and .res, others items are zero.
+     Function tests memory mapping of com channel.
+     This function is for internal using in library.
+     Function returns channel descriptor (TUniDesc).*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel code (ETH1_uni0, ..., ETH1_uni7, ETH2_uni0, ..., ETH2_uni7)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetChanIndex {HIDDEN} : int
+(*Test the existence of a communication channel
+   Function checks validity of chanCode.
+   This function is for internal using in library.
+   Function returns positive channel index
+   when chanCode is valid, otherwise result is -1.
+   Function returns -1 for channels which are opened by OpenUniSocket*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel code*)
+  END_VAR
+END_FUNCTION
+
+VAR_GLOBAL CONSTANT
+ ComErrorString : ARRAY [0..23] OF string [40] := [
+       'No error                                ',
+       'Channel is not in uni mode              ',
+       'Sending data are too long               ',
+       'Received data are too long              ',
+       'Wrong channel code                      ',
+       'Previous message is not sent yet        ',
+       'Zero message length                     ',
+       'Invalid communication speed             ',
+       'Channel is disabled                     ',
+       'Receiving buffers are full              ',
+       'Channel$'s receiving zone is too short   ',
+       'Invalid start delimiter                 ',
+       'Parity error                            ',
+       'Maximum message length exceeded         ',
+       'Invalid second byte of acknowledgment   ',
+       'Invalid second byte of end delimiter    ',
+       'Check sum error                         ',
+       'Invalid end delimiter                   ',
+       'Invalid length of sent data             ',
+       'Sent data zero length                   ',
+       'Timeout not held                        ',
+       'Invalid channel mode                    ',
+       'SSL/TLS handshake error                 ',
+       'Unknown error                           '];
+
+END_VAR
+
+__DECL FUNCTION GetLastComErrTxt : string
+(*errCode : USINT;         error code*)
+  VAR_INPUT
+    errCode          : usint;  (*error code*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetChanSettings : bool
+(*The test configuration of the serial channel
+   Function tests actual settings of serial channel
+   (channel must be in uni mode!).
+   Function returns TRUE when successful and
+   actual channels settings are set to variable chanSet.*)
+  VAR_INPUT
+    serChan          : usint;  (*number of serial channel (SCH1, ..., SCH10)*)
+  END_VAR
+  VAR_IN_OUT
+    chanSet          : TChanSettings;  (*actual settings for serial channel*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetChanSettings : usint
+(*Set serial port parameters
+   Function sets new parameters for serial channel
+   (communication speed, parity, ...).
+   Function returns 0 when successful,
+   in other case function returns error number.*)
+  VAR_INPUT
+    rq               : bool;  (*request for new settings*)
+    serChan          : usint;  (*number of serial channel (SCH1, ..., SCH10)*)
+  END_VAR
+  VAR_IN_OUT
+    chanSet          : TChanSettings;  (*new settings for serial channel*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetChanStat : TUni_STAT
+(*Test status of the communication channel
+   Function returns TUni_STAT structure.*)
+  VAR CONSTANT
+    initStat         : TUni_STAT :=  ( DSR := false,  CTS := false,  dummy1 := false,  TRO := false,
+                              RCF := false,  ROV := false,  TRF := false,  ARC := false);
+  END_VAR
+  VAR_INPUT
+    chanCode         : uint;  (*channel code (CH1_uni, ..., CH10_uni, ETH1_uni0, ..., ETH1_uni7, ETH2_uni0, ..., ETH2_uni7)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION EstabTCPconnection : usint
+(*Establish a TCP connection
+   Function starts to establish TCP connection.
+   This operation takes some time.
+   Function returns 0 when successful.
+   If it is fails function returns error code.*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel code (ETH1_uni0, ..., ETH1_uni7, ETH2_uni0, ..., ETH2_uni7)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CloseTCPconnection : usint
+(*Close TCP connection
+   Function starts to close TCP connection.
+   This operation takes some time.
+   Function returns 0 when successful.
+   If it is fails function returns error code.*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel code (ETH1_uni0, ..., ETH1_uni7, ETH2_uni0, ..., ETH2_uni7)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION IsEstabTCPconnection : bool
+(*Test the state of TCP connections
+   Function returns TRUE when TCP connection is established,
+   in other case function returns FALSE.*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel code (ETH1_uni0, ..., ETH1_uni7, ETH2_uni0, ..., ETH2_uni7)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetRemoteIPaddress : bool
+(*Set the destination IP address
+   Function sets new remote IP address,
+   remote port and local port of chanCode.
+   Function returns TRUE when successful,
+   in other case function returns FALSE.*)
+  VAR_INPUT
+    rq               : bool;  (*request for new settings*)
+    chanCode         : uint;  (*channel code (ETH1_uni0, ..., ETH1_uni7)*)
+  END_VAR
+  VAR_IN_OUT
+    ethAdr           : TRemoteEthAdr;  (*new settings*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetRemoteIPaddress : bool
+(*Test the destination IP address
+   Function tests actual remote IP address, remote port and local port of chanCode. Function returns TRUE when successful. Actual remote IP address, remote port and local port are set to variable ethAdr.*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel code (ETH1_uni0, ..., ETH1_uni7)*)
+  END_VAR
+  VAR_IN_OUT
+    ethAdr           : TRemoteEthAdr;  (*actual settings*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetLastIcomingMsgInf : bool
+(*Test the IP address from which the last message came. Only for Foxtrot 2 version 3.9 and later.*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel code (ETH1_uni0, ..., ETH1_uni7)*)
+  END_VAR
+  VAR_IN_OUT
+    msgInf           : TIncomingMsgInf;  (*info about incoming message*)
+  END_VAR
+END_FUNCTION
+
+VAR_GLOBAL CONSTANT
+ MAX_LENGHT_OF_WEB_USER_NAME : usint := 10;
+ HTTP_URI_SIZE : usint := 65;
+
+END_VAR
+
+TYPE T_SESSION_STATE : 
+  (SESSION_EMPTY,
+   SESSION_LOGIN,
+   SESSION_LOGIN_RUN,
+   SESSION_ACTIVE,
+   SESSION_LOGOUT 
+  );
+END_TYPE
+
+TYPE TWebServerAccess :
+  STRUCT
+    state            : T_SESSION_STATE;  (*session state*)
+    user             : string [10];  (*user name*)
+    level            : usint;  (*level of access*)
+    error            : usint;  (*error code*)
+    IP               : TIPadr;  (*IP address of user*)
+    lastFile         : string [65];  (*name of last requested file*)
+  END_STRUCT;
+END_TYPE
+
+TYPE  TWebServerAccessTable : ARRAY [0..7] OF TWebServerAccess;  (*access table of web server*)
+END_TYPE
+
+__DECL FUNCTION GetWebServerAccess : bool
+(*Get information about access to web server*)
+  VAR_IN_OUT
+    accessTable      : TWebServerAccessTable;  (*access table of web server*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ResetWebServerAccess : bool
+(*Clear one session in access table of web server*)
+  VAR_INPUT
+    rq               : bool;  (*request*)
+    index            : int;  (*index of session in accessTable[]*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetRTS : bool
+(*Set of RTS signal (for serial channel)
+   Function returns TRUE when successful
+   !!! Option "depends on SIGN.1" have to be selected
+    for Control mode of RTS signal in HW configuration*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel code (CH1_uni, ..., CH10_uni)*)
+    value            : bool;  (*RTS value*)
+  END_VAR
+  VAR
+    pUniOut          : PTR_TO TUni_OUT;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetRTS : bool
+(*Get state of RTS signal (for serial channel)
+   Function returns state of RTS signal*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel code (CH1_uni, ..., CH10_uni)*)
+  END_VAR
+  VAR
+    pUniOut          : PTR_TO TUni_OUT;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION MACADR_TO_STRING : string [18]
+(*Convert MAC addresses to a text string*)
+  VAR_INPUT
+    macAdr           : TMacAdr;  (*MAC address array*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetIPaddress : bool
+(*Test of current IP address
+   Function tests actual IP address, subnet mask
+   and gateway of EthChan.
+   Function returns TRUE when successful and
+   actual IP address, subnet mask and gateway address
+   are set into variable EthAdr.*)
+  VAR_INPUT
+    ethChan          : usint;  (*number of Ethernet channel (ETH1, ETH2, ETH3)*)
+  END_VAR
+  VAR_IN_OUT
+    ethAdr           : TLocalEthAdr;  (*actual IP address, subnet mask and gateway address*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetIPaddress2 : bool
+(*Test of current IP address
+   Function tests actual IP address, subnet mask,
+   gateway and DNS servers of ethChan.
+   Function returns TRUE when successful and
+   actual IP address, subnet mask and gateway address
+   are set into variable EthAdr.*)
+  VAR_INPUT
+    ethChan          : usint;  (*number of Ethernet channel (ETH1, ETH2, ETH3, ..., WLAN1, WLAN2)*)
+  END_VAR
+  VAR_IN_OUT
+    ethAdr           : TSetIpAdr2;  (*IP address, subnet mask and gateway address (included DNS servers)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetIPaddress : bool
+(*Setting up your own IP address
+   Function sets new IP address, subnet mask and gateway of ethChan. Function returns TRUE when successful, in other case function returns FALSE.*)
+  VAR_INPUT
+    rq               : bool;  (*request for new settings*)
+    ethChan          : usint;  (*number of Ethernet channel (ETH1, ETH2, ETH3)*)
+  END_VAR
+  VAR_IN_OUT
+    ethAdr           : TLocalEthAdr;  (*new IP address, subnet mask and gateway address*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetIPaddress2 : bool
+(*Setting up your own IP address
+   Function sets new IP address, subnet mask, gateway and DNS servers of ethChan. Function returns TRUE when successful (this may take several cycles), in other case function returns FALSE. Function is available for CP-2xxx only*)
+  VAR_INPUT
+    rq               : bool;  (*request for new settings*)
+    ethChan          : usint;  (*number of Ethernet channel (ETH1, ETH2, ETH3, ..., WLAN1, WLAN2)*)
+  END_VAR
+  VAR_IN_OUT
+    ethAdr           : TSetIpAdr2;  (*new IP address, subnet mask and gateway address (included DNS servers)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION OpenUniChannel : uint
+(*Open communication channel (for Foxtrot CP-2xxx only)
+           Returns handle of socket (0 means there is no free socket or there was any error).
+           Handle can be used as chanCode parameter for fbRecvFrom and fbSendTo*)
+  VAR_INPUT
+    chanCode         : uint;  (*channel code : ANY_uni, ETH1_uni, ETH2_uni, WLAN1_uni, WLAN2_uni, LTE1_uni, LOCALHOST_uni*)
+    myPort           : uint;  (*local port*)
+    hisIP            : TIPadr;  (*remote IP address*)
+    hisPort          : uint;  (*remote port*)
+    protocol         : usint;  (*protocol : UNI_UDP, UNI_TCP_CLIENT, UNI_TCP_SERVER, UNI_SSL_CLIENT*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CloseUniChannel : bool
+(*Close channel (which is opened by OpenUniChannel) and clear chanHandle*)
+  VAR_IN_OUT
+    chanHandle       : uint;  (*channel handle*)
+  END_VAR
+END_FUNCTION
+
+TYPE T_WIFI_PARAM :
+  STRUCT
+    enabled          : bool;  (*1 = enable wifi, 0 = disable wifi*)
+    mode             : usint;  (*0 = no function, 1 = PLC is client, 2 = PLC is HotSpot (access point)*)
+    ssid             : string [32];  (*identifier of WiFi net (Service Set Identifier)*)
+    password         : string [32];  (*password (8 characters minimally)*)
+    channel          : sint;  (*HotSpot channel number <1, ..., 11>*)
+    hidden           : bool;  (*hidden HotSpot (valid for HotSpot only)*)
+  END_STRUCT;
+END_TYPE
+
+TYPE T_WIFI_INFO :
+  STRUCT
+    ssid             : string [32];  (*identifier of WiFi net*)
+    signal           : sint;  (*signal strength [dBm]*)
+    channel          : usint;  (*channel number*)
+  END_STRUCT;
+END_TYPE
+
+TYPE T_SCAN_WIFI_INFO :
+  STRUCT
+    numWiFi          : usint;  (*number of networks found*)
+    wifi             : ARRAY [0..9] OF T_WIFI_INFO;  (*information about found networks*)
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION GetWiFiParam : bool
+(*Test of current settings of WLAN network
+  Function tests actual mode of WLAN (off/client/hotspot), ssid and password for requested WLAN channel. Function returns TRUE when successful and actual parameters are set into variable wifiParam. Only for Foxtrot 2 version 3.6 and later.*)
+  VAR_INPUT
+    wifiChan         : usint;  (*number of WLAN channel (WLAN1, WLAN2)*)
+  END_VAR
+  VAR_IN_OUT
+    wifiParam        : T_WIFI_PARAM;  (*parameters of WLAN network (WLAN1, WLAN2)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetWiFiParam : bool
+(*Change of current settings of WLAN network
+  Function sets new mode of WLAN (off/client/hotspot), ssid and password for requested WLAN channel. Function returns TRUE when successful (this may take several cycles).
+  If client or hotspot is set, the wifiParam.ssid parameter must be a non-empty string and the wifiParam.password parameter must be at least 8 characters long.
+  The wifiParam.channel and wifiParam.hidden parameters only make sense in hotspot mode.*)
+  VAR_INPUT
+    rq               : bool;  (*request for new settings*)
+    wifiChan         : usint;  (*number of WLAN channel (WLAN1, WLAN2)*)
+  END_VAR
+  VAR_IN_OUT
+    wifiParam        : T_WIFI_PARAM;  (*new parameters of WLAN network (WLAN1, WLAN2)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION_BLOCK fbScanWiFi
+(*Find information about nearby WiFi networks. The WiFi adapter in the PLC must be in client mode.*)
+  VAR_INPUT
+    rqScan           : bool;  (*the rising edge starts a WiFi scan*)
+    wifiChan         : usint;  (*number of WLAN channel (WLAN1, WLAN2)*)
+  END_VAR
+  VAR_IN_OUT
+    info             : T_SCAN_WIFI_INFO;  (*information about found networks*)
+  END_VAR
+  VAR_OUTPUT
+    done             : bool;  (*operation done*)
+    busy             : bool;  (*operation pending*)
+    err              : bool;  (*error flag*)
+    errTxt           : string [80];  (*error description*)
+  END_VAR
+  VAR
+    ScanWiFiOutFile  : string [17] :=  'RAM/WIFI_SCAN.TXT';
+    FileReadLine     : ReadLine;
+    index            : udint;
+    timeout          : TON;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbSendTo
+(*Transmit data over the communication channel
+   Function block sends array data[] to communication
+   channel specified by chanCode. Data length is specified
+   by variable lenTx.
+   Function block returns information about
+   sending message. If there is no error,
+   variable error is 0.*)
+  VAR_INPUT
+    rq               : bool;  (*request to send*)
+    chanCode         : uint;  (*channel code (CH1_uni, ..., CH10_uni, ETH1_uni0, ..., ETH1_uni7, ETH2_uni0, ..., ETH4_uni7)*)
+    lenTx            : uint;  (*message size (number of bytes)*)
+  END_VAR
+  VAR_IN_OUT
+    data             : TUni_BUFF;  (*buffer for send message*)
+  END_VAR
+  VAR_OUTPUT
+    mesSent          : bool;  (*sending of message was started*)
+    error            : usint;  (*error code*)
+    lenData          : uint;  (*size of sending message*)
+  END_VAR
+  VAR
+    pUniOut          : PTR_TO TUni_OUT;
+    pUniIn           : PTR_TO TUni_IN;
+    pUniOutData      : PTR_TO usint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbRecvFrom
+(*Receiving data from the communication channel
+   Function block receives message from communication
+   channel specified by chanCode. Received data are
+   saved to array data[]. Length of received message
+   is specified by variable lenData.
+   Function block returns information about
+   received message. If there is no error,
+   variable error is 0.*)
+  VAR_INPUT
+    rq               : bool;  (*request to receive*)
+    chanCode         : uint;  (*channel code (CH1_uni, ..., CH10_uni, ETH1_uni0, ..., ETH1_uni7, ETH2_uni0, ..., ETH4_uni7)*)
+    lenRx            : uint;  (*max. data size (number of bytes)*)
+  END_VAR
+  VAR_IN_OUT
+    data             : TUni_BUFF;  (*buffer for received message*)
+  END_VAR
+  VAR_OUTPUT
+    mesRec           : bool;  (*new message flag*)
+    error            : usint;  (*error code*)
+    lenData          : uint;  (*number of received bytes*)
+  END_VAR
+  VAR
+    pUniIn           : PTR_TO TUni_IN;
+    pUniInData       : PTR_TO usint;
+    oldARC           : bool;  (*ARRAY[0..39] OF BOOL;*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbRecvTxt
+(*Receives data from communication channel delimited by CR LF*)
+  VAR_INPUT
+    getMes           : bool;  (*Gets message from buffer*)
+    reset            : bool;  (*Flushes buffer*)
+    chanCode         : uint;  (*Channel code (CH1_uni, ..., CH10_uni, ETH1_uni0, ..., ETH1_uni7, ETH2_uni0, ..., ETH4_uni7)*)
+    lenBuf           : uint;  (*Lenght of buffer*)
+    lenTxt           : uint;  (*Lenght of txtMes*)
+  END_VAR
+  VAR_OUTPUT
+    full             : bool;  (*Buffer is full, messages were not taken fast enought*)
+    lenMes           : uint;  (*Message length*)
+    error            : usint;  (*error code*)
+  END_VAR
+  VAR
+    actPos           : uint;
+    RecvFrom         : fbRecvFrom;
+  END_VAR
+  VAR_IN_OUT
+    buffer           : usint;  (*First byte of working buffer*)
+    txtMes           : usint;  (*First byte of received text*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbRecvTxtChar
+(*Receives data from communication channel delimited by charachter specified by input 'delimiter'*)
+  VAR_INPUT
+    getMes           : bool;  (*Gets message from buffer*)
+    reset            : bool;  (*Flushes buffer*)
+    chanCode         : uint;  (*Channel code (CH1_uni, ..., CH10_uni, ETH1_uni0, ..., ETH1_uni7, ETH2_uni0, ..., ETH4_uni7)*)
+    lenBuf           : uint;  (*Lenght of buffer*)
+    lenTxt           : uint;  (*Lenght of txtMes*)
+    delimiter        : byte;  (*delimiter*)
+  END_VAR
+  VAR_OUTPUT
+    full             : bool;  (*Buffer is full, messages were not taken fast enought*)
+    lenMes           : uint;  (*Message length*)
+    error            : usint;  (*error code*)
+  END_VAR
+  VAR
+    actPos           : uint;
+    RecvFrom         : fbRecvFrom;
+  END_VAR
+  VAR_IN_OUT
+    buffer           : usint;  (*First byte of working buffer*)
+    txtMes           : usint;  (*First byte of received text*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION GetMACaddress : bool
+(*Test MAC address
+   Function tests actual MAC address of ethChan.
+   Function returns TRUE when successful and
+   actual MAC address is set to variable MacAdr.*)
+  VAR_INPUT
+    ethChan          : usint;  (*number of Ethernet channel (ETH1, ETH2, ETH3)*)
+  END_VAR
+  VAR_IN_OUT
+    MacAdr           : TMacAdr;  (*actual MAC address*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetDHCPsupport : bool
+(*Turn on support for DHCP
+   Function sets DHCP support.
+   IP address will obtain from DHCP server automatically.
+   Function returns TRUE when successful,
+   in other case function returns FALSE.*)
+  VAR_INPUT
+    rq               : bool;  (*request for DHCP support*)
+    ethChan          : usint;  (*number of Ethernet channel (in Foxtrot 1 ETH1 only)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION GetDNS_IP : TIPadr
+(*Function returns IP address of DNS server*)
+  VAR_INPUT
+    ethChan          : usint;  (*number of Ethernet channel (ETH1 only)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SetDNS_IP : bool
+(*Function sets Ip address of DNS server
+   Function returns TRUE when successful,
+   in other case function returns FALSE.*)
+  VAR_INPUT
+    rq               : bool;  (*request for new settings of DNS IP*)
+    ethChan          : usint;  (*number of Ethernet channel (ETH1 only)*)
+    DNS_IP           : TIPadr;  (*IP address of DNS server*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION STRING_TO_IPADR : TIPadr
+(*Convert text string to IP address*)
+  VAR_INPUT
+    IPAdr            : string [80];  (*IP address string*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION IPADR_TO_STRING : string
+  VAR_INPUT
+    IPAdr            : TIPadr;  (*IP address array*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION_BLOCK fbKeepAliveTCP
+(*Keep alive TCP connection
+   In order to keep connection alive, function block sends ACK packets when TCP connection is established and there are no data to transmit.
+   Function returns 0 when successful. If it is fails function returns error code.*)
+  VAR_INPUT
+    rq               : bool;  (*request to keep alive*)
+    chanCode         : uint;  (*channel code (ETH1_uni0, ..., ETH1_uni7, ETH2_uni0, ..., ETH2_uni7)*)
+    PT               : time :=  T#30s;  (*keep alive interval (T#5s...T#60s)*)
+  END_VAR
+  VAR_OUTPUT
+    error            : usint;  (*error code*)
+  END_VAR
+  VAR
+    tick             : fbTick;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION CheckGatewayIP : bool
+(*Check if IP address of gateway in PLC is valid*)
+  VAR_INPUT
+    ethChan          : usint;  (*number of Ethernet channel (ETH1, ETH2, ETH3)*)
+  END_VAR
+END_FUNCTION
+
+
+
+{LIBFILE="LOCALLIB\CONVERTLIB_V25_20220831.MLB"}
+(* Mosaic IDE library *)
+(* File name : C:\TecoLibSrc\ConvertLib\ConvertLib_V25_20220831.mlb *)
+(* Library : ConvertLib 2.5 *)
+(* Author : Teco a.s. *)
+(* Copyright : (c) 2010 - 2022 Teco a.s. *)
+(* IEC compiler version : 4.2.16.0 *)
+(* Assembler version : 4.3.00 *)
+
+//{Knihovna : ConvertLib 2.5  }
+(* History: *)
+(*
+v1.0 2010-11-17 Nem First edition
+v1.1 2011-07-22 Nem Functions STRING_TO_UPPER() a STRING_TO_LOWER()
+                    returns length of converted string
+v1.2 2012-02-13 Nem New function ISO8859_2_TO_CP1250()
+v1.3 2012-04-27 Nem New function ReplaceChar()
+v1.4 2012-09-03 Nem New functions DT_TO_DT_RFC822() a DT_RFC822_TO_DT()
+v1.5 2013-06-02 Nem Fix bug for june and july in DT_RFC822_TO_DT()
+v1.6 2013-09-23 Byd New functions WindDirectionT115Deg, WindDirectionT115StringCs, 
+                    WindDirectionT115StringEn and function blocks 
+                    fbMeterCounter, fbMeterPulse
+v1.7 2013-10-14 Byd DT_RFC822_TO_DT fixed for month October
+v1.8 2014-10-31 Nem New functions STRING_TO_INT_EX, STRING_TO_REAL_EX, 
+                    STRING_TO_LREAL_EX
+v1.9 2016-01-18 Nem New functions DT_TO_DT_HTTP() and UTF8_TO_CP125x()
+                    DT_RFC822_TO_DT fixed for PM
+v2.0 2017-01-19 Byd Fixed block fbMeterCounter for MaxPeriod less than 1000ms
+v2.1 2017-02-22 Byd Added functions CP1250_TO_UTF8, CP1251_TO_UTF8, CP1252_TO_UTF8, CP1253_TO_UTF8, CP1254_TO_UTF8, CP1255_TO_UTF8
+v2.2 2019-03-06 Byd Added function STRING_HEX_TO_BYTE_ARRAY
+v2.3 2020-12-14 Byd Added funtions STRING_CP1250_TO_LOWER a STRING_CP1250_TO_UPPER
+v2.4 2022-04-14 Nem Added funtions SwapBytes_UDINT, SwapBytes_DINT, SwapBytes_DWORD, SwapBytes_REAL, SwapBytes_UINT, 
+                    SwapBytes_INT, SwapBytes_WORD, SwapWords_UDINT, SwapWords_DINT, SwapWords_DWORD,
+                    Pt100_1385_Resistance_TO_Temperature and Pt100_1391_Resistance_TO_Temperature
+v2.5 30.08.2022 Byd Added funtions BCD_TO_UDINT, BCD_TO_USINT, USINT_TO_BCD, UDINT_TO_BCD and CorrectRhByTemp
+                    and function block fbCorrectRhAndTemp
+*)
+
+(*----------------------------------------------------------------------------*)
+
+__DECL FUNCTION STRING_TO_UPPER : uint
+(*Convert lowercase letters to uppercase. Returns length of string.*)
+  VAR_IN_OUT
+    input            : string [80];
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION STRING_CP1250_TO_UPPER : uint
+(*Convert lowercase letters to uppercase in CP-1250 code page. Returns length of string.*)
+  VAR_IN_OUT
+    input            : string [80];
+  END_VAR
+  VAR CONSTANT
+    upper_cp1250_table : ARRAY [154..255] OF byte := 
+      [138,155,140,141,142,143,160,161,
+       162,163,164,165,166,167,168,169,
+       170,171,172,173,174,175,176,177,
+       178,163,180,181,182,183,184,165,
+       170,187,188,189,188,175,192,193,
+       194,195,196,197,198,199,200,201,
+       202,203,204,205,206,207,208,209,
+       210,211,212,213,214,215,216,217,
+       218,219,220,221,222,223,192,193,
+       194,195,196,197,198,199,200,201,
+       202,203,204,205,206,207,208,209,
+       210,211,212,213,214,247,216,217,
+       218,219,220,221,222,255];
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION STRING_TO_LOWER : uint
+(*Convert uppercase letters to lowercase. Returns length of string.*)
+  VAR_IN_OUT
+    input            : string [80];
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION STRING_CP1250_TO_LOWER : uint
+(*Convert uppercase letters to lowercase in CP-1250 code page. Returns length of string.*)
+  VAR_IN_OUT
+    input            : string [80];
+  END_VAR
+  VAR CONSTANT
+    lower_cp1250_table : ARRAY [138..222] OF byte := 
+      [154,139,156,157,158,159,144,145,
+       146,147,148,149,150,151,152,153,
+       154,155,156,157,158,159,160,161,
+       162,179,164,185,166,167,168,169,
+       186,171,172,173,174,191,176,177,
+       178,179,180,181,182,183,184,185,
+       186,187,190,189,190,191,224,225,
+       226,227,228,229,230,231,232,233,
+       234,235,236,237,238,239,240,241,
+       242,243,244,245,246,215,248,249,
+       250,251,252,253,254];
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION STRING_HEX_TO_UDINT : udint
+(*Convert STRING (HEX NUMBER ONLY) TO UDINT
+  
+  Permissible characters : '0123456789abcdefABCDEF'*)
+  VAR_INPUT
+    input            : string [80];
+  END_VAR
+  VAR
+    tmp              : string [8] :=  '00000000';
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DEG_TO_RAD : lreal
+(*Convert degrees to radians*)
+  VAR_INPUT
+    angle            : lreal;  (*Angle in degrees*)
+  END_VAR
+  VAR CONSTANT
+    _180_pi          : lreal :=  3.1415926535897931/180.0;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION RAD_TO_DEG : lreal
+(*Convert radians to degrees*)
+  VAR_INPUT
+    angle            : lreal;  (*Angle in radians*)
+  END_VAR
+  VAR CONSTANT
+    _pi_180          : lreal :=  180.0/3.1415926535897931;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DEGREES_TO_ANGLE : lreal
+(*Convert angle (degrees, minutes, seconds) to degrees*)
+  VAR_INPUT
+    degrees          : int;  (*Degrees*)
+    minutes          : int;  (*Minutes*)
+    seconds          : int;  (*Seconds*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION FAHRENHEIT_TO_CELSIUS : real
+(*Convert temperature from Fahrenheit to Celsius*)
+  VAR_INPUT
+    temp             : real;  (*temperature °F*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CELSIUS_TO_FAHRENHEIT : real
+(*Convert temperature from Celsius to Fahrenheit*)
+  VAR_INPUT
+    temp             : real;  (*temperature °C*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ANGLE_TO_DEGREES : bool
+(*Convert angle in degrees to degrees/minutes/seconds*)
+  VAR_INPUT
+    angle            : lreal;  (*angle (degrees)*)
+  END_VAR
+  VAR_IN_OUT
+    degrees          : int;  (*Degrees*)
+    minutes          : int;  (*Minutes*)
+    seconds          : int;  (*Seconds*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION ISO8859_2_TO_CP1250 : udint
+(*Convert characters from ISO 8859-2 to CP-1250*)
+  VAR_IN_OUT
+    src              : usint;  (*first byte of string for conversion*)
+  END_VAR
+  VAR
+    ps               : PTR_TO usint;
+    s                : usint;
+  END_VAR
+  VAR CONSTANT
+    ISO8859_2_TO_CP1250_161_190 : ARRAY [161..190] OF usint :=  [
+      165, 162, 163, 164, 188, 140,
+      167, 168, 138, 170, 141, 143,
+      173, 142, 175, 176, 185, 178,
+      179, 180, 190, 156, 183, 184,
+      154, 186, 157, 159, 189, 158
+    ];
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION REPLACE_CHAR : uint
+(*Replace all character C1 with character C2
+Returns len of STRING*)
+  VAR_INPUT
+    C1               : byte;  (*ASCII value of character to be replaced*)
+    C2               : byte;  (*ASCII value of character used for replacement*)
+  END_VAR
+  VAR_IN_OUT
+    input            : string [255];  (*String where there characters will be replaced*)
+  END_VAR
+END_FUNCTION
+
+TYPE TypeTecoDateTime {HIDDEN} :
+  STRUCT
+    year             : usint;  (*rok     (poslední dvì èíslice letopoètu)*)
+    month            : usint;  (*mìsíc   (1 .. 12)*)
+    day              : usint;  (*den     (1 .. 28/29/30/31)*)
+    hour             : usint;  (*hodina  (0 .. 23)*)
+    min              : usint;  (*minuta  (0 .. 59)*)
+    sec              : usint;  (*sekunda (0 .. 59)*)
+    dayOfWeek        : usint;  (*den v týdnu (1 = pondìlí, 7 = nedìle)*)
+    milisec          : uint;  (*milisekunda*)
+  END_STRUCT;
+END_TYPE
+
+VAR_GLOBAL CONSTANT
+ MonthsNamesRFC822 : ARRAY [1..12] OF string [3] := ['Jan', 'Feb', 'Mar', 'Apr',
+                                                       'May', 'Jun', 'Jul', 'Aug',
+                                                       'Sep', 'Oct', 'Nov', 'Dec'];
+
+END_VAR
+
+__DECL FUNCTION DT_TO_DT_RFC822 : string [26]
+(*returns date and time according to RFC822
+
+  date and time according to RFC822
+
+  date            =       day month year
+  year            =       4 DIGIT
+  month           =       month-name
+  month-name      =       "Jan" / "Feb" / "Mar" / "Apr" /
+                          "May" / "Jun" / "Jul" / "Aug" /
+                          "Sep" / "Oct" / "Nov" / "Dec"
+  day             =       1-2 DIGIT
+  time            =       time-of-day zone
+  time-of-day     =       hour ":" minute ":" second
+  hour            =       2 DIGIT
+  minute          =       2 DIGIT
+  second          =       2 DIGIT
+  zone            =       (( "+" / "-" ) 4 DIGIT)*)
+  VAR_INPUT
+    dateTime         : dt;  (*Date and time in IEC DT format*)
+    UtcOff           : uint;  (*Offset from UTC in minutes*)
+  END_VAR
+  VAR
+    tmpDT            : TypeTecoDateTime;
+    tmpTime          : time;
+    Format           : string [80];
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION DT_RFC822_TO_DT : dt
+(*Conversion date and time according to RFC822 to IEC format DATE_AND_TIME
+  Returns standard IEC DT format
+
+  date and time according to RFC822
+
+  date            =       day month year
+  year            =       4 DIGIT
+  month           =       month-name
+  month-name      =       "Jan" / "Feb" / "Mar" / "Apr" /
+                          "May" / "Jun" / "Jul" / "Aug" /
+                          "Sep" / "Oct" / "Nov" / "Dec"
+  day             =       1-2 DIGIT
+  time            =       time-of-day zone
+  time-of-day     =       hour ":" minute ":" second
+  hour            =       2 DIGIT
+  minute          =       2 DIGIT
+  second          =       2 DIGIT
+  zone            =       (( "+" / "-" ) 4 DIGIT)*)
+  VAR_INPUT
+    dateTime         : string [80];  (*Date and time according to RFC822 (for example Tue, 28 Aug 2012 7:58 am)*)
+  END_VAR
+  VAR
+    tmpDT            : TypeTecoDateTime;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION WindDirectionT115Deg : real
+(*Conversion of resistivity measured of wind indicator T115 to degrees*)
+  VAR_INPUT
+    R                : real;
+  END_VAR
+  VAR CONSTANT
+    directionDeg     : ARRAY [0..7] OF real :=  [90,135,180,45,225,0,315,270];
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION WindDirectionT115StringCs : string [2]
+(*Conversion of measured resistivity of wind indicator T115 to Czech description of direction*)
+  VAR_INPUT
+    R                : real;  (*Measured resistivity of wind indicator T115*)
+  END_VAR
+  VAR
+    direction        : ARRAY [0..7] OF string [2] :=  ['V','JV','J','SV','JZ','S','SZ','Z'];
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION WindDirectionT115StringEn : string [2]
+(*Conversion of measured resistivity of wind indicator T115 to English description of direction*)
+  VAR_INPUT
+    R                : real;  (*Measured resistivity of wind indicator T115*)
+  END_VAR
+  VAR
+    direction        : ARRAY [0..7] OF string [2] :=  ['E','SE','S','NE','SW','N','NW','W'];
+  END_VAR
+END_FUNCTION
+
+VAR_GLOBAL CONSTANT
+ DayNamesRFC1123 : ARRAY [1..7] OF string [3] := [ 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+END_VAR
+
+__DECL FUNCTION DT_TO_DT_HTTP : string [40]
+(*returns date and time according to HTTP specification
+
+  date and time according to HTTP specification : Sun, 06 Nov 1994 08:49:37 GMT
+
+  date            =       day-of-week, day month year time
+  day-of-week     =       "Mon" | "Tue" | "Wen" | "Thu" | "Fri" | "Sat" | "Sun"
+  year            =       4 DIGIT
+  month           =       month-name
+  month-name      =       "Jan" | "Feb" | "Mar" | "Apr" |
+                          "May" | "Jun" | "Jul" | "Aug" |
+                          "Sep" | "Oct" | "Nov" | "Dec"
+  day             =       2 DIGIT
+  time            =       time-of-day "GMT"
+  time-of-day     =       hour ":" minute ":" second
+  hour            =       2 DIGIT
+  minute          =       2 DIGIT
+  second          =       2 DIGIT*)
+  VAR_INPUT
+    dateTime         : dt;  (*Date and time in IEC DT format*)
+    UtcOff           : uint;  (*Offset from UTC in minutes*)
+  END_VAR
+  VAR
+    gmtDT            : dt;
+    tmpDT            : TypeTecoDateTime;
+    tmpTime          : time;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION UTF8_TO_CP125x : uint
+(*Convert characters from UTF8 to CP-1250,...,CP1255
+        Returns the size of the resulting string*)
+  VAR_IN_OUT
+    str              : string [255];  (*string to be converted from UTF8 to CP125x*)
+  END_VAR
+  VAR_INPUT
+    codePage         : uint;  (*code page = 1250,...,1255*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION STRING_HEX_TO_BYTE_ARRAY : uint
+(*Conversion of hexadecimal number in ASCII string to binary value
+ACSII string must have even number of characters, output binary data will have half a size
+funkction returns length of binary data in bytes*)
+  VAR_INPUT
+    dataLen          : uint;  (*length of input data in bytes*)
+  END_VAR
+  VAR_IN_OUT
+    data             : usint;  (*first byte of input hexadecimal number*)
+    out              : usint;  (*first byte of output binary data*)
+  END_VAR
+  VAR
+    ptr              : udint;
+    end              : udint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SwapBytes_UDINT : udint
+(*Swaps the byte ordering of UDINT variable (16#1234_5678 -> 16#7856_3412). Conversion little-endian <-> big-endian*)
+  VAR_INPUT
+    in               : udint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SwapBytes_DINT : dint
+(*Swaps the byte ordering of DINT variable (16#0102_0304 -> 16#0403_0201). Conversion little-endian <-> big-endian*)
+  VAR_INPUT
+    in               : dint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SwapBytes_DWORD : dword
+(*Swaps the byte ordering of DWORD variable (16#1234_5678 -> 16#7856_3412). Conversion little-endian <-> big-endian*)
+  VAR_INPUT
+    in               : dword;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SwapBytes_REAL : real
+(*Swaps the byte ordering of REAL variable (16#B515_4941 -> 16#4149_15B5). Conversion little-endian <-> big-endian*)
+  VAR_INPUT
+    in               : real;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SwapBytes_UINT : uint
+(*Swaps the byte ordering of UINT variable (16#1234 -> 16#3412). Conversion little-endian <-> big-endian*)
+  VAR_INPUT
+    in               : uint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SwapBytes_INT : int
+(*Swaps the byte ordering of INT variable (16#1234 -> 16#3412). Conversion little-endian <-> big-endian*)
+  VAR_INPUT
+    in               : int;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SwapBytes_WORD : word
+(*Swaps the byte ordering of WORD variable (16#1234 -> 16#3412). Conversion little-endian <-> big-endian*)
+  VAR_INPUT
+    in               : word;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SwapWords_UDINT : udint
+(*Swap words of UDINT variable (16#1234_5678 -> 16#5678_1234)*)
+  VAR_INPUT
+    in               : udint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SwapWords_DINT : dint
+(*Swap words of DINT variable (16#1234_5678 -> 16#5678_1234)*)
+  VAR_INPUT
+    in               : dint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION SwapWords_DWORD : dword
+(*Swap words of DWORD variable (16#1234_5678 -> 16#5678_1234)*)
+  VAR_INPUT
+    in               : dword;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION Pt100_1385_Resistance_TO_Temperature : real
+(*Converts resistance [Ohm] measured by Pt100 sensor W100 = 1.385 to temperature [°C] with precision 0.1°C*)
+  VAR_INPUT
+    in               : real;  (*resistance [Ohm] measured by Pt100 sensor W100 = 1.385*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION Pt100_1391_Resistance_TO_Temperature : real
+(*Converts resistance [Ohm] measured by Pt100 sensor W100 = 1.391 to temperature [°C] with precision 0.1°C*)
+  VAR_INPUT
+    in               : real;  (*resistance [Ohm] measured by Pt100 sensor W100 = 1.385*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CorrectRhByTemp : real
+(*Corrects the relative humidity measured at a certain temperature according to the temperature correction*)
+  VAR_INPUT
+    RH               : real;  (*Mesaured relative humidity [%]*)
+    THERM            : real;  (*Measured temperature [°C]*)
+    CORR             : real;  (*Temperature correction [°C]*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION BCD_TO_UDINT : udint
+(*Converts a BCD encoded number to binary form (byte order is assumed to be big-endian, most significant byte has the lowest address). If the BCD number is greater than the maximum value of type UDINT (4294967295), an overflow occurs and the 32-bit remainder is returned.*)
+  VAR_INPUT
+    p                : PTR_TO byte;  (*A pointer to the byte with the first two digits*)
+    n                : usint;  (*Number of bytes (1, 2, 3, 4, 5)*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION BCD_TO_USINT : usint
+(*Converts a two-digit BCD-encoded number to binary form*)
+  VAR_INPUT
+    in               : byte;  (*byte with BCD encoded number*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION USINT_TO_BCD : byte
+(*Converts a two-digit number to BCD encoding*)
+  VAR_INPUT
+    in               : usint;  (*two-digit number*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION UDINT_TO_BCD : usint
+(*Converts UDINT to a BCD encoded number (byte order is big-endian, most significant byte has the lowest address). Function returns length of BCD code in bytes*)
+  VAR_INPUT
+    in               : udint;  (*A number that should be stored as BCD code*)
+    p                : PTR_TO byte;  (*A pointer to the first byte  where the BCD code will be stored*)
+    n                : usint;  (*Memory length for BCD code (1 - 5 bytes)*)
+  END_VAR
+  VAR
+    tmp              : ARRAY [0..4] OF byte;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION_BLOCK fbMeterPulse
+(*Counts pulses and estaminates their frequency*)
+  VAR_INPUT
+    Pulse            : bool R_EDGE;  (*Pulses*)
+    Reset            : bool R_EDGE;  (*Reset pulse counter*)
+    Freeze           : bool;  (*Stops counting and set frequency to zero*)
+    Filter           : time :=  T#2s;  (*Time constant of filter for frequency*)
+    MaxPeriod        : time :=  T#1m;  (*Maximum period between pulses*)
+    Base             : time :=  T#1s;  (*Base time period for estaminating frequency*)
+  END_VAR
+  VAR_OUTPUT
+    PulseOut         : bool;  (*Copy of input pulses*)
+    Overflow         : bool;  (*Pulse counter overflow, set Reset to logical 1*)
+    Frequency        : real;  (*Frequency [1/Base]*)
+  END_VAR
+  VAR_IN_OUT
+    Counter          : udint;  (*Pulse counter (have to be RETAIN!)*)
+  END_VAR
+  VAR
+    RawFrequncy      : real;
+    LastPulseTim     : time;
+    PulseLen         : real;
+    LastPulseLen     : real;
+    Exp1             : real;
+    LastFilterTime   : time;
+    OldFilter        : time;
+    MaxPulseLen      : real;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION_BLOCK fbMeterCounter
+(*Counts pulses and estaminates their frequency*)
+  VAR_INPUT
+    Cnt              : uint;  (*Counter of pulses*)
+    Reset            : bool R_EDGE;  (*Reset pulse counter*)
+    Freeze           : bool;  (*Stops counting and set frequency to zero*)
+    Filter           : time :=  T#2s;  (*Time constant of filter for frequency*)
+    MaxPeriod        : time :=  T#1m;  (*Maximum period between pulses*)
+    Base             : time :=  T#1s;  (*Base time period for estaminating frequency*)
+  END_VAR
+  VAR_OUTPUT
+    Change           : bool;  (*Counter of pulses changed value*)
+    Overflow         : bool;  (*Pulse counter overflow, set Reset to logical 1*)
+    Frequency        : real;  (*Frequency [1/Base]*)
+  END_VAR
+  VAR_IN_OUT
+    Counter          : dint;  (*Pulse counter (have to be RETAIN!)*)
+  END_VAR
+  VAR
+    RawFrequncy      : real;
+    LastPulseTim     : time;
+    PulseLen         : real;
+    LastPulseLen     : real;
+    Exp1             : real;
+    LastFilterTime   : time;
+    OldFilter        : time;
+    MaxPulseLen      : real;
+    Dif              : dint;
+    MaxDif           : dint;
+    CntOld           : uint;
+    Init             : bool;
+  END_VAR
+  VAR CONSTANT
+    MC_MAX_NEG_INT   : dint :=  -2147483648;
+  END_VAR
+END_FUNCTION_BLOCK
+
+__DECL FUNCTION STRING_TO_REAL_EX : real
+(*Conversion STRING to REAL, spaces and comma in number are enabled*)
+  VAR_INPUT
+    input            : string [80];
+  END_VAR
+  VAR
+    pchar1           : PTR_TO byte;
+    pchar2           : PTR_TO byte;
+    Buffer           : string [80];
+    value1           : byte;  (*pomocna hodnota*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION STRING_TO_LREAL_EX : lreal
+(*Conversion STRING to LREAL, spaces and comma in number are enabled*)
+  VAR_INPUT
+    input            : string [80];
+  END_VAR
+  VAR
+    pchar1           : PTR_TO byte;
+    pchar2           : PTR_TO byte;
+    Buffer           : string [80];
+    value1           : byte;  (*pomocna hodnota*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION STRING_TO_INT_EX : int
+(*Conversion STRING to REAL, spaces in number are enabled*)
+  VAR_INPUT
+    input            : string [80];
+  END_VAR
+  VAR
+    pchar1           : PTR_TO byte;
+    pchar2           : PTR_TO byte;
+    Buffer           : string [80];
+    value1           : byte;  (*pomocna hodnota*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CP125x_TO_UTF8 {HIDDEN} : udint
+  VAR_INPUT
+    maxLen           : udint;  (*maximum len of output buffer including end zero*)
+    TO_UTF8_128_255  : PTR_TO dword;
+  END_VAR
+  VAR_IN_OUT
+    cp125x           : string [255];
+    utf8             : string [255];
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CP1250_TO_UTF8 : udint
+(*Convert characters from CP-1250 to UTF8
+Returns the size of the resulting string*)
+  VAR_INPUT
+    maxLen           : udint;  (*maximum length of output buffer including end zero*)
+  END_VAR
+  VAR
+    TO_UTF8_128_255  : ARRAY [128..255] OF dword :=  [
+      16#00AC82E2,16#00BDBFEF,16#009A80E2,16#00BDBFEF,16#009E80E2,16#00A680E2,16#00A080E2,16#00A180E2,
+      16#00BDBFEF,16#00B080E2,16#0000A0C5,16#00B980E2,16#00009AC5,16#0000A4C5,16#0000BDC5,16#0000B9C5,
+      16#00BDBFEF,16#009880E2,16#009980E2,16#009C80E2,16#009D80E2,16#00A280E2,16#009380E2,16#009480E2,
+      16#00BDBFEF,16#00A284E2,16#0000A1C5,16#00BA80E2,16#00009BC5,16#0000A5C5,16#0000BEC5,16#0000BAC5,
+      16#0000A0C2,16#000087CB,16#000098CB,16#000081C5,16#0000A4C2,16#000084C4,16#0000A6C2,16#0000A7C2,
+      16#0000A8C2,16#0000A9C2,16#00009EC5,16#0000ABC2,16#0000ACC2,16#0000ADC2,16#0000AEC2,16#0000BBC5,
+      16#0000B0C2,16#0000B1C2,16#00009BCB,16#000082C5,16#0000B4C2,16#0000B5C2,16#0000B6C2,16#0000B7C2,
+      16#0000B8C2,16#000085C4,16#00009FC5,16#0000BBC2,16#0000BDC4,16#00009DCB,16#0000BEC4,16#0000BCC5,
+      16#000094C5,16#000081C3,16#000082C3,16#000082C4,16#000084C3,16#0000B9C4,16#000086C4,16#000087C3,
+      16#00008CC4,16#000089C3,16#000098C4,16#00008BC3,16#00009AC4,16#00008DC3,16#00008EC3,16#00008EC4,
+      16#000090C4,16#000083C5,16#000087C5,16#000093C3,16#000094C3,16#000090C5,16#000096C3,16#000097C3,
+      16#000098C5,16#0000AEC5,16#00009AC3,16#0000B0C5,16#00009CC3,16#00009DC3,16#0000A2C5,16#00009FC3,
+      16#000095C5,16#0000A1C3,16#0000A2C3,16#000083C4,16#0000A4C3,16#0000BAC4,16#000087C4,16#0000A7C3,
+      16#00008DC4,16#0000A9C3,16#000099C4,16#0000ABC3,16#00009BC4,16#0000ADC3,16#0000AEC3,16#00008FC4,
+      16#000091C4,16#000084C5,16#000088C5,16#0000B3C3,16#0000B4C3,16#000091C5,16#0000B6C3,16#0000B7C3,
+      16#000099C5,16#0000AFC5,16#0000BAC3,16#0000B1C5,16#0000BCC3,16#0000BDC3,16#0000A3C5,16#000099CB
+    ];
+  END_VAR
+  VAR_IN_OUT
+    cp1250           : string [255];  (*input string coded in CP-1250*)
+    utf8             : string [255];  (*output string coded in UTF-8*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CP1251_TO_UTF8 : udint
+(*Convert characters from CP-1251 to UTF8
+Returns the size of the resulting string*)
+  VAR_INPUT
+    maxLen           : udint;  (*maximum length of output buffer including end zero*)
+  END_VAR
+  VAR
+    TO_UTF8_128_255  : ARRAY [128..255] OF dword :=  [
+      16#000082D0,16#000083D0,16#009A80E2,16#000093D1,16#009E80E2,16#00A680E2,16#00A080E2,16#00A180E2,
+      16#00AC82E2,16#00B080E2,16#000089D0,16#00B980E2,16#00008AD0,16#00008CD0,16#00008BD0,16#00008FD0,
+      16#000092D1,16#009880E2,16#009980E2,16#009C80E2,16#009D80E2,16#00A280E2,16#009380E2,16#009480E2,
+      16#00BDBFEF,16#00A284E2,16#000099D1,16#00BA80E2,16#00009AD1,16#00009CD1,16#00009BD1,16#00009FD1,
+      16#0000A0C2,16#00008ED0,16#00009ED1,16#000088D0,16#0000A4C2,16#000090D2,16#0000A6C2,16#0000A7C2,
+      16#000081D0,16#0000A9C2,16#000084D0,16#0000ABC2,16#0000ACC2,16#0000ADC2,16#0000AEC2,16#000087D0,
+      16#0000B0C2,16#0000B1C2,16#000086D0,16#000096D1,16#000091D2,16#0000B5C2,16#0000B6C2,16#0000B7C2,
+      16#000091D1,16#009684E2,16#000094D1,16#0000BBC2,16#000098D1,16#000085D0,16#000095D1,16#000097D1,
+      16#000090D0,16#000091D0,16#000092D0,16#000093D0,16#000094D0,16#000095D0,16#000096D0,16#000097D0,
+      16#000098D0,16#000099D0,16#00009AD0,16#00009BD0,16#00009CD0,16#00009DD0,16#00009ED0,16#00009FD0,
+      16#0000A0D0,16#0000A1D0,16#0000A2D0,16#0000A3D0,16#0000A4D0,16#0000A5D0,16#0000A6D0,16#0000A7D0,
+      16#0000A8D0,16#0000A9D0,16#0000AAD0,16#0000ABD0,16#0000ACD0,16#0000ADD0,16#0000AED0,16#0000AFD0,
+      16#0000B0D0,16#0000B1D0,16#0000B2D0,16#0000B3D0,16#0000B4D0,16#0000B5D0,16#0000B6D0,16#0000B7D0,
+      16#0000B8D0,16#0000B9D0,16#0000BAD0,16#0000BBD0,16#0000BCD0,16#0000BDD0,16#0000BED0,16#0000BFD0,
+      16#000080D1,16#000081D1,16#000082D1,16#000083D1,16#000084D1,16#000085D1,16#000086D1,16#000087D1,
+      16#000088D1,16#000089D1,16#00008AD1,16#00008BD1,16#00008CD1,16#00008DD1,16#00008ED1,16#00008FD1
+    ];
+  END_VAR
+  VAR_IN_OUT
+    cp1251           : string [255];  (*input string coded in CP-1251*)
+    utf8             : string [255];  (*output string coded in UTF-8*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CP1252_TO_UTF8 : udint
+(*Convert characters from CP-1252 to UTF8
+Returns the size of the resulting string*)
+  VAR_INPUT
+    maxLen           : udint;  (*maximum length of output buffer including end zero*)
+  END_VAR
+  VAR
+    TO_UTF8_128_255  : ARRAY [128..255] OF dword :=  [
+      16#00AC82E2,16#00BDBFEF,16#009A80E2,16#000092C6,16#009E80E2,16#00A680E2,16#00A080E2,16#00A180E2,
+      16#000086CB,16#00B080E2,16#0000A0C5,16#00B980E2,16#000092C5,16#00BDBFEF,16#0000BDC5,16#00BDBFEF,
+      16#00BDBFEF,16#009880E2,16#009980E2,16#009C80E2,16#009D80E2,16#00A280E2,16#009380E2,16#009480E2,
+      16#00009CCB,16#00A284E2,16#0000A1C5,16#00BA80E2,16#000093C5,16#00BDBFEF,16#0000BEC5,16#0000B8C5,
+      16#0000A0C2,16#0000A1C2,16#0000A2C2,16#0000A3C2,16#0000A4C2,16#0000A5C2,16#0000A6C2,16#0000A7C2,
+      16#0000A8C2,16#0000A9C2,16#0000AAC2,16#0000ABC2,16#0000ACC2,16#0000ADC2,16#0000AEC2,16#0000AFC2,
+      16#0000B0C2,16#0000B1C2,16#0000B2C2,16#0000B3C2,16#0000B4C2,16#0000B5C2,16#0000B6C2,16#0000B7C2,
+      16#0000B8C2,16#0000B9C2,16#0000BAC2,16#0000BBC2,16#0000BCC2,16#0000BDC2,16#0000BEC2,16#0000BFC2,
+      16#000080C3,16#000081C3,16#000082C3,16#000083C3,16#000084C3,16#000085C3,16#000086C3,16#000087C3,
+      16#000088C3,16#000089C3,16#00008AC3,16#00008BC3,16#00008CC3,16#00008DC3,16#00008EC3,16#00008FC3,
+      16#000090C3,16#000091C3,16#000092C3,16#000093C3,16#000094C3,16#000095C3,16#000096C3,16#000097C3,
+      16#000098C3,16#000099C3,16#00009AC3,16#00009BC3,16#00009CC3,16#00009DC3,16#00009EC3,16#00009FC3,
+      16#0000A0C3,16#0000A1C3,16#0000A2C3,16#0000A3C3,16#0000A4C3,16#0000A5C3,16#0000A6C3,16#0000A7C3,
+      16#0000A8C3,16#0000A9C3,16#0000AAC3,16#0000ABC3,16#0000ACC3,16#0000ADC3,16#0000AEC3,16#0000AFC3,
+      16#0000B0C3,16#0000B1C3,16#0000B2C3,16#0000B3C3,16#0000B4C3,16#0000B5C3,16#0000B6C3,16#0000B7C3,
+      16#0000B8C3,16#0000B9C3,16#0000BAC3,16#0000BBC3,16#0000BCC3,16#0000BDC3,16#0000BEC3,16#0000BFC3
+    ];
+  END_VAR
+  VAR_IN_OUT
+    cp1252           : string [255];  (*input string coded in CP-1252*)
+    utf8             : string [255];  (*output string coded in UTF-8*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CP1253_TO_UTF8 : udint
+(*Convert characters from CP-1253 to UTF8
+Returns the size of the resulting string*)
+  VAR_INPUT
+    maxLen           : udint;  (*maximum length of output buffer including end zero*)
+  END_VAR
+  VAR
+    TO_UTF8_128_255  : ARRAY [128..255] OF dword :=  [
+      16#00AC82E2,16#00BDBFEF,16#009A80E2,16#000092C6,16#009E80E2,16#00A680E2,16#00A080E2,16#00A180E2,
+      16#00BDBFEF,16#00B080E2,16#00BDBFEF,16#00B980E2,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,
+      16#00BDBFEF,16#009880E2,16#009980E2,16#009C80E2,16#009D80E2,16#00A280E2,16#009380E2,16#009480E2,
+      16#00BDBFEF,16#00A284E2,16#00BDBFEF,16#00BA80E2,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,
+      16#0000A0C2,16#000085CE,16#000086CE,16#0000A3C2,16#0000A4C2,16#0000A5C2,16#0000A6C2,16#0000A7C2,
+      16#0000A8C2,16#0000A9C2,16#00BDBFEF,16#0000ABC2,16#0000ACC2,16#0000ADC2,16#0000AEC2,16#009580E2,
+      16#0000B0C2,16#0000B1C2,16#0000B2C2,16#0000B3C2,16#000084CE,16#0000B5C2,16#0000B6C2,16#0000B7C2,
+      16#000088CE,16#000089CE,16#00008ACE,16#0000BBC2,16#00008CCE,16#0000BDC2,16#00008ECE,16#00008FCE,
+      16#000090CE,16#000091CE,16#000092CE,16#000093CE,16#000094CE,16#000095CE,16#000096CE,16#000097CE,
+      16#000098CE,16#000099CE,16#00009ACE,16#00009BCE,16#00009CCE,16#00009DCE,16#00009ECE,16#00009FCE,
+      16#0000A0CE,16#0000A1CE,16#00BDBFEF,16#0000A3CE,16#0000A4CE,16#0000A5CE,16#0000A6CE,16#0000A7CE,
+      16#0000A8CE,16#0000A9CE,16#0000AACE,16#0000ABCE,16#0000ACCE,16#0000ADCE,16#0000AECE,16#0000AFCE,
+      16#0000B0CE,16#0000B1CE,16#0000B2CE,16#0000B3CE,16#0000B4CE,16#0000B5CE,16#0000B6CE,16#0000B7CE,
+      16#0000B8CE,16#0000B9CE,16#0000BACE,16#0000BBCE,16#0000BCCE,16#0000BDCE,16#0000BECE,16#0000BFCE,
+      16#000080CF,16#000081CF,16#000082CF,16#000083CF,16#000084CF,16#000085CF,16#000086CF,16#000087CF,
+      16#000088CF,16#000089CF,16#00008ACF,16#00008BCF,16#00008CCF,16#00008DCF,16#00008ECF,16#00BDBFEF
+    ];
+  END_VAR
+  VAR_IN_OUT
+    cp1253           : string [255];  (*input string coded in CP-1253*)
+    utf8             : string [255];  (*output string coded in UTF-8*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CP1254_TO_UTF8 : udint
+(*Convert characters from CP-1254 to UTF8
+Returns the size of the resulting string*)
+  VAR_INPUT
+    maxLen           : udint;  (*maximum length of output buffer including end zero*)
+  END_VAR
+  VAR
+    TO_UTF8_128_255  : ARRAY [128..255] OF dword :=  [
+      16#00AC82E2,16#000081C2,16#009A80E2,16#000092C6,16#009E80E2,16#00A680E2,16#00A080E2,16#00A180E2,
+      16#000086CB,16#00B080E2,16#0000A0C5,16#00B980E2,16#000092C5,16#00008DC2,16#00008EC2,16#00008FC2,
+      16#000090C2,16#009880E2,16#009980E2,16#009C80E2,16#009D80E2,16#00A280E2,16#009380E2,16#009480E2,
+      16#00009CCB,16#00A284E2,16#0000A1C5,16#00BA80E2,16#000093C5,16#00009DC2,16#00009EC2,16#0000B8C5,
+      16#0000A0C2,16#0000A1C2,16#0000A2C2,16#0000A3C2,16#0000A4C2,16#0000A5C2,16#0000A6C2,16#0000A7C2,
+      16#0000A8C2,16#0000A9C2,16#0000AAC2,16#0000ABC2,16#0000ACC2,16#0000ADC2,16#0000AEC2,16#0000AFC2,
+      16#0000B0C2,16#0000B1C2,16#0000B2C2,16#0000B3C2,16#0000B4C2,16#0000B5C2,16#0000B6C2,16#0000B7C2,
+      16#0000B8C2,16#0000B9C2,16#0000BAC2,16#0000BBC2,16#0000BCC2,16#0000BDC2,16#0000BEC2,16#0000BFC2,
+      16#000080C3,16#000081C3,16#000082C3,16#000083C3,16#000084C3,16#000085C3,16#000086C3,16#000087C3,
+      16#000088C3,16#000089C3,16#00008AC3,16#00008BC3,16#00008CC3,16#00008DC3,16#00008EC3,16#00008FC3,
+      16#00009EC4,16#000091C3,16#000092C3,16#000093C3,16#000094C3,16#000095C3,16#000096C3,16#000097C3,
+      16#000098C3,16#000099C3,16#00009AC3,16#00009BC3,16#00009CC3,16#0000B0C4,16#00009EC5,16#00009FC3,
+      16#0000A0C3,16#0000A1C3,16#0000A2C3,16#0000A3C3,16#0000A4C3,16#0000A5C3,16#0000A6C3,16#0000A7C3,
+      16#0000A8C3,16#0000A9C3,16#0000AAC3,16#0000ABC3,16#0000ACC3,16#0000ADC3,16#0000AEC3,16#0000AFC3,
+      16#00009FC4,16#0000B1C3,16#0000B2C3,16#0000B3C3,16#0000B4C3,16#0000B5C3,16#0000B6C3,16#0000B7C3,
+      16#0000B8C3,16#0000B9C3,16#0000BAC3,16#0000BBC3,16#0000BCC3,16#0000B1C4,16#00009FC5,16#0000BFC3
+    ];
+  END_VAR
+  VAR_IN_OUT
+    cp1254           : string [255];  (*input string coded in CP-1254*)
+    utf8             : string [255];  (*output string coded in UTF-8*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CP1255_TO_UTF8 : udint
+(*Convert characters from CP-1255 to UTF8
+Returns the size of the resulting string*)
+  VAR_INPUT
+    maxLen           : udint;  (*maximum length of output buffer including end zero*)
+  END_VAR
+  VAR
+    TO_UTF8_128_255  : ARRAY [128..255] OF dword :=  [
+      16#00AC82E2,16#00BDBFEF,16#009A80E2,16#000092C6,16#009E80E2,16#00A680E2,16#00A080E2,16#00A180E2,
+      16#000086CB,16#00B080E2,16#00BDBFEF,16#00B980E2,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,
+      16#00BDBFEF,16#009880E2,16#009980E2,16#009C80E2,16#009D80E2,16#00A280E2,16#009380E2,16#009480E2,
+      16#00009CCB,16#00A284E2,16#00BDBFEF,16#00BA80E2,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,
+      16#0000A0C2,16#0000A1C2,16#0000A2C2,16#0000A3C2,16#00AA82E2,16#0000A5C2,16#0000A6C2,16#0000A7C2,
+      16#0000A8C2,16#0000A9C2,16#000097C3,16#0000ABC2,16#0000ACC2,16#0000ADC2,16#0000AEC2,16#0000AFC2,
+      16#0000B0C2,16#0000B1C2,16#0000B2C2,16#0000B3C2,16#0000B4C2,16#0000B5C2,16#0000B6C2,16#0000B7C2,
+      16#0000B8C2,16#0000B9C2,16#0000B7C3,16#0000BBC2,16#0000BCC2,16#0000BDC2,16#0000BEC2,16#0000BFC2,
+      16#0000B0D6,16#0000B1D6,16#0000B2D6,16#0000B3D6,16#0000B4D6,16#0000B5D6,16#0000B6D6,16#0000B7D6,
+      16#0000B8D6,16#0000B9D6,16#00BDBFEF,16#0000BBD6,16#0000BCD6,16#0000BDD6,16#0000BED6,16#0000BFD6,
+      16#000080D7,16#000081D7,16#000082D7,16#000083D7,16#0000B0D7,16#0000B1D7,16#0000B2D7,16#0000B3D7,
+      16#0000B4D7,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,16#00BDBFEF,
+      16#000090D7,16#000091D7,16#000092D7,16#000093D7,16#000094D7,16#000095D7,16#000096D7,16#000097D7,
+      16#000098D7,16#000099D7,16#00009AD7,16#00009BD7,16#00009CD7,16#00009DD7,16#00009ED7,16#00009FD7,
+      16#0000A0D7,16#0000A1D7,16#0000A2D7,16#0000A3D7,16#0000A4D7,16#0000A5D7,16#0000A6D7,16#0000A7D7,
+      16#0000A8D7,16#0000A9D7,16#0000AAD7,16#00BDBFEF,16#00BDBFEF,16#008E80E2,16#008F80E2,16#00BDBFEF
+    ];
+  END_VAR
+  VAR_IN_OUT
+    cp1255           : string [255];  (*input string coded in CP-1255*)
+    utf8             : string [255];  (*output string coded in UTF-8*)
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION_BLOCK fbCorrectRhAndTemp
+(*Corrects the relative humidity measured at a certain temperature according to the temperature correction*)
+  VAR_INPUT
+    RH               : real;  (*Mesaured relative humidity [%]*)
+    THERM            : real;  (*Measured temperature [°C/F]*)
+    CORR             : real;  (*Temperature correction [°C/F]*)
+    thermInF         : bool;  (*Measured temperature is in Fahrenheit*)
+    corrInF          : bool;  (*Temperature correction is in Fahrenheit*)
+  END_VAR
+  VAR_OUTPUT
+    corrRh           : real;  (*Corrected relative humidity [%]*)
+    corrThermC       : real;  (*Corrected temperature [°C]*)
+    corrThermF       : real;  (*Corrected temperature [°F]*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+
+
+{LIBFILE="LOCALLIB\COOLMASTERLIB_V11_20140620.MLB"}
+(* Mosaic IDE library *)
+(* File name : C:\TecoLib\CoolMasterLib_V11_20140620.mlb *)
+(* Library : CoolMasterLib 1.1 *)
+(* Author : Teco a.s. *)
+(* Copyright : (c) 2014 Teco a.s. *)
+(* IEC compiler version : 3.8.20.0 *)
+(* Assembler version : 4.3.00 *)
+
+//{Knihovna : CoolMasterLib 1.1  }
+(* History: *)
+(*
+v0.2            zis  first version fbCoolMasterUnit
+v0.4            zis  first version fbCoolMasterControl
+v0.5 2014-30-05 nem  memory consumption was optimalized
+v1.0 2014-06-01 nem first version of library for master and slave communication
+v1.1 2014-06-20 nem added output variables rx_cmd_stat_cnt and rx_cmd_cont_cnt
+                    into fbCoolMasterUnit()
+                    struct T_COOL_MASTER_UNIT_LIST increased to 32 records
+*)
+
+(*----------------------------------------------------------------------------*)
+// {LIBRARY="LOCALLIB\DATABOXLIB_V15_20131118.MLB"}
+// {LIBRARY="LOCALLIB\DEBUGCOMLIB_V15_20120321.MLB"}
+// {LIBRARY="LOCALLIB\FILELIB_V20_20131202.MLB"}
+
+VAR_GLOBAL CONSTANT
+ COOL_MASTER_UNIT_STATE_OFF : bool :=  false;
+ COOL_MASTER_UNIT_STATE_ON : bool :=  true;
+ COOL_MASTER_UNIT_FAN_SPEED_UNKNOWN : usint :=  0;
+ COOL_MASTER_UNIT_FAN_SPEED_LOW : usint :=  1;
+ COOL_MASTER_UNIT_FAN_SPEED_MEDIUM : usint :=  2;
+ COOL_MASTER_UNIT_FAN_SPEED_HIGH : usint :=  3;
+ COOL_MASTER_UNIT_FAN_SPEED_AUTO : usint :=  4;
+ COOL_MASTER_UNIT_FAN_SPEED_TOP : usint :=  5;
+ COOL_MASTER_UNIT_MODE_COOL : usint :=  0;
+ COOL_MASTER_UNIT_MODE_DRY : usint :=  1;
+ COOL_MASTER_UNIT_MODE_FAN : usint :=  2;
+ COOL_MASTER_UNIT_MODE_AUTO : usint :=  3;
+ COOL_MASTER_UNIT_MODE_HEAT : usint :=  4;
+ COOL_MASTER_SWING_STATE_UNKNOWN : usint :=  0;
+ COOL_MASTER_SWING_STATE_AUTO : usint :=  1;
+ COOL_MASTER_SWING_STATE_HORIZONTAL : usint :=  2;
+ COOL_MASTER_SWING_STATE_30_DEGREE : usint :=  3;
+ COOL_MASTER_SWING_STATE_45_DEGREE : usint :=  4;
+ COOL_MASTER_SWING_STATE_60_DEGREE : usint :=  5;
+ COOL_MASTER_SWING_STATE_VERTICAL : usint :=  6;
+ COOL_MASTER_FILTER_DIRTY : bool :=  true;
+ COOL_MASTER_FILTER_CLEAN : bool :=  false;
+
+END_VAR
+
+__DECL FUNCTION CoolMaster_support {HIDDEN} : bool
+  VAR_INPUT
+    code             : udint;
+    tim              : udint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION CoolMaster_MemcpyPtr {HIDDEN} : udint
+  VAR_INPUT
+    source           : PTR_TO udint;  (*source*)
+    dest             : PTR_TO udint;  (*destination*)
+    length           : udint;  (*number of bytes*)
+  END_VAR
+END_FUNCTION
+
+VAR_GLOBAL CONSTANT
+ CMC_HVAC_MAXIMUM_UNITS : uint :=  32;
+ CMC_COMMAND_TYPE_UNIT_STATE_OFF : uint :=  1;
+ CMC_COMMAND_TYPE_UNIT_STATE_ON : uint :=  2;
+ CMC_COMMAND_TYPE_SET_POINT : uint :=  3;
+ CMC_COMMAND_TYPE_FAN_SPEED : uint :=  4;
+ CMC_COMMAND_TYPE_SWING_STATE : uint :=  5;
+ CMC_COMMAND_TYPE_FILTER_CLEAR : uint :=  6;
+ CMC_COMMAND_TYPE_UNIT_MODE : uint :=  7;
+
+END_VAR
+
+TYPE tpCMC_COMMUNICATION_STATE_MACHINE : 
+  (CMC_FSM_INIT,
+   CMC_FSM_POLL_TO_DEVICE,
+   CMC_FSM_RECEIVING,
+   CMC_FSM_WAIT_POLL_TIME_OUT,
+   CMC_FSM_TIME_OUT,
+   CMC_FSM_ERROR,
+   CMC_FSM_RESTART_POLL 
+  );
+END_TYPE
+
+TYPE tpCOOLMASTER_MODEL : 
+  (COOLMASTER_MODEL_1000D,
+   COOLMASTER_MODEL_2000S,
+   COOLMASTER_MODEL_3000T,
+   COOLMASTER_MODEL_4000M,
+   COOLMASTER_MODEL_6000L,
+   COOLMASTER_MODEL_7000F,
+   COOLMASTER_MODEL_8000MH,
+   COOLMASTER_MODEL_9000H 
+  );
+END_TYPE
+
+TYPE T_COOL_MASTER_PARAM :
+  STRUCT
+    b_unit_enabled   : bool;  (*unit (0-disabled, 1-enabled)*)
+    ui_system_number : uint;  (*system number*)
+    ui_unit_number   : uint;  (*unit number*)
+    s_unit_name      : string [24];  (*unit name*)
+  END_STRUCT;
+END_TYPE
+
+TYPE T_COOL_MASTER_STATE :
+  STRUCT
+    b_unit_connection : bool;  (*communication (0-disconnected, 1-connected)*)
+    b_unit_state     : bool;  (*unit state (0-off, 1-on)*)
+    ui_temperature_set_point : int;  (*desired room temperature*)
+    ui_room_temperature : int;  (*measured room temperature*)
+    ui_unit_fan_speed : usint;  (*fan speed (0-unknown, 1-low, 2-medium, 3-high, 4-auto, 5-top)*)
+    ui_unit_mode     : usint;  (*unit mode (0-Cool, 1-Dry, 2-Fan, 3-Auto, 4-Heat)*)
+    ui_swing_state   : usint;  (*swing state (0-unknown, 1-auto, 2-horizontal, 3-30°, 4-45°, 5-60°, 6-vertical)*)
+    b_air_filter     : bool;  (*air filter (0-clear, 1-dirty)*)
+    s_fault_code     : string [8];
+    b_fault_state    : bool;
+    ui_failed_respose_counter : usint;
+  END_STRUCT;
+END_TYPE
+
+TYPE T_COOL_MASTER_CONTROL :
+  STRUCT
+    b_unit_off       : bool;  (*if true then request for switch off*)
+    b_unit_on        : bool;  (*if true then request for switch on*)
+    ui_temperature_set_point : int;  (*desired room temperature <5°C,30°C>*)
+    ui_unit_fan_speed : usint;  (*fan speed change (1-low, 2-medium, 3-high, 4-auto, 5-top)*)
+    ui_unit_mode     : usint;  (*mode change (0-Cool, 1-Dry, 2-Fan, 3-Auto, 4-Heat)*)
+    ui_swing_state   : usint;  (*swing change (1-auto, 2-horizontal, 3-30°, 4-45°, 5-60°, 6-vertical)*)
+    b_air_filter_clear : bool;  (*if true then request for reset filter sign*)
+  END_STRUCT;
+END_TYPE
+
+TYPE T_COOL_MASTER_HVAC_UNIT :
+  STRUCT
+    param            : T_COOL_MASTER_PARAM;
+    state            : T_COOL_MASTER_STATE;
+    control          : T_COOL_MASTER_CONTROL;
+  END_STRUCT;
+END_TYPE
+
+TYPE  T_COOL_MASTER_CONTROL_LIST : ARRAY [1..32] OF T_COOL_MASTER_HVAC_UNIT;
+END_TYPE
+
+TYPE  T_COOL_MASTER_HVAC_UNIT_LIST_PREV {HIDDEN} : ARRAY [1..32] OF T_COOL_MASTER_CONTROL;
+END_TYPE
+
+TYPE stCMC_statistic {HIDDEN} :
+  STRUCT
+    tx_counter       : uint;
+    rx_counter       : uint;
+    last_rx_cmd      : string [80];
+    rx_cmd           : string [80];
+  END_STRUCT;
+END_TYPE
+
+TYPE stCMC_contr {HIDDEN} :
+  STRUCT
+    comm_state       : tpCMC_COMMUNICATION_STATE_MACHINE;  (*default state is  CMC_FSM_INIT;*)
+    rx_request       : bool;
+    com_statistic    : stCMC_statistic;
+  END_STRUCT;
+END_TYPE
+
+__DECL FUNCTION_BLOCK fbCoolMasterControl
+  VAR_INPUT
+    chan_code        : uint;  (*code of serial channel (CH1_uni, ... )*)
+    connection_req   : bool;  (*Flag activates or stops communication sessions*)
+    polling_time     : time :=  T#5.0s;  (*Polling to system time range*)
+    coolmaster_model : tpCOOLMASTER_MODEL;  (*CoolMaster model*)
+  END_VAR
+  VAR_OUTPUT
+    com_ok           : bool;  (*communication is OK*)
+    err              : bool;  (*error flag*)
+    err_ID           : usint;  (*number of error*)
+    err_txt          : string [80];  (*description of error*)
+    last_room_index  : uint;  (*index of unit (in list)*)
+    rx_complete_cycles : udint;  (*counter of complete scan*)
+    tx_command_counter : udint;  (*counter of transmitted packages*)
+  END_VAR
+  VAR_IN_OUT
+    units_list       : T_COOL_MASTER_CONTROL_LIST;  (*unit list*)
+  END_VAR
+  VAR CONSTANT
+    CMC_RX_BUFFER_SIZE : uint :=  100;
+    CMC_TX_BUFFER_SIZE : uint :=  100;
+    CMC_MAX_COMMANDS_COUNT : uint :=  13;
+    CMC_MAX_FAN_SPEED_COMMANDS_COUNT : uint :=  5;
+    CMC_MAX_SWING_COMMANDS_COUNT : uint :=  6;
+  END_VAR
+  VAR
+    COOLMASTER_errors_list : ARRAY [1..4] OF string [16] :=  ['CoolMaster','Unknown command','Bad parameters','ERROR:1'];
+    COOLMASTER_cmd_list : ARRAY [0..13] OF string [8] := 
+                                       ['stat3 ','off ','on ','temp ','fspeed ','swing ','filt ','cool ','dry ','fan ','auto ','heat ','alloff ','allon '];
+    COOLMASTER_fanspeed_cmd_list : ARRAY [1..5] OF string [2] :=  ['l','m','h','a','t'];
+    COOLMASTER_swing_cmd_list : ARRAY [1..6] OF string [2] :=  ['a','h','3','4','6','v'];
+    fbRecvCMDTxt     : fbRecvTxt;
+    fbSendCMDTo      : fbSendTo;
+    stCom_contr      : stCMC_contr;
+    room_units_control_prev : T_COOL_MASTER_HVAC_UNIT_LIST_PREV;
+    unit_control     : T_COOL_MASTER_CONTROL;
+    unit_control_prev : T_COOL_MASTER_CONTROL;
+    in_buf           : ARRAY [0..100] OF usint;
+    out_buf          : ARRAY [0..100] OF usint;
+    out_buf_ptr_str  : PTR_TO string [80];
+    tx_pack_length   : uint;
+    polling_timer_ton : TON;
+    timCMC           : TON;
+    polling_timer_state : bool;
+    add_secondary_parameter_request : bool;
+    bresponse_recieved : bool;
+    coolmaster_connection_state : bool :=  true;
+    coolmaster_response_time_out : uint :=  5;
+    room_index       : uint;
+    user_command_type : uint;
+    command_room_index : uint;
+    polling_room_index : uint;
+    in_msg           : string [32];
+    index            : uint;
+    error_number     : uint;
+    msg_length       : uint;
+  END_VAR
+END_FUNCTION_BLOCK
+
+VAR_GLOBAL CONSTANT
+ CMU_MAXIMUM_UNITS : uint :=  32;
+ CMU_RX_BUFFER_SIZE {HIDDEN} : uint :=  100;
+ CMU_TX_BUFFER_SIZE {HIDDEN} : uint :=  32*32;
+ COOLMASTER_COMMAND1_ALL_OFF {HIDDEN} : uint :=  1;
+ COOLMASTER_COMMAND2_ALL_ON {HIDDEN} : uint :=  2;
+ COOLMASTER_COMMAND3_COOL {HIDDEN} : uint :=  3;
+ COOLMASTER_COMMAND4_DRY {HIDDEN} : uint :=  4;
+ COOLMASTER_COMMAND5_HEAT {HIDDEN} : uint :=  5;
+ COOLMASTER_COMMAND6_FAN {HIDDEN} : uint :=  6;
+ COOLMASTER_COMMAND7_FILT {HIDDEN} : uint :=  7;
+ COOLMASTER_COMMAND8_FSPEED {HIDDEN} : uint :=  8;
+ COOLMASTER_COMMAND9_OFF {HIDDEN} : uint :=  9;
+ COOLMASTER_COMMAND10_ON {HIDDEN} : uint :=  10;
+ COOLMASTER_COMMAND11_STATE_3 {HIDDEN} : uint :=  11;
+ COOLMASTER_COMMAND12_STATE_2 {HIDDEN} : uint :=  12;
+ COOLMASTER_COMMAND13_STATE {HIDDEN} : uint :=  13;
+ COOLMASTER_COMMAND14_SWING {HIDDEN} : uint :=  14;
+ COOLMASTER_COMMAND15_TEMP {HIDDEN} : uint :=  15;
+ COOLMASTER_COMMAND16_SET {HIDDEN} : uint :=  16;
+ COOLMASTER_COMMAND17_SIMUL {HIDDEN} : uint :=  17;
+ COOLMASTER_COMMAND18_BOOT {HIDDEN} : uint :=  18;
+ COOLMASTER_COMMAND19_AUTO {HIDDEN} : uint :=  19;
+
+END_VAR
+
+TYPE T_COOL_MASTER_UNIT_DATA :
+  STRUCT
+    b_unit_state     : bool;  (*unit state (0-off, 1-on)*)
+    ui_temperature_set_point : int;  (*desired room temperature*)
+    ui_room_temperature : int;  (*measured room temperature*)
+    ui_unit_fan_speed : usint;  (*fan speed (0-unknown, 1-low, 2-medium, 3-high, 4-auto, 5-top)*)
+    ui_unit_mode     : usint;  (*unit mode (0-Cool, 1-Dry, 2-Fan, 3-Auto, 4-Heat)*)
+    ui_swing_state   : usint;  (*swing state (0-unknown, 1-auto, 2-horizontal, 3-30°, 4-45°, 5-60°, 6-vertical)*)
+    b_air_filter     : bool;  (*air filter (0-clear, 1-dirty)*)
+  END_STRUCT;
+END_TYPE
+
+TYPE T_COOL_MASTER_UNIT :
+  STRUCT
+    param            : T_COOL_MASTER_PARAM;
+    data             : T_COOL_MASTER_UNIT_DATA;
+  END_STRUCT;
+END_TYPE
+
+TYPE T_COOL_MASTER_CNT {HIDDEN} :
+  STRUCT
+    last_cmd         : string [80];
+    last_cmd_len     : uint;
+    last_cmd_type    : uint;
+    last_cmd_system_number : uint;
+    last_cmd_unit_number : uint;
+    last_cmd_param   : string [80];
+    cmd_exe_cntr     : uint;
+    cmd_stat_cntr    : uint;
+    err_code         : uint;
+    tx_cntr          : udint;
+    com_without_address : bool;
+    unit_array_index : uint;
+    coolmaster_out_buf : ARRAY [0..1024] OF usint;
+  END_STRUCT;
+END_TYPE
+
+TYPE  T_COOL_MASTER_UNIT_LIST : ARRAY [1..32] OF T_COOL_MASTER_UNIT;
+END_TYPE
+
+__DECL FUNCTION fCOOL_MASTER_StateResponce_Creator {HIDDEN} : uint
+  VAR_INPUT
+    state_command_type : uint;  (*1-state,2-state2,3-state3*)
+  END_VAR
+  VAR_IN_OUT
+    Room_units       : T_COOL_MASTER_UNIT_LIST;
+    CoolMaster_CNT   : T_COOL_MASTER_CNT;
+  END_VAR
+  VAR CONSTANT
+    CMU_MAX_RESPONCE_MSG_COUNT : uint :=  13;
+  END_VAR
+  VAR
+    COOLMASTER_resp_list : ARRAY [1..13] OF string [8] := 
+                            [' ON  ',' OFF ','C ','High ','Med  ','Low  ','Auto ','Cool OK','Dry  OK','Heat OK','Fan  OK','Auto OK','Top'];
+    LengthOfMessageToSend : uint;
+    temp             : uint;
+    unit_index       : uint;
+    coolmaster_out_buf_ptr_str : PTR_TO string [80];
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION fCOOL_MASTER_PresetAll_ON_OFF {HIDDEN} : bool
+  VAR_INPUT
+    preseted_command : bool;
+  END_VAR
+  VAR_IN_OUT
+    Room_units       : T_COOL_MASTER_UNIT_LIST;
+  END_VAR
+  VAR
+    index            : uint;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION fCOOL_MASTER_Execute_Command {HIDDEN} : uint
+  VAR_IN_OUT
+    Room_units       : T_COOL_MASTER_UNIT_LIST;
+    CoolMaster_CNT   : T_COOL_MASTER_CNT;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION fCOOL_MASTER_Find_UnitArrayIndex {HIDDEN} : uint
+  VAR_INPUT
+    system_number    : uint;
+    unit_number      : uint;
+  END_VAR
+  VAR_IN_OUT
+    Room_units       : T_COOL_MASTER_UNIT_LIST;
+  END_VAR
+  VAR
+    index_return     : uint :=  16#ffff;
+    index            : uint;
+    found            : bool;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION fCOOL_MASTER_Command_Parcer {HIDDEN} : bool
+  VAR_IN_OUT
+    units_list       : T_COOL_MASTER_UNIT_LIST;
+    CoolMaster_CNT   : T_COOL_MASTER_CNT;
+  END_VAR
+  VAR CONSTANT
+    CMU_MAX_COMMANDS_COUNT : uint :=  19;
+    CMU_MINIMUM_COMMAND_LENGTH : uint :=  7;
+  END_VAR
+  VAR
+    COOLMASTER_cmd_list : ARRAY [1..19] OF string [8] := 
+                        ['alloff','allon','cool','dry','heat','fan','filt','fspeed','off','on','stat3','stat2','stat','swing','temp','set','simul','boot','auto'];
+    index            : uint;
+    str_temp         : string [80];
+    sys_num_pos      : uint;
+    unit_num_pos     : uint;
+    com_without_address : bool;
+  END_VAR
+END_FUNCTION
+
+__DECL FUNCTION_BLOCK fbCoolMasterUnit
+  VAR_INPUT
+    chan_code        : uint;  (*code of serial channel (CH1_uni, ... )*)
+  END_VAR
+  VAR_OUTPUT
+    err              : bool;  (*error flag*)
+    err_ID           : usint;  (*number of error*)
+    err_txt          : string [80];  (*description of error*)
+    rx_command_counter : udint;  (*counter of received packages*)
+    rx_cmd_stat_cnt  : uint;  (*counter of received monitoring messages*)
+    rx_cmd_cont_cnt  : uint;  (*counter of received control messages*)
+    rx_unit_index    : uint;  (*index unit that is currently communicating*)
+  END_VAR
+  VAR_IN_OUT
+    units_list       : T_COOL_MASTER_UNIT_LIST;  (*units list*)
+  END_VAR
+  VAR
+    RecvCMDTxt       : fbRecvTxt;
+    SendCMDTo        : fbSendTo;
+    in_buf           : ARRAY [0..100] OF usint;
+    timCMU           : TON;
+    LengthOfMessageToSend : uint;
+    CoolMaster_CNT   : T_COOL_MASTER_CNT;
+    CoolMaster_err   : ARRAY [1..3] OF string [18] :=  ['Unknown command$0d$0A>','Bad parameters$0d$0A>','ERROR:1$0d$0A>'];
+    CoolMasterTrailer : string [5] :=  'OK$0d$0A>';  (*ARRAY[0..8] OF BYTE := [ 16#D, 16#A, 16#4F, 16#4B, 16#D, 16#A,16#3E];*)
+  END_VAR
+END_FUNCTION_BLOCK
+
+
+

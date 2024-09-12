@@ -1,0 +1,93 @@
+#srcfile 'R:\AUT\MOSAIC\SESTAKZAKLADAC\SESTAK_ZAKLADAC\PRGZAKLADACNEW.CFC'
+
+#defpou prgZakladacNew
+  bool START,
+  RS RS_POS_VER_01,
+  RS RS_POS_VER_04,
+  RS RS_POS_VER_03,
+  RS RS_POS_VER_02,
+  fourBitEncoder INT_TO_BITS,
+  fourBitEncoder INT_TO_BITS_HOR
+
+ 
+#srcfile 'R:\AUT\MOSAIC\SESTAKZAKLADAC\SESTAK_ZAKLADAC\PRGZAKLADACNEW.CFC'
+#pou prgZakladacNew
+#srcline 1 ;PROGRAM prgZakladacNew
+P     61
+prgZakladacNew_L0:
+ LINK 0
+#srcline 191 ;(*  43	*)	MAX
+#srcline 192 ;(*  62	*)	ST 	INT_TO_BITS.INPUT
+ WRX  INT_TO_BITS~INPUT
+#debug_left int INT_TO_BITS.INPUT
+#srcline 193 ;(*  62	*)	CAL	INT_TO_BITS()
+ LEAX INT_TO_BITS
+ CAL  fourBitEncoder_L0
+#srcline 194 ;(*  62	*)	LD 	INT_TO_BITS.BIT0
+ LDX  INT_TO_BITS~BIT0
+#debug bool INT_TO_BITS.BIT0
+#srcline 195 ;(*   7	*)	ST 	poziceMotoru_ver_0
+ WR   bool poziceMotoru_ver_0
+#debug_left bool poziceMotoru_ver_0
+#srcline 196 ;(*  62	*)	LD 	INT_TO_BITS.BIT2
+ LDX  INT_TO_BITS~BIT2
+#debug bool INT_TO_BITS.BIT2
+#srcline 197 ;(*  25	*)	ST 	poziceMotoru_ver_2
+ WR   bool poziceMotoru_ver_2
+#debug_left bool poziceMotoru_ver_2
+#srcline 198 ;(*  62	*)	LD 	INT_TO_BITS.BIT1
+ LDX  INT_TO_BITS~BIT1
+#debug bool INT_TO_BITS.BIT1
+#srcline 199 ;(*  16	*)	ST 	poziceMotoru_ver_1
+ WR   bool poziceMotoru_ver_1
+#debug_left bool poziceMotoru_ver_1
+#srcline 200 ;(*  62	*)	LD 	INT_TO_BITS.BIT3
+ LDX  INT_TO_BITS~BIT3
+#debug bool INT_TO_BITS.BIT3
+#srcline 201 ;(*  34	*)	ST 	poziceMotoru_ver_3
+ WR   bool poziceMotoru_ver_3
+#debug_left bool poziceMotoru_ver_3
+#srcline 202 ;//N002
+#srcline 203 ;(* 121	*)	MAX
+ MAX
+#srcline 204 ;(* 139	*)	ST 	INT_TO_BITS_HOR.INPUT
+ WRX  INT_TO_BITS_HOR~INPUT
+#debug_left bool INT_TO_BITS_HOR.INPUT
+#srcline 205 ;(* 139	*)	CAL	INT_TO_BITS_HOR()
+ LEAX INT_TO_BITS_HOR
+ CAL  fourBitEncoder_L0
+#srcline 206 ;(* 139	*)	LD 	INT_TO_BITS_HOR.BIT0
+ LDX  INT_TO_BITS_HOR~BIT0
+#debug bool INT_TO_BITS_HOR.BIT0
+#srcline 207 ;(*  85	*)	ST 	poziceMotoru_hor_0
+ WR   bool poziceMotoru_hor_0
+#debug_left bool poziceMotoru_hor_0
+#srcline 208 ;(* 139	*)	LD 	INT_TO_BITS_HOR.BIT2
+ LDX  INT_TO_BITS_HOR~BIT2
+#debug bool INT_TO_BITS_HOR.BIT2
+#srcline 209 ;(* 103	*)	ST 	poziceMotoru_hor_2
+ WR   bool poziceMotoru_hor_2
+#debug_left bool poziceMotoru_hor_2
+#srcline 210 ;(* 139	*)	LD 	INT_TO_BITS_HOR.BIT1
+ LDX  INT_TO_BITS_HOR~BIT1
+#debug bool INT_TO_BITS_HOR.BIT1
+#srcline 211 ;(*  94	*)	ST 	poziceMotoru_hor_1
+ WR   bool poziceMotoru_hor_1
+#debug_left bool poziceMotoru_hor_1
+#srcline 212 ;(* 139	*)	LD 	INT_TO_BITS_HOR.BIT3
+ LDX  INT_TO_BITS_HOR~BIT3
+#debug bool INT_TO_BITS_HOR.BIT3
+#srcline 213 ;(* 112	*)	ST 	poziceMotoru_hor_3
+ WR   bool poziceMotoru_hor_3
+#debug_left bool poziceMotoru_hor_3
+#srcline 215 ;END_PROGRAM
+ ULNK
+RET
+E     61
+#endpou 
+
+
+
+ 
+
+#srcfile ''

@@ -1,0 +1,18 @@
+FUNCTION_BLOCK zakladacEncodeInt
+(**)
+  VAR_INPUT
+    inputInt : INT;
+  END_VAR
+  VAR_OUTPUT
+    out0 : BOOL;
+    out1 : BOOL;
+    out2 : BOOL;
+    out3 : BOOL;
+  END_VAR
+
+END_FUNCTION_BLOCK 
+
+
+
+
+

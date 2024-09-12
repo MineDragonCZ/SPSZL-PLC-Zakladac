@@ -1,0 +1,53 @@
+#srcfile 'R:\AUT\MOSAIC\SESTAKZAKLADAC\SESTAK_ZAKLADAC\ZAKLADACPOSUNVLEVO.CFC'
+
+#defpou zakladacPosunVlevo
+  bool RUN,
+  bool RESET,
+  bool DONE,
+  R_TRIG R_TRIG_01,
+  RS RS_TOGGLE_RUN,
+  R_TRIG R_TRIG_02
+
+ 
+#srcfile 'R:\AUT\MOSAIC\SESTAKZAKLADAC\SESTAK_ZAKLADAC\ZAKLADACPOSUNVLEVO.CFC'
+#pou zakladacPosunVlevo
+#srcline 1 ;FUNCTION_BLOCK zakladacPosunVlevo
+P     61
+zakladacPosunVlevo_L0:
+ LINK 0
+#srcline 102 ;(*  10	*)	CAL	R_TRIG_01(CLK:=RUN)
+ LDX  RUN
+#debug bool RUN
+ WRX  R_TRIG_01~CLK
+#debug_left bool R_TRIG_01~CLK
+ LEAX R_TRIG_01
+ CAL  R_TRIG_L0
+#srcline 103 ;(*  55	*)	CAL	R_TRIG_02(CLK:=RESET)
+ LDX  RESET
+#debug bool RESET
+ WRX  R_TRIG_02~CLK
+#debug_left bool R_TRIG_02~CLK
+ LEAX R_TRIG_02
+ CAL  R_TRIG_L0
+#srcline 104 ;(*  27	*)	CAL	RS_TOGGLE_RUN(S:=R_TRIG_01.Q, R1:=R_TRIG_02.Q)
+ LDX  R_TRIG_01~Q
+#debug bool R_TRIG_01.Q
+ WRX  RS_TOGGLE_RUN~S
+#debug_left bool RS_TOGGLE_RUN~S
+ LDX  R_TRIG_02~Q
+#debug bool R_TRIG_02.Q
+ WRX  RS_TOGGLE_RUN~R1
+#debug_left bool RS_TOGGLE_RUN~R1
+ LEAX RS_TOGGLE_RUN
+ CAL  RS_L0
+#srcline 106 ;END_FUNCTION_BLOCK
+ ULNK
+RET
+E     61
+#endpou 
+
+
+
+ 
+
+#srcfile ''

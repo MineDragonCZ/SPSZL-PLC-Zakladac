@@ -1,0 +1,108 @@
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\SESTAK_ZAKLADAC\PRGZAKLADACNEW.ST'
+ 
+ LD   bool pohybDokoncen_hor
+#debug bool pohybDokoncen_hor
+ LD   bool pohybDokoncen_ver
+#debug bool pohybDokoncen_ver
+ AND
+ WRX  pohyb_dokoncen
+#debug_left bool pohyb_dokoncen
+#srcline 47 ;  zhaveniMotoru_hor := 1;
+ LD   bool -1      ; true
+ WR   bool zhaveniMotoru_hor
+#debug_left bool zhaveniMotoru_hor
+#srcline 48 ;  zhaveniMotoru_ver := 1;
+ LD   bool -1      ; true
+ WR   bool zhaveniMotoru_ver
+#debug_left bool zhaveniMotoru_ver
+#srcline 49 ;  startMotoru := 0;
+ LD   bool 0       ; false
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 51 ;  timer_1_done := timer_1.Q;
+ LDX  timer_1~Q
+#debug bool timer_1.Q
+ WRX  timer_1_done
+#debug_left bool timer_1_done
+#srcline 52 ;  IF timer_1_done THEN
+ LDX  timer_1_done
+#debug bool timer_1_done
+ JMC  prgZakladacNew_L1
+#srcline 53 ;    timer_2_done := timer_2.Q;
+ LDX  timer_2~Q
+#debug bool timer_2.Q
+ WRX  timer_2_done
+#debug_left bool timer_2_done
+#srcline 54 ;  END_IF
+prgZakladacNew_L1:
+#srcline 55 ;  timer_1(IN := NOT(timer_1_done), PT := t#500ms);
+ LDX  timer_1_done
+#debug bool timer_1_done
+ NEG
+ WRX  timer_1~IN
+#debug_left bool timer_1~IN
+ LD   time 500
+ WRX  timer_1~PT
+#debug_left time timer_1~PT
+ LEAX timer_1
+ CAL  TON_L0
+#srcline 56 ;  timer_2(IN := NOT(timer_2_done), PT := t#1000ms);
+ LDX  timer_2_done
+#debug bool timer_2_done
+ NEG
+ WRX  timer_2~IN
+#debug_left bool timer_2~IN
+ LD   time 1000
+ WRX  timer_2~PT
+#debug_left time timer_2~PT
+ LEAX timer_2
+ CAL  TON_L0
+#srcline 58 ;  IF pohyb_dokoncen AND timer_1_done THEN
+ LDX  pohyb_dokoncen
+#debug bool pohyb_dokoncen
+ LDX  timer_1_done
+#debug bool timer_1_done
+ AND
+ JMC  prgZakladacNew_L3
+#srcline 59 ;    timer_1_done := false;
+ LD   bool 0       ; false
+ WRX  timer_1_done
+#debug_left bool timer_1_done
+#srcline 60 ;    CASE zakladac_state OF
+ LDX  zakladac_state
+#debug int zakladac_state
+ EXTW 
+ WRY  P0__st__
+ LD   0
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladacNew_L6
+#srcline 61 ;         0:
+#srcline 62 ;           IF start AND NOT(stop) THEN
+ LDX  start
+#debug bool start
+ LDX  stop
+#debug bool stop
+ NEG
+ AND
+ JMC  prgZakladacNew_L7
+#srcline 63 ;              zakladac_state := 1;
+ LD   int 1
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 64 ;              RETURN;
+ JMP  prgZakladacNew_RET
+#srcline 65 ;           END_IF;
+prgZakladacNew_L7:
+ JMP  prgZakladacNew_L5
+prgZakladacNew_L6:
+ LD   1
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladacNew_L9
+#srcline 66 ;         1:
+#srcline 67 ;            motor_hor_0 := 0;
+; *** ERROR[2] - LINE: 67: COLUMN: 24 - ';' expected or in previous expression ';' is missing
+ 
+
+#srcfile ''

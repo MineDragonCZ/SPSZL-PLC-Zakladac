@@ -1,0 +1,7 @@
+CONFIGURATION Sestak_zakladac
+  RESOURCE CPM
+    TASK FreeWheeling(Number := 0);
+    PROGRAM Zakladac WITH FreeWheeling : prgZakladac ();
+    PROGRAM ZakladacNew WITH FreeWheeling : prgZakladacNew ();
+  END_RESOURCE
+END_CONFIGURATION

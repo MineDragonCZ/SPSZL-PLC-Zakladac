@@ -1,0 +1,12 @@
+0;3;|0;|;|0;DO.DO0;posuvChapadlo_ver;
+0;3;|0;|;|0;DO.DO1;celistiChapadlo;
+0;3;|0;|;|0;DO.DO3;color2_save;
+0;3;|0;|;|0;DO.DO2;color1_potlac;
+0;3;|0;|;|0;DI.DI0;pripravenKPohybu_hor;
+0;3;|0;|;|0;DI.DI1;pohybDokoncen_hor;
+0;3;|0;|;|0;DI.DI2;pripravenKPohybu_ver;
+0;3;|0;|;|0;DI.DI3;pohybDokoncen_ver;
+0;3;|0;|;|0;DI.DI4;chapadloHorniPoloha;
+0;3;|0;|;|0;DI.DI5;chapadloDolniPoloha;
+0;3;|0;|;|0;DI.DI6;chapadloRozevrene;
+0;3;|0;|;|0;DI.DI7;chapadloSevrene;

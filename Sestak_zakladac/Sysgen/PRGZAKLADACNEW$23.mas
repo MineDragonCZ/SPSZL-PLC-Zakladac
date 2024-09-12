@@ -1,0 +1,199 @@
+#srcfile 'C:\MOSAICAPP\SINZAKLADAC\SESTAK_ZAKLADAC\PRGZAKLADACNEW.ST'
+
+#defpou prgZakladacNew
+  int zakladac_state,
+  bool start,
+  bool stop,
+  bool pohyb_dokoncen,
+  TOF timer_1,
+  bool timer_1_done
+
+ 
+#srcfile 'C:\MOSAICAPP\SINZAKLADAC\SESTAK_ZAKLADAC\PRGZAKLADACNEW.ST'
+#pou prgZakladacNew
+#srcline 1 ;PROGRAM prgZakladacNew
+
+#struct prgZakladacNew__temp__
+  dint P0__st__
+P     61
+prgZakladacNew_L0:
+ LINK __SizeOf(prgZakladacNew__temp__)
+; Initialize - dynamic variables
+; End initialize - dynamic variables
+#srcline 28 ;  pohyb_dokoncen := (pohybDokoncen_hor AND pohybDokoncen_ver);
+ LD   bool pohybDokoncen_hor
+#debug bool pohybDokoncen_hor
+ LD   bool pohybDokoncen_ver
+#debug bool pohybDokoncen_ver
+ AND
+ WRX  pohyb_dokoncen
+#debug_left bool pohyb_dokoncen
+#srcline 29 ;  zhaveniMotoru_hor := 1;
+ LD   bool -1      ; true
+ WR   bool zhaveniMotoru_hor
+#debug_left bool zhaveniMotoru_hor
+#srcline 30 ;  zhaveniMotoru_ver := 1;
+ LD   bool -1      ; true
+ WR   bool zhaveniMotoru_ver
+#debug_left bool zhaveniMotoru_ver
+#srcline 31 ;  
+#srcline 32 ;  IF timer_1.Q THEN
+ LDX  timer_1~Q
+#debug bool timer_1.Q
+ JMC  prgZakladacNew_L1
+#srcline 33 ;     timer_1_done := timer_1.Q;
+ LDX  timer_1~Q
+#debug bool timer_1.Q
+ WRX  timer_1_done
+#debug_left bool timer_1_done
+#srcline 34 ;  END_IF
+prgZakladacNew_L1:
+#srcline 35 ;  timer_1(IN := NOT(timer_1_done), PT := t#500ms);
+ LDX  timer_1_done
+#debug bool timer_1_done
+ NEG
+ WRX  timer_1~IN
+#debug_left bool timer_1~IN
+ LD   time 500
+ WRX  timer_1~PT
+#debug_left time timer_1~PT
+ LEAX timer_1
+ CAL  TOF_L0
+#srcline 37 ;  IF pohyb_dokoncen THEN
+ LDX  pohyb_dokoncen
+#debug bool pohyb_dokoncen
+ JMC  prgZakladacNew_L3
+#srcline 38 ;    CASE zakladac_state OF
+ LDX  zakladac_state
+#debug int zakladac_state
+ EXTW 
+ WRY  P0__st__
+ LD   0
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladacNew_L6
+#srcline 39 ;         0:
+#srcline 40 ;           IF start AND NOT(stop) THEN
+ LDX  start
+#debug bool start
+ LDX  stop
+#debug bool stop
+ NEG
+ AND
+ JMC  prgZakladacNew_L7
+#srcline 41 ;              zakladac_state := 1;
+ LD   int 1
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 42 ;              RETURN;
+ JMP  prgZakladacNew_RET
+#srcline 43 ;           END_IF;
+prgZakladacNew_L7:
+ JMP  prgZakladacNew_L5
+prgZakladacNew_L6:
+ LD   1
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladacNew_L9
+#srcline 44 ;         1:
+#srcline 45 ;            IF NOT timer_1_done THEN RETURN; END_IF
+ LDX  timer_1_done
+#debug bool timer_1_done
+ NEG
+ JMC  prgZakladacNew_L10
+ JMP  prgZakladacNew_RET
+prgZakladacNew_L10:
+#srcline 46 ;            motor_hor_0 := 0;
+ LD   bool 0       ; false
+ WR   motor_hor_0
+#debug_left bool motor_hor_0
+#srcline 47 ;            motor_hor_1 := 0;
+ LD   bool 0       ; false
+ WR   motor_hor_1
+#debug_left bool motor_hor_1
+#srcline 48 ;            motor_hor_2 := 0;
+ LD   bool 0       ; false
+ WR   motor_hor_2
+#debug_left bool motor_hor_2
+#srcline 49 ;            motor_hor_3 := 0;
+ LD   bool 0       ; false
+ WR   motor_hor_3
+#debug_left bool motor_hor_3
+#srcline 50 ;            vyberMotoru := 0;
+ LD   bool 0       ; false
+ WR   bool vyberMotoru
+#debug_left bool vyberMotoru
+#srcline 51 ;            startMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 52 ;            zakladac_state := 2;
+ LD   int 2
+ WRX  zakladac_state
+#debug_left int zakladac_state
+ JMP  prgZakladacNew_L5
+prgZakladacNew_L9:
+ LD   2
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladacNew_L12
+#srcline 53 ;         2:
+#srcline 54 ;            IF NOT timer_1_done THEN RETURN; END_IF
+ LDX  timer_1_done
+#debug bool timer_1_done
+ NEG
+ JMC  prgZakladacNew_L13
+ JMP  prgZakladacNew_RET
+prgZakladacNew_L13:
+#srcline 55 ;            motor_ver_0 := 0;
+ LD   bool 0       ; false
+ WR   motor_ver_0
+#debug_left bool motor_ver_0
+#srcline 56 ;            motor_ver_1 := 0;
+ LD   bool 0       ; false
+ WR   motor_ver_1
+#debug_left bool motor_ver_1
+#srcline 57 ;            motor_ver_2 := 0;
+ LD   bool 0       ; false
+ WR   motor_ver_2
+#debug_left bool motor_ver_2
+#srcline 58 ;            motor_ver_3 := 0;
+ LD   bool 0       ; false
+ WR   motor_ver_3
+#debug_left bool motor_ver_3
+#srcline 59 ;            vyberMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool vyberMotoru
+#debug_left bool vyberMotoru
+#srcline 60 ;            startMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool startMotoru
+#debug_left bool startMotoru
+ JMP  prgZakladacNew_L5
+prgZakladacNew_L12:
+prgZakladacNew_L5:
+#srcline 62 ;  END_IF
+prgZakladacNew_L3:
+#srcline 63 ;END_PROGRAM
+prgZakladacNew_RET:
+ ULNK
+RET
+E     61
+
+; Initialize - variables
+P     61
+prgZakladacNew__InstanceInit__:
+ LINK 0
+ LEAX timer_1
+ CAL  TOF__InstanceInit__
+ ULNK
+RET
+E     61
+; End initialize - variables
+#endpou 
+
+
+
+ 
+
+#srcfile ''

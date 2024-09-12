@@ -1,0 +1,334 @@
+#srcfile 'R:\AUT\MOSAIC\SESTAKZAKLADAC\SESTAK_ZAKLADAC\PRGZAKLADAC.CFC'
+
+#defpou prgZakladac
+  bool fix_pozice,
+  bool startZakladace,
+  zakladacVemVyrobek hledani01
+
+ 
+#srcfile 'R:\AUT\MOSAIC\SESTAKZAKLADAC\SESTAK_ZAKLADAC\PRGZAKLADAC.CFC'
+#pou prgZakladac
+#srcline 1 ;PROGRAM prgZakladac
+
+#struct prgZakladac__temp__
+  int _Nod_Tmp_25,
+  bool _Fun_Tmp_IN1_21_1,
+  bool _Nod_Tmp_26,
+  bool _Nod_Tmp_23,
+  bool _Nod_Tmp_17,
+  bool _Fun_Tmp_IN1_19_1,
+  bool _Fun_Tmp_IN1_16_1,
+  int _Nod_Tmp_12,
+  bool _Fun_Tmp_IN1_8_1,
+  bool _Nod_Tmp_13,
+  bool _Nod_Tmp_10,
+  bool _Nod_Tmp_4,
+  bool _Fun_Tmp_IN1_6_1,
+  bool _Fun_Tmp_IN1_3_1,
+  bool _Nod_Tmp_2
+P     61
+prgZakladac_L0:
+ LINK __SizeOf(prgZakladac__temp__)
+; Initialize - dynamic variables
+; End initialize - dynamic variables
+#srcline 1037 ;(* 956	*)	LD 	pozice_vertikalni
+ LD   pozice_vertikalni
+#debug int pozice_vertikalni
+ EXTW 
+#srcline 1038 ;(* 747	*)	ST	_Nod_Tmp_25
+ WRY  _Nod_Tmp_25
+#debug_left int _Nod_Tmp_25
+#srcline 1039 ;(* 565	*)	LD 	_Nod_Tmp_25
+ LDY  _Nod_Tmp_25
+#debug int _Nod_Tmp_25
+ EXTW 
+#srcline 1040 ;(* 573	*)	EQ 	1
+ LD   int 1
+ EQ
+#srcline 1041 ;(* 805	*)	ST 	_Fun_Tmp_IN1_21_1
+ WRY  _Fun_Tmp_IN1_21_1
+#debug_left bool _Fun_Tmp_IN1_21_1
+#srcline 1042 ;(* 624	*)	LD 	_Nod_Tmp_25
+ LDY  _Nod_Tmp_25
+#debug int _Nod_Tmp_25
+ EXTW 
+#srcline 1043 ;(* 632	*)	EQ 	3
+ LD   int 3
+ EQ
+#srcline 1044 ;(* 792	*)	ST	_Nod_Tmp_26
+ WRY  _Nod_Tmp_26
+#debug_left bool _Nod_Tmp_26
+#srcline 1045 ;(* 680	*)	LD 	_Nod_Tmp_25
+ LDY  _Nod_Tmp_25
+#debug int _Nod_Tmp_25
+ EXTW 
+#srcline 1046 ;(* 688	*)	EQ 	5
+ LD   int 5
+ EQ
+#srcline 1047 ;(* 846	*)	ST	_Nod_Tmp_23
+ WRY  _Nod_Tmp_23
+#debug_left bool _Nod_Tmp_23
+#srcline 1048 ;(* 720	*)	LD 	_Nod_Tmp_25
+ LDY  _Nod_Tmp_25
+#debug int _Nod_Tmp_25
+ EXTW 
+#srcline 1049 ;(* 728	*)	EQ 	15
+ LD   int 15
+ EQ
+#srcline 1050 ;(* 901	*)	ST	_Nod_Tmp_17
+ WRY  _Nod_Tmp_17
+#debug_left bool _Nod_Tmp_17
+#srcline 1051 ;(* 805	*)	LD 	_Fun_Tmp_IN1_21_1
+ LDY  _Fun_Tmp_IN1_21_1
+#debug bool _Fun_Tmp_IN1_21_1
+#srcline 1052 ;(* 813	*)	OR 	_Nod_Tmp_26
+ LDY  _Nod_Tmp_26
+#debug bool _Nod_Tmp_26
+ OR
+#srcline 1053 ;(* 821	*)	OR 	_Nod_Tmp_23
+ LDY  _Nod_Tmp_23
+#debug bool _Nod_Tmp_23
+ OR
+#srcline 1054 ;(* 829	*)	OR 	_Nod_Tmp_17
+ LDY  _Nod_Tmp_17
+#debug bool _Nod_Tmp_17
+ OR
+#srcline 1055 ;(* 525	*)	ST 	poziceMotoru_ver_0
+ WR   bool poziceMotoru_ver_0
+#debug_left bool poziceMotoru_ver_0
+#srcline 1056 ;(* 596	*)	LD 	_Nod_Tmp_25
+ LDY  _Nod_Tmp_25
+#debug int _Nod_Tmp_25
+ EXTW 
+#srcline 1057 ;(* 604	*)	EQ 	2
+ LD   int 2
+ EQ
+#srcline 1058 ;(* 914	*)	ST 	_Fun_Tmp_IN1_19_1
+ WRY  _Fun_Tmp_IN1_19_1
+#debug_left bool _Fun_Tmp_IN1_19_1
+#srcline 1059 ;(* 914	*)	LD 	_Fun_Tmp_IN1_19_1
+ LDY  _Fun_Tmp_IN1_19_1
+#debug bool _Fun_Tmp_IN1_19_1
+#srcline 1060 ;(* 922	*)	OR 	_Nod_Tmp_26
+ LDY  _Nod_Tmp_26
+#debug bool _Nod_Tmp_26
+ OR
+#srcline 1061 ;(* 930	*)	OR 	_Nod_Tmp_17
+ LDY  _Nod_Tmp_17
+#debug bool _Nod_Tmp_17
+ OR
+#srcline 1062 ;(* 534	*)	ST 	poziceMotoru_ver_1
+ WR   bool poziceMotoru_ver_1
+#debug_left bool poziceMotoru_ver_1
+#srcline 1063 ;(* 652	*)	LD 	_Nod_Tmp_25
+ LDY  _Nod_Tmp_25
+#debug int _Nod_Tmp_25
+ EXTW 
+#srcline 1064 ;(* 660	*)	EQ 	4
+ LD   int 4
+ EQ
+#srcline 1065 ;(* 859	*)	ST 	_Fun_Tmp_IN1_16_1
+ WRY  _Fun_Tmp_IN1_16_1
+#debug_left bool _Fun_Tmp_IN1_16_1
+#srcline 1066 ;(* 859	*)	LD 	_Fun_Tmp_IN1_16_1
+ LDY  _Fun_Tmp_IN1_16_1
+#debug bool _Fun_Tmp_IN1_16_1
+#srcline 1067 ;(* 867	*)	OR 	_Nod_Tmp_23
+ LDY  _Nod_Tmp_23
+#debug bool _Nod_Tmp_23
+ OR
+#srcline 1068 ;(* 875	*)	OR 	_Nod_Tmp_17
+ LDY  _Nod_Tmp_17
+#debug bool _Nod_Tmp_17
+ OR
+#srcline 1069 ;(* 543	*)	ST 	poziceMotoru_ver_2
+ WR   bool poziceMotoru_ver_2
+#debug_left bool poziceMotoru_ver_2
+#srcline 1070 ;(* 892	*)	LD	_Nod_Tmp_17
+ LDY  _Nod_Tmp_17
+#debug bool _Nod_Tmp_17
+#srcline 1071 ;(* 552	*)	ST 	poziceMotoru_ver_3
+ WR   bool poziceMotoru_ver_3
+#debug_left bool poziceMotoru_ver_3
+#srcline 1072 ;//N001
+#srcline 1073 ;(*  40	*)	LD 	pozice_horizontalni
+ LD   pozice_horizontalni
+#debug int pozice_horizontalni
+ EXTW 
+#srcline 1074 ;(* 229	*)	ST	_Nod_Tmp_12
+ WRY  _Nod_Tmp_12
+#debug_left int _Nod_Tmp_12
+#srcline 1075 ;(*  47	*)	LD 	_Nod_Tmp_12
+ LDY  _Nod_Tmp_12
+#debug int _Nod_Tmp_12
+ EXTW 
+#srcline 1076 ;(*  55	*)	EQ 	1
+ LD   int 1
+ EQ
+#srcline 1077 ;(* 287	*)	ST 	_Fun_Tmp_IN1_8_1
+ WRY  _Fun_Tmp_IN1_8_1
+#debug_left bool _Fun_Tmp_IN1_8_1
+#srcline 1078 ;(* 106	*)	LD 	_Nod_Tmp_12
+ LDY  _Nod_Tmp_12
+#debug int _Nod_Tmp_12
+ EXTW 
+#srcline 1079 ;(* 114	*)	EQ 	3
+ LD   int 3
+ EQ
+#srcline 1080 ;(* 274	*)	ST	_Nod_Tmp_13
+ WRY  _Nod_Tmp_13
+#debug_left bool _Nod_Tmp_13
+#srcline 1081 ;(* 162	*)	LD 	_Nod_Tmp_12
+ LDY  _Nod_Tmp_12
+#debug int _Nod_Tmp_12
+ EXTW 
+#srcline 1082 ;(* 170	*)	EQ 	5
+ LD   int 5
+ EQ
+#srcline 1083 ;(* 328	*)	ST	_Nod_Tmp_10
+ WRY  _Nod_Tmp_10
+#debug_left bool _Nod_Tmp_10
+#srcline 1084 ;(* 202	*)	LD 	_Nod_Tmp_12
+ LDY  _Nod_Tmp_12
+#debug int _Nod_Tmp_12
+ EXTW 
+#srcline 1085 ;(* 210	*)	EQ 	15
+ LD   int 15
+ EQ
+#srcline 1086 ;(* 383	*)	ST	_Nod_Tmp_4
+ WRY  _Nod_Tmp_4
+#debug_left bool _Nod_Tmp_4
+#srcline 1087 ;(* 287	*)	LD 	_Fun_Tmp_IN1_8_1
+ LDY  _Fun_Tmp_IN1_8_1
+#debug bool _Fun_Tmp_IN1_8_1
+#srcline 1088 ;(* 295	*)	OR 	_Nod_Tmp_13
+ LDY  _Nod_Tmp_13
+#debug bool _Nod_Tmp_13
+ OR
+#srcline 1089 ;(* 303	*)	OR 	_Nod_Tmp_10
+ LDY  _Nod_Tmp_10
+#debug bool _Nod_Tmp_10
+ OR
+#srcline 1090 ;(* 311	*)	OR 	_Nod_Tmp_4
+ LDY  _Nod_Tmp_4
+#debug bool _Nod_Tmp_4
+ OR
+#srcline 1091 ;(*   4	*)	ST 	poziceMotoru_hor_0
+ WR   bool poziceMotoru_hor_0
+#debug_left bool poziceMotoru_hor_0
+#srcline 1092 ;(*  78	*)	LD 	_Nod_Tmp_12
+ LDY  _Nod_Tmp_12
+#debug int _Nod_Tmp_12
+ EXTW 
+#srcline 1093 ;(*  86	*)	EQ 	2
+ LD   int 2
+ EQ
+#srcline 1094 ;(* 396	*)	ST 	_Fun_Tmp_IN1_6_1
+ WRY  _Fun_Tmp_IN1_6_1
+#debug_left bool _Fun_Tmp_IN1_6_1
+#srcline 1095 ;(* 396	*)	LD 	_Fun_Tmp_IN1_6_1
+ LDY  _Fun_Tmp_IN1_6_1
+#debug bool _Fun_Tmp_IN1_6_1
+#srcline 1096 ;(* 404	*)	OR 	_Nod_Tmp_13
+ LDY  _Nod_Tmp_13
+#debug bool _Nod_Tmp_13
+ OR
+#srcline 1097 ;(* 412	*)	OR 	_Nod_Tmp_4
+ LDY  _Nod_Tmp_4
+#debug bool _Nod_Tmp_4
+ OR
+#srcline 1098 ;(*  13	*)	ST 	poziceMotoru_hor_1
+ WR   bool poziceMotoru_hor_1
+#debug_left bool poziceMotoru_hor_1
+#srcline 1099 ;(* 134	*)	LD 	_Nod_Tmp_12
+ LDY  _Nod_Tmp_12
+#debug int _Nod_Tmp_12
+ EXTW 
+#srcline 1100 ;(* 142	*)	EQ 	4
+ LD   int 4
+ EQ
+#srcline 1101 ;(* 341	*)	ST 	_Fun_Tmp_IN1_3_1
+ WRY  _Fun_Tmp_IN1_3_1
+#debug_left bool _Fun_Tmp_IN1_3_1
+#srcline 1102 ;(* 341	*)	LD 	_Fun_Tmp_IN1_3_1
+ LDY  _Fun_Tmp_IN1_3_1
+#debug bool _Fun_Tmp_IN1_3_1
+#srcline 1103 ;(* 349	*)	OR 	_Nod_Tmp_10
+ LDY  _Nod_Tmp_10
+#debug bool _Nod_Tmp_10
+ OR
+#srcline 1104 ;(* 357	*)	OR 	_Nod_Tmp_4
+ LDY  _Nod_Tmp_4
+#debug bool _Nod_Tmp_4
+ OR
+#srcline 1105 ;(*  22	*)	ST 	poziceMotoru_hor_2
+ WR   bool poziceMotoru_hor_2
+#debug_left bool poziceMotoru_hor_2
+#srcline 1106 ;(* 374	*)	LD	_Nod_Tmp_4
+ LDY  _Nod_Tmp_4
+#debug bool _Nod_Tmp_4
+#srcline 1107 ;(*  31	*)	ST 	poziceMotoru_hor_3
+ WR   bool poziceMotoru_hor_3
+#debug_left bool poziceMotoru_hor_3
+#srcline 1108 ;//N002
+#srcline 1109 ;(* 465	*)	LD 	true
+ LD   bool -1       ; true
+#srcline 1110 ;(* 480	*)	ST	_Nod_Tmp_2
+ WRY  _Nod_Tmp_2
+#debug_left bool _Nod_Tmp_2
+#srcline 1111 ;(* 456	*)	ST 	zhaveniMotoru_hor
+ WR   bool zhaveniMotoru_hor
+#debug_left bool zhaveniMotoru_hor
+#srcline 1112 ;(* 480	*)	LD	_Nod_Tmp_2
+ LDY  _Nod_Tmp_2
+#debug bool _Nod_Tmp_2
+#srcline 1113 ;(* 471	*)	ST 	zhaveniMotoru_ver
+ WR   bool zhaveniMotoru_ver
+#debug_left bool zhaveniMotoru_ver
+#srcline 1114 ;//N003
+#srcline 1115 ;(* 971	*)	CAL	toggleChapadla()
+ LEA  toggleChapadla
+ CAL  RS_L0
+#srcline 1116 ;(* 971	*)	LD 	toggleChapadla.Q1
+ LD   toggleChapadla~Q1
+#debug bool toggleChapadla.Q1
+#srcline 1117 ;(* 962	*)	ST 	celistiChapadlo
+ WR   bool celistiChapadlo
+#debug_left bool celistiChapadlo
+#srcline 1118 ;//N004
+#srcline 1119 ;(* 468	*)	LD 	zapnout_posuv
+ LD   zapnout_posuv
+#debug bool zapnout_posuv
+#srcline 1120 ;(* 438	*)	ST 	startMotoru
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 1121 ;//N005
+#srcline 1122 ;(* 496	*)	LD 	vyber_posuvu
+ LD   vyber_posuvu
+#debug bool vyber_posuvu
+#srcline 1123 ;(* 504	*)	AND 	vertikalniManipulacePovolena
+ LD   bool vertikalniManipulacePovolena
+#debug bool vertikalniManipulacePovolena
+ AND
+#srcline 1124 ;(* 447	*)	ST 	vyberMotoru
+ WR   bool vyberMotoru
+#debug_left bool vyberMotoru
+#srcline 1125 ;//N006
+#srcline 1126 ;(* 984	*)	CAL	hledani01(VYHLEDAT:=startZakladace)
+ LDX  startZakladace
+#debug bool startZakladace
+ WRX  hledani01~VYHLEDAT
+#debug_left bool hledani01~VYHLEDAT
+ LEAX hledani01
+ CAL  zakladacVemVyrobek_L0
+#srcline 1128 ;END_PROGRAM
+ ULNK
+RET
+E     61
+#endpou 
+
+
+
+ 
+
+#srcfile ''
