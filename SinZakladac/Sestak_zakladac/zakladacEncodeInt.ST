@@ -53,6 +53,36 @@ FUNCTION_BLOCK zakladacEncodeInt
       out2 := 1;
       out3 := 0;
   END_IF
+  IF inputInt = 6 THEN
+      out0 := 0;
+      out1 := 1;
+      out2 := 1;
+      out3 := 0;
+  END_IF
+  IF inputInt = 7 THEN
+      out0 := 1;
+      out1 := 1;
+      out2 := 1;
+      out3 := 0;
+  END_IF
+  IF inputInt = 8 THEN
+      out0 := 0;
+      out1 := 0;
+      out2 := 0;
+      out3 := 1;
+  END_IF
+  IF inputInt = 9 THEN
+      out0 := 1;
+      out1 := 0;
+      out2 := 0;
+      out3 := 1;
+  END_IF
+  IF inputInt = 10 THEN
+      out0 := 0;
+      out1 := 1;
+      out2 := 0;
+      out3 := 1;
+  END_IF
 
 END_FUNCTION_BLOCK
 

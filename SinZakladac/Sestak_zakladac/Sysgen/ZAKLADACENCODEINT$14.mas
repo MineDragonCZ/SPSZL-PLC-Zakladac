@@ -1,4 +1,4 @@
-#srcfile 'C:\MOSAICAPP\SPSZL-PLC-ZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\ZAKLADACENCODEINT.ST'
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\ZAKLADACENCODEINT.ST'
 
 #defpou zakladacEncodeInt
   int inputInt,
@@ -8,7 +8,7 @@
   bool out3
 
  
-#srcfile 'C:\MOSAICAPP\SPSZL-PLC-ZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\ZAKLADACENCODEINT.ST'
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\ZAKLADACENCODEINT.ST'
 #pou zakladacEncodeInt
 #srcline 1 ;FUNCTION_BLOCK zakladacEncodeInt
 P     61
@@ -181,7 +181,132 @@ zakladacEncodeInt_L9:
 #debug_left bool out3
 #srcline 55 ;  END_IF
 zakladacEncodeInt_L11:
-#srcline 57 ;END_FUNCTION_BLOCK
+#srcline 56 ;  IF inputInt = 6 THEN
+ LDX  inputInt
+#debug int inputInt
+ EXTW 
+ LD   int 6
+ EQ
+ JMC  zakladacEncodeInt_L13
+#srcline 57 ;      out0 := 0;
+ LD   bool 0       ; false
+ WRX  out0
+#debug_left bool out0
+#srcline 58 ;      out1 := 1;
+ LD   bool -1      ; true
+ WRX  out1
+#debug_left bool out1
+#srcline 59 ;      out2 := 1;
+ LD   bool -1      ; true
+ WRX  out2
+#debug_left bool out2
+#srcline 60 ;      out3 := 0;
+ LD   bool 0       ; false
+ WRX  out3
+#debug_left bool out3
+#srcline 61 ;  END_IF
+zakladacEncodeInt_L13:
+#srcline 62 ;  IF inputInt = 7 THEN
+ LDX  inputInt
+#debug int inputInt
+ EXTW 
+ LD   int 7
+ EQ
+ JMC  zakladacEncodeInt_L15
+#srcline 63 ;      out0 := 1;
+ LD   bool -1      ; true
+ WRX  out0
+#debug_left bool out0
+#srcline 64 ;      out1 := 1;
+ LD   bool -1      ; true
+ WRX  out1
+#debug_left bool out1
+#srcline 65 ;      out2 := 1;
+ LD   bool -1      ; true
+ WRX  out2
+#debug_left bool out2
+#srcline 66 ;      out3 := 0;
+ LD   bool 0       ; false
+ WRX  out3
+#debug_left bool out3
+#srcline 67 ;  END_IF
+zakladacEncodeInt_L15:
+#srcline 68 ;  IF inputInt = 8 THEN
+ LDX  inputInt
+#debug int inputInt
+ EXTW 
+ LD   int 8
+ EQ
+ JMC  zakladacEncodeInt_L17
+#srcline 69 ;      out0 := 0;
+ LD   bool 0       ; false
+ WRX  out0
+#debug_left bool out0
+#srcline 70 ;      out1 := 0;
+ LD   bool 0       ; false
+ WRX  out1
+#debug_left bool out1
+#srcline 71 ;      out2 := 0;
+ LD   bool 0       ; false
+ WRX  out2
+#debug_left bool out2
+#srcline 72 ;      out3 := 1;
+ LD   bool -1      ; true
+ WRX  out3
+#debug_left bool out3
+#srcline 73 ;  END_IF
+zakladacEncodeInt_L17:
+#srcline 74 ;  IF inputInt = 9 THEN
+ LDX  inputInt
+#debug int inputInt
+ EXTW 
+ LD   int 9
+ EQ
+ JMC  zakladacEncodeInt_L19
+#srcline 75 ;      out0 := 1;
+ LD   bool -1      ; true
+ WRX  out0
+#debug_left bool out0
+#srcline 76 ;      out1 := 0;
+ LD   bool 0       ; false
+ WRX  out1
+#debug_left bool out1
+#srcline 77 ;      out2 := 0;
+ LD   bool 0       ; false
+ WRX  out2
+#debug_left bool out2
+#srcline 78 ;      out3 := 1;
+ LD   bool -1      ; true
+ WRX  out3
+#debug_left bool out3
+#srcline 79 ;  END_IF
+zakladacEncodeInt_L19:
+#srcline 80 ;  IF inputInt = 10 THEN
+ LDX  inputInt
+#debug int inputInt
+ EXTW 
+ LD   int 10
+ EQ
+ JMC  zakladacEncodeInt_L21
+#srcline 81 ;      out0 := 0;
+ LD   bool 0       ; false
+ WRX  out0
+#debug_left bool out0
+#srcline 82 ;      out1 := 1;
+ LD   bool -1      ; true
+ WRX  out1
+#debug_left bool out1
+#srcline 83 ;      out2 := 0;
+ LD   bool 0       ; false
+ WRX  out2
+#debug_left bool out2
+#srcline 84 ;      out3 := 1;
+ LD   bool -1      ; true
+ WRX  out3
+#debug_left bool out3
+#srcline 85 ;  END_IF
+zakladacEncodeInt_L21:
+#srcline 87 ;END_FUNCTION_BLOCK
  ULNK
 RET
 E     61

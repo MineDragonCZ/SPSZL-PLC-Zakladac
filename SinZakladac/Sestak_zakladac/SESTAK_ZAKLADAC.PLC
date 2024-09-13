@@ -9,7 +9,7 @@ dirs=""
 [/compiler]
 
 [plcselection]
-connection=2
+connection=3
 openchannel=1
 chanel=0
 speed=9

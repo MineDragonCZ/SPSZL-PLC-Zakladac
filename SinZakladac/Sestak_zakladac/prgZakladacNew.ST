@@ -19,10 +19,11 @@ PROGRAM prgZakladacNew
      
      current_slot : INT := 0;
      
+     
      last_scanned_color : INT := -1;
      (*
        stavy:
-             -1: zatím nebyla naskenována žádný barva
+             -1: zatím nebyla naskenována žádná barva
              0: neznámá
              1: modrá
              2: èervená
@@ -41,6 +42,10 @@ PROGRAM prgZakladacNew
 
      
      intEncoder : zakladacEncodeInt;
+     getVerticalAddressFromColor : zakladacGetVerticalAddrFromColor;
+     
+     main_clock_time : TIME := t#250ms;
+     subs_clock_time : TIME := t#500ms;
   END_VAR
   startMotoru := 0;
 
@@ -52,8 +57,8 @@ PROGRAM prgZakladacNew
   IF timer_1_done THEN
     timer_2_done := timer_2.Q;
   END_IF
-  timer_1(IN := NOT(timer_1_done), PT := t#3000ms);
-  timer_2(IN := NOT(timer_2_done), PT := t#3000ms);
+  timer_1(IN := NOT(timer_1_done), PT := main_clock_time);
+  timer_2(IN := NOT(timer_2_done), PT := subs_clock_time);
   
   IF stop THEN
      zakladac_state := 0;
@@ -84,7 +89,7 @@ PROGRAM prgZakladacNew
             celistiChapadlo := 0;
             posuvChapadlo_ver := 0;
          ;
-         2: // reset vertikalne do vychozi pozice
+         2:
             vyberMotoru := 1;
             poziceMotoru_ver_0 := 0;
             poziceMotoru_ver_1 := 0;
@@ -93,29 +98,29 @@ PROGRAM prgZakladacNew
             zakladac_state := 3;
          ;
          3: // reset vertikalne do vychozi pozice
+           IF vertikalniManipulacePovolena THEN
             startMotoru := 1;
             zakladac_state := 4;
+           END_IF
          ;
          4:
             IF materialJe THEN
-               zakladac_state := 5;
-               zakladac_substate := 0;
+                zakladac_state := 5;
+                zakladac_substate := 0;
             ELSE
-              IF current_slot >= 5 THEN
-                 current_slot := 0;
-              ELSE
-                 current_slot := current_slot + 1;
-              END_IF
-              zakladac_state := 4;
+                current_slot := current_slot + 1;
+                IF current_slot >= 4 THEN
+                   current_slot := 0;
+                END_IF
+                intEncoder(inputInt := current_slot,
+                                    out0 => poziceMotoru_hor_0,
+                                    out1 => poziceMotoru_hor_1,
+                                    out2 => poziceMotoru_hor_2,
+                                    out3 => poziceMotoru_hor_3
+                );
+                vyberMotoru := 0;
+                startMotoru := 1;
             END_IF
-            intEncoder(inputInt := current_slot,
-                                out0 => poziceMotoru_hor_0,
-                                out1 => poziceMotoru_hor_1,
-                                out2 => poziceMotoru_hor_2,
-                                out3 => poziceMotoru_hor_3
-            );
-            vyberMotoru := 0;
-            startMotoru := 1;
          ;
          5:
             IF timer_2_done THEN
@@ -152,9 +157,11 @@ PROGRAM prgZakladacNew
             zakladac_state := 8;
          ;
          8:
+           IF vertikalniManipulacePovolena THEN
             startMotoru := 1;
             zakladac_state := 9;
             zakladac_substate := 0;
+           END_IF
          ;
          9:
             IF timer_2_done THEN
@@ -192,38 +199,41 @@ PROGRAM prgZakladacNew
               END_CASE;
             END_IF
          ;
-         10: // TODO: Setup address by color
-            poziceMotoru_ver_0 := 1;
-            poziceMotoru_ver_1 := 1;
-            poziceMotoru_ver_2 := 1;
-            poziceMotoru_ver_3 := 1;
-            vyberMotoru := 1;
-            zakladac_state := 11;
+         10:
+            getVerticalAddressFromColor(color := last_scanned_color, addr => intEncoder.inputInt);
+            intEncoder(
+                out0 => poziceMotoru_ver_0,
+                out1 => poziceMotoru_ver_1,
+                out2 => poziceMotoru_ver_2,
+                out3 => poziceMotoru_ver_3
+            );
+             zakladac_state := 11;
          ;
-         11: // TODO: Setup address by color
+         11:
+           IF vertikalniManipulacePovolena THEN
+            vyberMotoru := 1;
             startMotoru := 1;
             zakladac_state := 12;
+           END_IF
          ;
          12:
-            IF NOT(materialJe) AND NOT(current_slot = 5) THEN
+            IF NOT(materialJe) THEN
                zakladac_state := 13;
                zakladac_substate := 0;
             ELSE
-              IF current_slot > 5 THEN
-                 current_slot := 0;
-              ELSE
-                 current_slot := current_slot + 1;
-              END_IF
-              zakladac_state := 12;
+                current_slot := current_slot + 1;
+                IF current_slot >= 4 THEN
+                   current_slot := 0;
+                END_IF
+                intEncoder(inputInt := current_slot,
+                                    out0 => poziceMotoru_hor_0,
+                                    out1 => poziceMotoru_hor_1,
+                                    out2 => poziceMotoru_hor_2,
+                                    out3 => poziceMotoru_hor_3
+                );
+                vyberMotoru := 0;
+                startMotoru := 1;
             END_IF
-            intEncoder(inputInt := current_slot,
-                                out0 => poziceMotoru_hor_0,
-                                out1 => poziceMotoru_hor_1,
-                                out2 => poziceMotoru_hor_2,
-                                out3 => poziceMotoru_hor_3
-            );
-            vyberMotoru := 0;
-            startMotoru := 1;
          ;
          13:
             IF timer_2_done THEN
@@ -240,7 +250,7 @@ PROGRAM prgZakladacNew
                     zakladac_substate := 0;
                     zakladac_state := 1;
                    ;
-              END_CASE ;
+              END_CASE;
             END_IF
          ;
 

@@ -38,5 +38,6 @@
 #usefile "SESTAK_ZAKLADAC.ST"
 #usefile "zakladacEncodeInt.ST"
 #usefile "PanelMaker\OI1073.mos", 'auto'
+#usefile "zakladacGetVerticalAddrFromColor.ST"
 #usefile "prgZakladacNew.ST"
 #usefile "Sestak_zakladac.mcf", 'auto'

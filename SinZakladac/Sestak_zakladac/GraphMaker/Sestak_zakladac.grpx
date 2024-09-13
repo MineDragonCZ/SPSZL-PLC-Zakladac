@@ -1,2 +1,15 @@
 [Settings]
 Show=0
+Labels=0
+Lock=0
+LockY=0
+Crop=0
+Orto=0
+[FormGraph1]
+DockPos=1
+StayOnTop=0
+CanDock=0
+Height=864
+Width=1559
+Top=0
+Left=0
