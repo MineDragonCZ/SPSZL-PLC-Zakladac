@@ -22,27 +22,32 @@ FUNCTION_BLOCK zakladacEncodeInt
       out1 := 0;
       out2 := 0;
       out3 := 0;
-  ELSE IF inputInt = 1 THEN
+  END_IF
+  IF inputInt = 1 THEN
       out0 := 0;
       out1 := 0;
       out2 := 0;
       out3 := 0;
-  ELSE IF inputInt = 2 THEN
+  END_IF
+  IF inputInt = 2 THEN
       out0 := 0;
       out1 := 1;
       out2 := 0;
       out3 := 0;
-  ELSE IF inputInt = 3 THEN
+  END_IF
+  IF inputInt = 3 THEN
       out0 := 1;
       out1 := 1;
       out2 := 0;
       out3 := 0;
-  ELSE IF inputInt = 4 THEN
+  END_IF
+  IF inputInt = 4 THEN
       out0 := 0;
       out1 := 0;
       out2 := 1;
       out3 := 0;
-  ELSE IF inputInt = 5 THEN
+  END_IF
+  IF inputInt = 5 THEN
       out0 := 1;
       out1 := 0;
       out2 := 1;

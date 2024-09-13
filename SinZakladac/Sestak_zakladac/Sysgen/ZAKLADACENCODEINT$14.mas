@@ -1,4 +1,4 @@
-#srcfile 'F:\MOSAICAPP\SINZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\ZAKLADACENCODEINT.ST'
+#srcfile 'C:\MOSAICAPP\SPSZL-PLC-ZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\ZAKLADACENCODEINT.ST'
 
 #defpou zakladacEncodeInt
   int inputInt,
@@ -8,7 +8,7 @@
   bool out3
 
  
-#srcfile 'F:\MOSAICAPP\SINZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\ZAKLADACENCODEINT.ST'
+#srcfile 'C:\MOSAICAPP\SPSZL-PLC-ZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\ZAKLADACENCODEINT.ST'
 #pou zakladacEncodeInt
 #srcline 1 ;FUNCTION_BLOCK zakladacEncodeInt
 P     61
@@ -63,8 +63,8 @@ zakladacEncodeInt_L1:
  LD   int 1
  EQ
  JMC  zakladacEncodeInt_L3
-#srcline 27 ;      out0 := 0;
- LD   bool 0       ; false
+#srcline 27 ;      out0 := 1;
+ LD   bool -1      ; true
  WRX  out0
 #debug_left bool out0
 #srcline 28 ;      out1 := 0;

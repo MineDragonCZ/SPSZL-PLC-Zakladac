@@ -1,6 +1,5 @@
 1;1;|0;|;|0;DO.DO0;zhaveniMotoru_hor;
 1;1;|0;|;|0;DO.DO1;zhaveniMotoru_ver;
-1;1;|0;|;|0;DO.DO2;vyberMotoru;
 1;1;|0;|;|0;DO.DO3;startMotoru;
 1;1;|0;|;|0;DO.DO4;poziceMotoru_hor_0;
 1;1;|0;|;|0;DO.DO5;poziceMotoru_hor_1;
@@ -17,3 +16,4 @@
 1;0;|0;|;|0;DI.DI1;cervenaBarva;
 1;0;|0;|;|0;DI.DI2;stribrnaBarva;
 1;0;|0;|;|0;DI.DI3;zelenaBarva;
+1;1;|0;|;|0;DO.DO2;vyberMotoru;

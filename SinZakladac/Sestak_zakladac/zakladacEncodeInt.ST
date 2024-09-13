@@ -24,7 +24,7 @@ FUNCTION_BLOCK zakladacEncodeInt
       out3 := 0;
   END_IF
   IF inputInt = 1 THEN
-      out0 := 0;
+      out0 := 1;
       out1 := 0;
       out2 := 0;
       out3 := 0;
