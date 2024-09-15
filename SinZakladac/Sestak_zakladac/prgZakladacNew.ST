@@ -88,6 +88,8 @@ PROGRAM prgZakladacNew
             // reset celisti - otevøení a posun nahoru
             celistiChapadlo := 0;
             posuvChapadlo_ver := 0;
+            
+            last_scanned_color := -1;
          ;
          2:
             vyberMotoru := 1;
