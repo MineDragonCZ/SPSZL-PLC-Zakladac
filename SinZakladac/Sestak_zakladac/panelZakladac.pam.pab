@@ -83,6 +83,6 @@ panobject5="ZakladacNew.zakladac_substate",1,32776,0,"",89,7,95,8,12632256,0,126
 panobject6="ZakladacNew.timer_1.ET",1,32780,0,"",66,9,77,10,12632256,0,12632256,0,"Text1","Text0",0
 panobject7="ZakladacNew.pohyb_dokoncen",1,32787,0,"",66,11,71,12,65280,0,255,0,"true","false",0
 panobject8="vertikalniManipulacePovolena",1,32787,0,"",66,13,71,14,65280,0,255,0,"true","false",0
-panobject9="vyberMotoruHorVer",1,32787,0,"",78,13,79,14,12632256,0,12632256,0,"1","0",0
+panobject9="vyberMotoru",1,32787,0,"",78,13,79,14,12632256,0,12632256,0,"1","0",0
 [/panelobjects]
 

@@ -3,10 +3,10 @@ Version="xPRO","4.3.00"
 [/desktop]
 
 [dockinfo]
-centralpc=56412820,1,0,0
-leftpane=56406468,0,1,1,349,1
-bottompane=56378332,1,50
-rightpane=56380620,0,167,0
+centralpc=55297032,1,0,0
+leftpane=55291956,0,1,1,349,1
+bottompane=55259308,1,50
+rightpane=55261588,0,167,0
 [/dockinfo]
 
 [closedtextpaneleditors]
@@ -122,15 +122,15 @@ nodeplus="PlcIde"
 [/prjmngr]
 
 [msgwin2]
-window=56378332,1,0,0,20,1559,39,653,20,1276,0,0,1
+window=55259308,1,0,0,20,1175,39,653,20,1276,0,0,1
 [/msgwin2]
 
 [msgwin1]
-window=56378332,1,0,0,20,1559,39,653,20,1276,0,0,0
+window=55259308,1,0,0,20,1175,39,653,20,1276,0,0,0
 [/msgwin1]
 
 [breakswin]
-window=56378332,1,0,0,20,1559,39,653,20,1276,0,0,2
+window=55259308,1,0,0,20,1175,39,653,20,1276,0,0,2
 hdrwidth0=200
 hdrwidth1=30
 hdrwidth2=80
@@ -168,7 +168,7 @@ font="Courier New",1,0,10,-13,-2147483640,0,0
 [/memwin2]
 
 [watch2win]
-window=56378332,1,0,0,20,1559,39,653,20,1276,0,0,3
+window=55259308,1,0,0,20,1175,39,653,20,1276,0,0,3
 hdrnamew=240,60,0
 font="Courier New",10
 hiresreadability=0
@@ -198,19 +198,19 @@ valobj="0","1","5","4","3","15","14","13","12","11","10","9","8","7","6","2"
 [/evalmodifdlg]
 
 [paneltexted]
-editor="XClip-Panel",1,0,1,1,1,1,5149714,1693968,228279724,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+editor="XClip-Panel",1,0,1,1,1,1,5149714,1693968,218726896,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 window=0,0,0,94,313,483,313,483,313,483,0,0,-1
 font="Lucida Console",11
 [/paneltexted]
 
 [ctrlswin]
-window=56406468,1,0,0,918,341,948,216,832,341,0,0,0
+window=55291956,1,0,0,702,341,948,341,832,341,0,0,0
 [/ctrlswin]
 
 [prjfileswin]
-window=56406468,1,0,0,918,341,948,216,832,341,0,0,1
+window=55291956,1,0,0,702,341,948,341,832,341,0,0,1
 filesheight=409
-relatedheight=464
+relatedheight=248
 relatedcnt=4
 relfile0="Sysgen\Sestak_zakladac.map"
 relfile1="panelZakladac.pam"
@@ -219,7 +219,7 @@ relfile3="SendRoot\TecoApi.pub"
 [/prjfileswin]
 
 [Datalogger]
-window=56412820,0,0,0,705,1741,384,97,735,1552,0,0,0
+window=55297032,0,0,0,532,1357,532,97,735,1552,0,0,0
 [/Datalogger]
 
 [CFC_Editors]
@@ -238,13 +238,13 @@ window=0,0,2,0,196,352,196,352,196,352,0,0,-1
 [/PanelSIM_1]
 
 [FormRegMngr1]
-window=56406468,1,0,0,918,341,948,349,832,341,0,0,5
+window=55291956,1,0,0,702,341,732,349,832,341,0,0,5
 [/FormRegMngr1]
 
 [PlcNetManager]
 SortItems=1
 SortPlcs=1
-window=56406468,1,0,0,918,341,948,349,832,341,0,0,4
+window=55291956,1,0,0,702,341,732,349,832,341,0,0,4
 [/PlcNetManager]
 
 [SelectPLC]
@@ -252,12 +252,12 @@ IOSetupColW="200,190,138,72,72,72,64,140,"
 [/SelectPLC]
 
 [FormDesign1]
-window=56412820,1,0,0,864,1559,948,1920,894,1567,0,0,3
+window=55297032,1,0,0,648,1175,732,1536,832,1552,0,0,3
 [/FormDesign1]
 
 [textsyneditor]
-editor="prgZakladacNew.ST",1,1,0,92,38,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1
-window=56412820,1,0,0,864,1559,948,1920,832,1552,0,0,1
+editor="prgZakladacNew.ST",1,0,0,206,60,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1
+window=55297032,1,0,0,648,1175,732,1536,832,1552,0,0,1
 localparams=0,1,1,1,1,30,0,80,1,2,1,0,0
 font="Courier New",10
 relay=0,0,0,0,0,"",0,0
@@ -266,18 +266,18 @@ debugparams=1,0,1
 [/textsyneditor]
 
 [textsyneditor]
-editor="zakladacGetVerticalAddrFromColor.ST",1,0,0,21,46,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1
-window=56412820,1,0,0,864,1559,948,1920,894,1567,0,0,4
+editor="zakladacGetVerticalAddrFromColor.ST",1,0,0,17,35,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1
+window=55297032,1,0,0,648,1175,732,1536,832,1552,0,0,4
 localparams=0,1,1,1,1,30,0,80,1,2,1,0,0
 font="Courier New",10
 relay=0,0,0,0,0,"",0,0
-inspectorctx=""
+inspectorctx="ZakladacNew"
 debugparams=1,0,1
 [/textsyneditor]
 
 [paneltexted]
-editor="panelZakladac.pam",0,0,10,68,1,1,5149714,1693968,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-window=56412820,1,0,0,864,1559,948,1920,832,1552,0,0,2
+editor="panelZakladac.pam",0,0,17,38,1,1,5149714,1693968,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+window=55297032,1,0,0,648,1175,732,1536,832,1552,0,0,2
 font="Lucida Console",11
 [/paneltexted]
 

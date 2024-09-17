@@ -1,11 +1,12 @@
 [Settings]
 Show=1
+Ask=0
 [FormDesign1]
 DockPos=1
 StayOnTop=0
 CanDock=0
-Height=864
-Width=1559
+Height=648
+Width=1175
 Top=0
 Left=0
 LeftPanel=145
@@ -15,4 +16,4 @@ Width=340
 Top=284
 Left=790
 [TimeStamps]
-CompileTD=1726224547
+CompileTD=1726568907

@@ -6,15 +6,15 @@ FUNCTION_BLOCK zakladacGetVerticalAddrFromColor
            addr : INT;
   END_VAR
   VAR
-      modraBarva_key : INT := 1
-      cervenaBarva_key : INT := 2
-      stribrnaBarva_key : INT := 3
-      zelenaBarva_key : INT := 4
+      modraBarva_key : INT := 1;
+      cervenaBarva_key : INT := 2;
+      stribrnaBarva_key : INT := 3;
+      zelenaBarva_key : INT := 4;
       
-      modraBarva_addr : INT := 2
-      cervenaBarva_addr : INT := 1
-      stribrnaBarva_addr : INT := 3
-      zelenaBarva_addr : INT := 0
+      modraBarva_addr : INT := 2;
+      cervenaBarva_addr : INT := 1;
+      stribrnaBarva_addr : INT := 3;
+      zelenaBarva_addr : INT := 0;
   END_VAR
   
   addr := 0;

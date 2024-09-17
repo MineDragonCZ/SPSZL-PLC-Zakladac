@@ -2,12 +2,48 @@
 <web version="8.1" propfont="true" foot="© 2007 - 2020 Teco a.s." dwMode="1" MaxUid="1487">
 	<Grid Enable="1" X="5" Y="5" />
 	<globalset newdim="1" />
-	<group caption="ControlPanel" level="0" locked="0" altdim="false" notforid="false">
-		<page caption="Index" name="PAGE1.XML" background="" bgcolor="16777215" repeat="false" hidden="false" ajax="true" pause="1000" level="0" default="true" ucid="1726224542" width="0" height="0"></page>
+	<group caption="ControlPanel" level="0" locked="0" altdim="false" notforid="false" Uid="1488">
+		<page caption="Index" name="PAGE1.XML" background="" bgcolor="16777215" repeat="false" hidden="false" ajax="true" pause="1000" level="0" default="true" ucid="1726224542" width="0" height="0" Uid="1487"></page>
 	</group>
 	<images></images>
 	<Languages>
 		<Language Code="5" Editor="1" />
 	</Languages>
 	<Layers active="0"></Layers>
+	<security crypt="1" count="10">
+		<user level="-1" name="0" pass="CF" />
+		<user level="-1" name="1" pass="CE" />
+		<user level="-1" name="2" pass="CD" />
+		<user level="-1" name="3" pass="CC" />
+		<user level="-1" name="4" pass="CB" />
+		<user level="-1" name="5" pass="CA" />
+		<user level="-1" name="6" pass="C9" />
+		<user level="-1" name="7" pass="C8" />
+		<user level="-1" name="8" pass="C7" />
+		<user level="-1" name="9" pass="C6" />
+	</security>
+	<autologin count="10">
+		<mac level="0" mac="00:00:00:00:00:00" note="" />
+		<mac level="0" mac="00:00:00:00:00:00" note="" />
+		<mac level="0" mac="00:00:00:00:00:00" note="" />
+		<mac level="0" mac="00:00:00:00:00:00" note="" />
+		<mac level="0" mac="00:00:00:00:00:00" note="" />
+		<mac level="0" mac="00:00:00:00:00:00" note="" />
+		<mac level="0" mac="00:00:00:00:00:00" note="" />
+		<mac level="0" mac="00:00:00:00:00:00" note="" />
+		<mac level="0" mac="00:00:00:00:00:00" note="" />
+		<mac level="0" mac="00:00:00:00:00:00" note="" />
+	</autologin>
+	<tecoapi count="10">
+		<api level="-1" name="" pass="" />
+		<api level="-1" name="" pass="" />
+		<api level="-1" name="" pass="" />
+		<api level="-1" name="" pass="" />
+		<api level="-1" name="" pass="" />
+		<api level="-1" name="" pass="" />
+		<api level="-1" name="" pass="" />
+		<api level="-1" name="" pass="" />
+		<api level="-1" name="" pass="" />
+		<api level="-1" name="" pass="" />
+	</tecoapi>
 </web>

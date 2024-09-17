@@ -1,6 +1,6 @@
 PROGRAM prgZakladacNew
   VAR
-     zakladac_state : INT := 0;
+     zakladac_state : INT := -1;
      zakladac_substate : INT := 0;
      (*
        stavy:
@@ -44,8 +44,11 @@ PROGRAM prgZakladacNew
      intEncoder : zakladacEncodeInt;
      getVerticalAddressFromColor : zakladacGetVerticalAddrFromColor;
      
-     main_clock_time : TIME := t#250ms;
+     main_clock_time : TIME := t#200ms;
      subs_clock_time : TIME := t#500ms;
+     
+     
+     barva_patro_addr : INT;
   END_VAR
   startMotoru := 0;
 
@@ -61,33 +64,38 @@ PROGRAM prgZakladacNew
   timer_2(IN := NOT(timer_2_done), PT := subs_clock_time);
   
   IF stop THEN
-     zakladac_state := 0;
+     zakladac_state := -1;
      zakladac_substate := 0;
   END_IF
 
   IF pohyb_dokoncen AND timer_1_done THEN
     timer_1_done := false;
     CASE zakladac_state OF
-         0:
+         -1:
            IF start AND NOT(stop) THEN
-              zakladac_state := 1;
+              zakladac_state := 0;
               zakladac_substate := 0;
               RETURN;
            END_IF
-
-         1: // reset horizontalne do vychozi pozice
+         0:
+           // reset horizontalne do vychozi pozice
             poziceMotoru_hor_0 := 1;
             poziceMotoru_hor_1 := 0;
             poziceMotoru_hor_2 := 1;
             poziceMotoru_hor_3 := 0;
             vyberMotoru := 0;
-            startMotoru := 1;
             current_slot := 5;
-            zakladac_state := 2;
-            
+            zakladac_state := 1;
+
             // reset celisti - otevøení a posun nahoru
             celistiChapadlo := 0;
             posuvChapadlo_ver := 0;
+
+            last_scanned_color := -1;
+         ;
+         1:
+            startMotoru := 1;
+            zakladac_state := 2;
          ;
          2:
             vyberMotoru := 1;
@@ -132,6 +140,8 @@ PROGRAM prgZakladacNew
                     zakladac_substate := 1;
                    1:
                     celistiChapadlo := 1;
+                    zakladac_substate := 2;
+                   2:
                     posuvChapadlo_ver := 0;
                     zakladac_substate := 0;
                     zakladac_state := 6;
@@ -144,26 +154,30 @@ PROGRAM prgZakladacNew
             poziceMotoru_hor_2 := 1;
             poziceMotoru_hor_3 := 0;
             vyberMotoru := 0;
-            startMotoru := 1;
             current_slot := 5;
             zakladac_state := 7;
          ;
          7:
+            startMotoru := 1;
+            current_slot := 5;
+            zakladac_state := 8;
+         ;
+         8:
             poziceMotoru_ver_0 := 1;
             poziceMotoru_ver_1 := 1;
             poziceMotoru_ver_2 := 0;
             poziceMotoru_ver_3 := 0;
             vyberMotoru := 1;
-            zakladac_state := 8;
+            zakladac_state := 9;
          ;
-         8:
+         9:
            IF vertikalniManipulacePovolena THEN
             startMotoru := 1;
-            zakladac_state := 9;
+            zakladac_state := 10;
             zakladac_substate := 0;
            END_IF
          ;
-         9:
+         10:
             IF timer_2_done THEN
               timer_2_done := false;
               CASE zakladac_substate OF
@@ -194,48 +208,52 @@ PROGRAM prgZakladacNew
                    3: // posun zpet nahoru od èidla
                       posuvChapadlo_ver := 0;
                       zakladac_substate := 0;
-                      zakladac_state := 10;
+                      zakladac_state := 11;
                    ;
               END_CASE;
             END_IF
          ;
-         10:
-            getVerticalAddressFromColor(color := last_scanned_color, addr => intEncoder.inputInt);
-            intEncoder(
+         11:
+            getVerticalAddressFromColor(color := last_scanned_color, addr => barva_patro_addr);
+            intEncoder(inputInt := barva_patro_addr,
                 out0 => poziceMotoru_ver_0,
                 out1 => poziceMotoru_ver_1,
                 out2 => poziceMotoru_ver_2,
                 out3 => poziceMotoru_ver_3
             );
-             zakladac_state := 11;
+             zakladac_state := 12;
          ;
-         11:
+         12:
            IF vertikalniManipulacePovolena THEN
             vyberMotoru := 1;
             startMotoru := 1;
-            zakladac_state := 12;
+            zakladac_state := 13;
            END_IF
          ;
-         12:
-            IF NOT(materialJe) THEN
-               zakladac_state := 13;
+         13:
+            IF NOT(materialJe) AND current_slot < 4 THEN
+               zakladac_state := 15;
                zakladac_substate := 0;
             ELSE
-                current_slot := current_slot + 1;
-                IF current_slot >= 4 THEN
-                   current_slot := 0;
-                END_IF
-                intEncoder(inputInt := current_slot,
-                                    out0 => poziceMotoru_hor_0,
-                                    out1 => poziceMotoru_hor_1,
-                                    out2 => poziceMotoru_hor_2,
-                                    out3 => poziceMotoru_hor_3
-                );
-                vyberMotoru := 0;
-                startMotoru := 1;
+              current_slot := current_slot + 1;
+              IF current_slot >= 4 THEN
+                 current_slot := 0;
+              END_IF
+              intEncoder(inputInt := current_slot,
+                                  out0 => poziceMotoru_hor_0,
+                                  out1 => poziceMotoru_hor_1,
+                                  out2 => poziceMotoru_hor_2,
+                                  out3 => poziceMotoru_hor_3
+              );
+              vyberMotoru := 0;
+              zakladac_state := 14;
             END_IF
          ;
-         13:
+         14:
+            startMotoru := 1;
+            zakladac_state := 13;
+         ;
+         15:
             IF timer_2_done THEN
               timer_2_done := false;
               CASE zakladac_substate OF
@@ -248,7 +266,7 @@ PROGRAM prgZakladacNew
                     celistiChapadlo := 0;
                     posuvChapadlo_ver := 0;
                     zakladac_substate := 0;
-                    zakladac_state := 1;
+                    zakladac_state := 0;
                    ;
               END_CASE;
             END_IF

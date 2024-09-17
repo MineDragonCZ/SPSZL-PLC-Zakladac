@@ -23,13 +23,13 @@ FUNCTION_BLOCK zakladacGetVerticalAddrFromColor
      addr := modraBarva_addr;
   END_IF
   IF color = cervenaBarva_key THEN
-     addr := modraBarva_addr;
+     addr := cervenaBarva_addr;
   END_IF
   IF color = stribrnaBarva_key THEN
-     addr := modraBarva_addr;
+     addr := stribrnaBarva_addr;
   END_IF
   IF color = zelenaBarva_key THEN
-     addr := modraBarva_addr;
+     addr := zelenaBarva_addr;
   END_IF
 
 END_FUNCTION_BLOCK

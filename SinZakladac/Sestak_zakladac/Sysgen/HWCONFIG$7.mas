@@ -1,4 +1,4 @@
-#srcfile 'F:\MOSAICAPP\SINZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\SYSGEN\HWCONFIG.ST'
+#srcfile 'C:\MOSAICAPP\SPSZL-PLC-ZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\SYSGEN\HWCONFIG.ST'
 
 ; Global variables
 #def  CPU_TYPE 75
@@ -91,6 +91,11 @@
   usint ERR,
   udint trueMes,
   udint falseMes
+#struct  TETHStatistic_BACnet
+  usint STAT,
+  usint ERR,
+  udint trueMes,
+  udint falseMes
 #struct  TCHControl
   uint CONTROL
 
@@ -164,7 +169,7 @@
 
 ; Global variables
  
-#srcfile 'F:\MOSAICAPP\SINZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\SYSGEN\HWCONFIG.ST'
+#srcfile 'C:\MOSAICAPP\SPSZL-PLC-ZAKLADAC\SINZAKLADAC\SESTAK_ZAKLADAC\SYSGEN\HWCONFIG.ST'
 
 
  
