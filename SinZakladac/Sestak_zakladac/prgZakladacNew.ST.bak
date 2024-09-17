@@ -44,7 +44,7 @@ PROGRAM prgZakladacNew
      intEncoder : zakladacEncodeInt;
      getVerticalAddressFromColor : zakladacGetVerticalAddrFromColor;
      
-     main_clock_time : TIME := t#200ms;
+     main_clock_time : TIME := t#100ms;
      subs_clock_time : TIME := t#500ms;
      
      
@@ -109,6 +109,7 @@ PROGRAM prgZakladacNew
            IF vertikalniManipulacePovolena THEN
             startMotoru := 1;
             zakladac_state := 4;
+            zakladac_substate := 0;
            END_IF
          ;
          4:
@@ -116,18 +117,26 @@ PROGRAM prgZakladacNew
                 zakladac_state := 5;
                 zakladac_substate := 0;
             ELSE
-                current_slot := current_slot + 1;
-                IF current_slot >= 4 THEN
-                   current_slot := 0;
-                END_IF
-                intEncoder(inputInt := current_slot,
-                                    out0 => poziceMotoru_hor_0,
-                                    out1 => poziceMotoru_hor_1,
-                                    out2 => poziceMotoru_hor_2,
-                                    out3 => poziceMotoru_hor_3
-                );
-                vyberMotoru := 0;
-                startMotoru := 1;
+                CASE zakladac_substate OF
+                     0:
+                      current_slot := current_slot + 1;
+                      IF current_slot >= 4 THEN
+                         current_slot := 0;
+                      END_IF
+                      intEncoder(inputInt := current_slot,
+                                          out0 => poziceMotoru_hor_0,
+                                          out1 => poziceMotoru_hor_1,
+                                          out2 => poziceMotoru_hor_2,
+                                          out3 => poziceMotoru_hor_3
+                      );
+                      vyberMotoru := 0;
+                      zakladac_substate := 1;
+                     ;
+                     1:
+                       zakladac_substate := 0;
+                       startMotoru := 1;
+                     ;
+                END_CASE;
             END_IF
          ;
          5:
@@ -197,7 +206,7 @@ PROGRAM prgZakladacNew
                       IF cervenaBarva THEN
                          last_scanned_color := 2;
                       END_IF
-                      IF stribrnaBarva THEN
+                      IF stribrnaBarva OR magnet THEN
                          last_scanned_color := 3;
                       END_IF
                       IF zelenaBarva THEN
