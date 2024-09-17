@@ -32,6 +32,25 @@ FUNCTION_BLOCK zakladacGetVerticalAddrFromColor
   END_VAR
 END_FUNCTION_BLOCK 
 
+FUNCTION_BLOCK zakladacPanelVarHolder
+(**)
+  VAR_INPUT
+    state : INT;
+  END_VAR
+  VAR
+    isIdle : BOOL;
+    isMoving : BOOL;
+    isReseting : BOOL;
+    isMovingOverScan : BOOL;
+    isSearching : BOOL;
+    isGrabingMaterial : BOOL;
+    isScaning : BOOL;
+    isLookingForAPlace : BOOL;
+    isPuttingDownMaterial : BOOL;
+    isLost : BOOL;
+  END_VAR
+END_FUNCTION_BLOCK 
+
 
 
 

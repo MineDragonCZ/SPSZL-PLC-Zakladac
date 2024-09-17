@@ -1,11 +1,11 @@
 [Settings]
-Show=1
+Show=0
 Ask=0
 [FormDesign1]
 DockPos=1
 StayOnTop=0
 CanDock=0
-Height=648
+Height=573
 Width=1175
 Top=0
 Left=0
