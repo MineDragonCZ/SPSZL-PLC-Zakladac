@@ -67,10 +67,7 @@ FUNCTION_BLOCK zakladacPanelVarHolder
           isLookingForAPlace := true;
           isMoving := true;
        15:
-          isLookingForAPlace := true;
-       12:
-          isLookingForAPlace := true;
-          isMoving := true;
+          isPuttingDownMaterial := true;
   END_CASE
 
 END_FUNCTION_BLOCK

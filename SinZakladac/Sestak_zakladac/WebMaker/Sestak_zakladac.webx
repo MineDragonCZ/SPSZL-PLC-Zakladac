@@ -1,5 +1,5 @@
 [Settings]
-Show=0
+Show=1
 Ask=0
 [FormDesign1]
 DockPos=1
@@ -16,4 +16,4 @@ Width=340
 Top=284
 Left=790
 [TimeStamps]
-CompileTD=1726578344
+CompileTD=1726655330

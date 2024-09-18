@@ -68,7 +68,7 @@ FUNCTION_BLOCK zakladacPanelVarHolder
           isMoving := true;
        15:
           isPuttingDownMaterial := true;
-  END_CASE
+  END_CASE;
 
 END_FUNCTION_BLOCK
 

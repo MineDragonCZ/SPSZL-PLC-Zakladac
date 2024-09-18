@@ -17,7 +17,7 @@ PROGRAM prgZakladacNew
              4: zelená
      *)
 
-     start: BOOL;
+     start: BOOL := 1;
      stop: BOOL;
      pohyb_dokoncen: BOOL;
 
@@ -31,13 +31,15 @@ PROGRAM prgZakladacNew
      getVerticalAddressFromColor: zakladacGetVerticalAddrFromColor;
 
      main_clock_time: TIME := T#200ms;
-     subs_clock_time: TIME := T#500ms;
+     subs_clock_time: TIME := T#700ms;
 
 
      barva_patro_addr: INT;
 
      zakladac_status: STRING;
      zakladac_panel_var_holder : zakladacPanelVarHolder;
+     
+     searching_index : INT := 0;
   END_VAR
   startMotoru := 0;
 
@@ -83,6 +85,7 @@ PROGRAM prgZakladacNew
             // reset celisti - otevøení a posun nahoru
             celistiChapadlo := 0;
             posuvChapadlo_ver := 0;
+            searching_index := 0;
 
             last_scanned_color := - 1;
          ;
@@ -118,8 +121,13 @@ PROGRAM prgZakladacNew
                      0:
                       zakladac_status := 'MOVING TO NEXT SLOT (SETUP)';
                       current_slot := current_slot + 1;
-                      IF current_slot >= 4 THEN
+                      IF current_slot >= 5 THEN
                          current_slot := 0;
+                         searching_index := searching_index + 1;
+                         IF searching_index > 3 THEN
+                            stop := 1;
+                            searching_index := 0;
+                         END_IF
                       END_IF
                       intEncoder(inputInt := current_slot,
                                           out0 => poziceMotoru_hor_0,
@@ -258,7 +266,7 @@ PROGRAM prgZakladacNew
             ELSE
               zakladac_status := 'MOVE TO THE NEXT SLOT (SETUP)';
               current_slot := current_slot + 1;
-              IF current_slot >= 4 THEN
+              IF current_slot >= 5 THEN
                  current_slot := 0;
               END_IF
               intEncoder(inputInt := current_slot,
