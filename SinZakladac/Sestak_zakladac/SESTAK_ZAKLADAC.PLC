@@ -9,7 +9,7 @@ dirs=""
 [/compiler]
 
 [plcselection]
-connection=2
+connection=3
 openchannel=1
 chanel=0
 speed=9
@@ -69,7 +69,7 @@ genrst=0
 askrst=0
 genrunp=1
 genhltp=1
-mode=2
+mode=1
 plcn=0
 checkprgname=0
 verifyiocfg=1

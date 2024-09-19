@@ -40,6 +40,9 @@ PROGRAM prgZakladacNew
      zakladac_panel_var_holder : zakladacPanelVarHolder;
      
      searching_index : INT := 0;
+     
+     automatic_mode : BOOL := 1;
+     manual_mode_next_step : BOOL := 0;
   END_VAR
   startMotoru := 0;
 
@@ -50,6 +53,13 @@ PROGRAM prgZakladacNew
   timer_1_done := timer_1.Q OR NOT(pohyb_dokoncen);
   IF timer_1_done THEN
     timer_2_done := timer_2.Q;
+  END_IF
+  IF NOT(automatic_mode) AND NOT(manual_mode_next_step) THEN
+     timer_1_done := false;
+     timer_2_done := false;
+  END_IF
+  IF timer_1_done OR timer_2_done THEN
+     manual_mode_next_step := false;
   END_IF
   timer_1(IN := NOT(timer_1_done), PT := main_clock_time);
   timer_2(IN := NOT(timer_2_done), PT := subs_clock_time);
