@@ -3,10 +3,10 @@ Version="xPRO","4.3.00"
 [/desktop]
 
 [dockinfo]
-centralpc=28034720,1,0,0
-leftpane=28031616,0,1,1,286,1
-bottompane=27999072,0,0
-rightpane=28000492,0,167,0
+centralpc=56411772,1,0,0
+leftpane=56406724,0,1,0,0,1
+bottompane=56375256,0,166
+rightpane=56377524,0,167,0
 [/dockinfo]
 
 [closedtextpaneleditors]
@@ -112,15 +112,15 @@ nodeplus="PlcIde"
 [/prjmngr]
 
 [msgwin2]
-window=27999072,1,0,0,136,1238,39,653,136,1276,0,0,1
+window=56375256,1,0,0,136,1524,39,653,136,1276,0,0,1
 [/msgwin2]
 
 [msgwin1]
-window=27999072,1,0,0,136,1238,39,653,136,1276,0,0,0
+window=56375256,1,0,0,136,1524,39,653,136,1276,0,0,0
 [/msgwin1]
 
 [breakswin]
-window=27999072,1,0,0,136,1238,39,653,136,1276,0,0,2
+window=56375256,1,0,0,136,1524,39,653,136,1276,0,0,2
 hdrwidth0=200
 hdrwidth1=30
 hdrwidth2=80
@@ -158,7 +158,7 @@ font="Courier New",1,0,10,-13,-2147483640,0,0
 [/memwin2]
 
 [watch2win]
-window=27999072,1,0,0,136,1238,39,653,136,1276,0,0,3
+window=56375256,1,0,0,136,1524,39,653,136,1276,0,0,3
 hdrnamew=240,60,0
 font="Courier New",10
 hiresreadability=0
@@ -194,11 +194,11 @@ font="Lucida Console",11
 [/paneltexted]
 
 [ctrlswin]
-window=28031616,1,0,0,702,278,948,278,832,278,0,0,0
+window=56406724,1,0,0,702,278,948,278,832,278,0,0,0
 [/ctrlswin]
 
 [prjfileswin]
-window=28031616,1,0,0,702,278,948,278,832,278,0,0,1
+window=56406724,1,0,0,702,278,948,278,832,278,0,0,1
 filesheight=409
 relatedheight=248
 relatedcnt=4
@@ -209,7 +209,7 @@ relfile3="SendRoot\TecoApi.pub"
 [/prjfileswin]
 
 [Datalogger]
-window=28034720,0,0,0,532,1357,532,97,735,1552,0,0,0
+window=56411772,0,0,0,532,1357,532,97,735,1552,0,0,0
 [/Datalogger]
 
 [CFC_Editors]
@@ -220,26 +220,22 @@ window=0,0,979,290,196,352,196,352,196,352,0,0,-1
 [/PanelSIM_1]
 
 [FormRegMngr1]
-window=28031616,1,0,0,702,278,732,286,317,278,0,0,5
+window=56406724,1,0,0,702,278,732,286,317,278,0,0,5
 [/FormRegMngr1]
 
 [PlcNetManager]
 SortItems=1
 SortPlcs=1
-window=28031616,1,0,0,702,278,732,286,832,278,0,0,4
+window=56406724,1,0,0,702,278,732,286,832,278,0,0,4
 [/PlcNetManager]
 
 [SelectPLC]
 IOSetupColW="200,190,72,72,72,72,64,140,"
 [/SelectPLC]
 
-[FormDesign1]
-window=28034720,0,0,0,698,1238,562,1246,562,1246,0,0,3
-[/FormDesign1]
-
 [textsyneditor]
-editor="prgZakladac.ST",1,1,0,324,42,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1
-window=28034720,1,0,0,698,1238,732,1536,832,1552,0,0,1
+editor="prgZakladac.ST",1,1,0,322,14,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1
+window=56411772,1,0,0,702,1524,732,1536,832,1552,0,0,1
 localparams=0,1,1,1,1,30,0,80,1,2,1,0,0
 font="Courier New",10
 relay=0,0,0,0,0,"",0,0
@@ -249,7 +245,7 @@ debugparams=1,0,1
 
 [paneltexted]
 editor="panelZakladac.pam",0,0,7,77,1,1,5149714,1693968,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-window=28034720,1,0,0,698,1238,732,1536,735,1552,0,0,2
+window=56411772,1,0,0,702,1524,732,1536,735,1552,0,0,2
 font="Lucida Console",11
 [/paneltexted]
 
