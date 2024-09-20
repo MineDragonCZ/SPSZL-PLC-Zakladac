@@ -43,7 +43,17 @@ PROGRAM	prgZakladac
 
 		 automatic_mode	:	BOOL :=	1;
 		 manual_mode_next_step : BOOL	:= 0;
+		 manual_mode_next_step_input : BOOL := 0;
+		 manual_mode_next_step_input_last : BOOL := 0;
 	END_VAR
+	
+	IF manual_mode_next_step_input AND NOT(manual_mode_next_step_input_last) THEN
+	   manual_mode_next_step := true;
+	   manual_mode_next_step_input_last := true;
+	END_IF
+	IF NOT(manual_mode_next_step_input) THEN
+	   manual_mode_next_step_input_last := false;
+	END_IF
 
 	pohyb_dokoncen :=	(pohybDokoncen_hor AND pohybDokoncen_ver);
 	zhaveniMotoru_hor	:= 1;
@@ -66,6 +76,7 @@ PROGRAM	prgZakladac
 	IF stop	THEN
 		 zakladac_state	:= -1;
 		 zakladac_substate :=	0;
+		 stop := false;
 	END_IF
 
 	IF pohyb_dokoncen	AND	timer_1_done THEN
@@ -306,8 +317,12 @@ PROGRAM	prgZakladac
 										zakladac_substate	:= 1;
 									 ;
 									 1:
-										zakladac_status	:= 'RELEASE	THE	MATERIAL AND RAISE THE ARM';
+										zakladac_status	:= 'RELEASE	THE	MATERIAL';
 										celistiChapadlo	:= 0;
+										zakladac_substate	:= 2;
+									 ;
+									 2:
+										zakladac_status	:= 'RAISE THE ARM';
 										posuvChapadlo_ver	:= 0;
 										zakladac_substate	:= 0;
 										zakladac_state :=	0;
