@@ -1,0 +1,7 @@
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\PRGZAKLADAC.ST'
+ 
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\PRGZAKLADAC.ST'
+; *** ERROR[24] - LINE: 30: COLUMN: 35 - Unknown declarator of variables, constants, parameters and tables
+ 
+
+#srcfile ''

@@ -1,0 +1,58 @@
+FUNCTION_BLOCK zakladacEncodeInt
+(**)
+  VAR_INPUT
+    inputInt : INT;
+  END_VAR
+  VAR_OUTPUT
+    out0 : BOOL;
+    out1 : BOOL;
+    out2 : BOOL;
+    out3 : BOOL;
+  END_VAR
+
+END_FUNCTION_BLOCK 
+
+FUNCTION_BLOCK zakladacGetVerticalAddrFromColor
+(**)
+  VAR_INPUT
+    color : INT;
+  END_VAR
+  VAR_OUTPUT
+    addr : INT;
+  END_VAR
+  VAR
+    modraBarva_key : INT := 1;
+    cervenaBarva_key : INT := 2;
+    stribrnaBarva_key : INT := 3;
+    zelenaBarva_key : INT := 4;
+    modraBarva_addr : INT := 2;
+    cervenaBarva_addr : INT := 1;
+    stribrnaBarva_addr : INT := 3;
+    zelenaBarva_addr : INT := 0;
+  END_VAR
+END_FUNCTION_BLOCK 
+
+FUNCTION_BLOCK zakladacPanelVarHolder
+(**)
+  VAR_INPUT
+    state : INT;
+    subState : INT;
+  END_VAR
+  VAR
+    isIdle : BOOL;
+    isMoving : BOOL;
+    isReseting : BOOL;
+    isMovingOverScan : BOOL;
+    isSearching : BOOL;
+    isGrabingMaterial : BOOL;
+    isScaning : BOOL;
+    isLookingForAPlace : BOOL;
+    isPuttingDownMaterial : BOOL;
+    isLost : BOOL;
+  END_VAR
+END_FUNCTION_BLOCK 
+
+
+
+
+

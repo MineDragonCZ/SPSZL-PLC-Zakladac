@@ -1,0 +1,1471 @@
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\PRGZAKLADAC.ST'
+
+#defpou prgZakladac
+  int zakladac_state,
+  int zakladac_substate,
+  int current_slot,
+  int last_scanned_color,
+  bool start,
+  bool stop,
+  bool pohyb_dokoncen,
+  TON timer_1,
+  bool timer_1_done,
+  TON timer_2,
+  bool timer_2_done,
+  zakladacEncodeInt intEncoder,
+  zakladacGetVerticalAddrFromColor getVerticalAddressFromColor,
+  time main_clock_time,
+  time subs_clock_time,
+  int barva_patro_addr,
+  string[81] zakladac_status,
+  zakladacPanelVarHolder zakladac_panel_var_holder,
+  int searching_index,
+  bool automatic_mode,
+  bool manual_mode_next_step
+
+ 
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\PRGZAKLADAC.ST'
+#pou prgZakladac
+#srcline 1 ;PROGRAM prgZakladac
+
+#struct prgZakladac__temp__
+  dint P0__st__,
+  dint P1__st__,
+  dint P2__st__,
+  dint P3__st__,
+  dint P4__st__,
+  string[82] PS0__st__
+#data byte _str_prgZakladac_0 = 
+  'I','D','L','E',0
+#data byte _str_prgZakladac_1 = 
+  'R','E','S','E','T','I','N','G','.','.','.',0
+#data byte _str_prgZakladac_2 = 
+  'M','O','V','E',' ','H','O','R','.',' ','T','O',' ','Z','E','R','O',' ','(','R',
+  'U','N',')',0
+#data byte _str_prgZakladac_3 = 
+  'M','O','V','E',' ','V','E','R','.',' ','T','O',' ','Z','E','R','O',' ','(','S',
+  'E','T','U','P',')',0
+#data byte _str_prgZakladac_4 = 
+  'M','O','V','E',' ','V','E','R','.',' ','T','O',' ','Z','E','R','O',' ','(','R',
+  'U','N',')',0
+#data byte _str_prgZakladac_5 = 
+  'C','H','E','C','K','I','N','G',' ','M','A','T','E','R','I','A','L',' ','T','O',
+  ' ','P','I','C','K',' ','U','P',0
+#data byte _str_prgZakladac_6 = 
+  'M','O','V','I','N','G',' ','T','O',' ','N','E','X','T',' ','S','L','O','T',' ',
+  '(','S','E','T','U','P',')',0
+#data byte _str_prgZakladac_7 = 
+  'M','O','V','I','N','G',' ','T','O',' ','N','E','X','T',' ','S','L','O','T',' ',
+  '(','R','U','N',')',0
+#data byte _str_prgZakladac_8 = 
+  'P','I','C','K','I','N','G',' ','U','P',' ','M','A','T','E','R','I','A','L',' ',
+  '(','L','O','W','E','R',' ','A','R','M',')',0
+#data byte _str_prgZakladac_9 = 
+  'P','I','C','K','I','N','G',' ','U','P',' ','M','A','T','E','R','I','A','L',' ',
+  '(','G','R','A','B',')',0
+#data byte _str_prgZakladac_10 = 
+  'P','I','C','K','I','N','G',' ','U','P',' ','M','A','T','E','R','I','A','L',' ',
+  '(','R','A','I','S','E',' ','A','R','M',')',0
+#data byte _str_prgZakladac_11 = 
+  'M','O','V','E',' ','O','V','E','R',' ','T','H','E',' ','S','E','N','S','O','R',
+  ' ','H','O','R','.',' ','(','S','E','T','U','P',')',0
+#data byte _str_prgZakladac_12 = 
+  'M','O','V','E',' ','O','V','E','R',' ','T','H','E',' ','S','E','N','S','O','R',
+  ' ','H','O','R','.',' ','(','R','U','N',')',0
+#data byte _str_prgZakladac_13 = 
+  'M','O','V','E',' ','O','V','E','R',' ','T','H','E',' ','S','E','N','S','O','R',
+  ' ','V','E','R','.',' ','(','S','E','T','U','P',')',0
+#data byte _str_prgZakladac_14 = 
+  'M','O','V','E',' ','O','V','E','R',' ','T','H','E',' ','S','E','N','S','O','R',
+  ' ','V','E','R','.',' ','(','R','U','N',')',0
+#data byte _str_prgZakladac_15 = 
+  'L','O','W','E','R',' ','T','H','E',' ','A','R','M',' ','T','O',' ','T','H','E',
+  ' ','S','E','N','S','O','R',0
+#data byte _str_prgZakladac_16 = 
+  'S','C','A','N','N','I','N','G',' ','C','O','L','O','R','.','.','.',0
+#data byte _str_prgZakladac_17 = 
+  'R','A','I','S','E',' ','T','H','E',' ','A','R','M',' ','F','R','O','M',' ','T',
+  'H','E',' ','S','E','N','S','O','R',0
+#data byte _str_prgZakladac_18 = 
+  'E','N','C','O','D','E',' ','C','O','L','O','R',' ','T','O',' ','V','E','R','.',
+  ' ','A','D','D','R','E','S','S',' ','A','N','D',' ','S','E','T',0
+#data byte _str_prgZakladac_19 = 
+  'M','O','V','E',' ','V','E','R','.',' ','T','O',' ','T','H','E',' ','E','N','C',
+  'O','D','E','D',' ','A','D','D','R','E','S','S',0
+#data byte _str_prgZakladac_20 = 
+  'F','I','N','D',' ','E','M','P','T','Y',' ','S','L','O','T',' ','T','O',' ','P',
+  'L','A','C','E',' ','T','H','E',' ','M','A','T','E','R','I','A','L',0
+#data byte _str_prgZakladac_21 = 
+  'M','O','V','E',' ','T','O',' ','T','H','E',' ','N','E','X','T',' ','S','L','O',
+  'T',' ','(','S','E','T','U','P',')',0
+#data byte _str_prgZakladac_22 = 
+  'M','O','V','E',' ','T','O',' ','T','H','E',' ','N','E','X','T',' ','S','L','O',
+  'T',' ','(','R','U','N',')',0
+#data byte _str_prgZakladac_23 = 
+  'E','M','P','T','Y',' ','S','L','O','T',' ','F','O','U','N','D',' ','-',' ','P',
+  'U','T',' ','D','O','W','N',' ','M','A','T','E','R','I','A','L',0
+#data byte _str_prgZakladac_24 = 
+  'L','O','W','E','R',' ','T','H','E',' ','A','R','M',0
+#data byte _str_prgZakladac_25 = 
+  'R','E','L','E','A','S','E',' ','T','H','E',' ','M','A','T','E','R','I','A','L',
+  ' ','A','N','D',' ','R','A','I','S','E',' ','T','H','E',' ','A','R','M',0
+P     61
+prgZakladac_L0:
+ LINK __SizeOf(prgZakladac__temp__)
+; Initialize - dynamic variables
+; End initialize - dynamic variables
+#srcline 48 ;  pohyb_dokoncen := (pohybDokoncen_hor AND pohybDokoncen_ver);
+ LD   bool pohybDokoncen_hor
+#debug bool pohybDokoncen_hor
+ LD   bool pohybDokoncen_ver
+#debug bool pohybDokoncen_ver
+ AND
+ WRX  pohyb_dokoncen
+#debug_left bool pohyb_dokoncen
+#srcline 49 ;  zhaveniMotoru_hor := 1;
+ LD   bool -1      ; true
+ WR   bool zhaveniMotoru_hor
+#debug_left bool zhaveniMotoru_hor
+#srcline 50 ;  zhaveniMotoru_ver := 1;
+ LD   bool -1      ; true
+ WR   bool zhaveniMotoru_ver
+#debug_left bool zhaveniMotoru_ver
+#srcline 52 ;  timer_1_done := timer_1.Q OR NOT(pohyb_dokoncen);
+ LDX  timer_1~Q
+#debug bool timer_1.Q
+ LDX  pohyb_dokoncen
+#debug bool pohyb_dokoncen
+ NEG
+ OR  
+ WRX  timer_1_done
+#debug_left bool timer_1_done
+#srcline 53 ;  IF timer_1_done THEN
+ LDX  timer_1_done
+#debug bool timer_1_done
+ JMC  prgZakladac_L1
+#srcline 54 ;    timer_2_done := timer_2.Q;
+ LDX  timer_2~Q
+#debug bool timer_2.Q
+ WRX  timer_2_done
+#debug_left bool timer_2_done
+#srcline 55 ;  END_IF
+prgZakladac_L1:
+#srcline 56 ;  IF NOT(automatic_mode) AND NOT(manual_mode_next_step) THEN
+ LDX  automatic_mode
+#debug bool automatic_mode
+ NEG
+ LDX  manual_mode_next_step
+#debug bool manual_mode_next_step
+ NEG
+ AND
+ JMC  prgZakladac_L3
+#srcline 57 ;     timer_1_done := false;
+ LD   bool 0       ; false
+ WRX  timer_1_done
+#debug_left bool timer_1_done
+#srcline 58 ;     timer_2_done := false;
+ LD   bool 0       ; false
+ WRX  timer_2_done
+#debug_left bool timer_2_done
+#srcline 59 ;  END_IF
+prgZakladac_L3:
+#srcline 60 ;  IF timer_1_done OR timer_2_done THEN
+ LDX  timer_1_done
+#debug bool timer_1_done
+ LDX  timer_2_done
+#debug bool timer_2_done
+ OR  
+ JMC  prgZakladac_L5
+#srcline 61 ;     manual_mode_next_step := false;
+ LD   bool 0       ; false
+ WRX  manual_mode_next_step
+#debug_left bool manual_mode_next_step
+#srcline 62 ;  END_IF
+prgZakladac_L5:
+#srcline 63 ;  timer_1(IN := NOT(timer_1_done), PT := main_clock_time);
+ LDX  timer_1_done
+#debug bool timer_1_done
+ NEG
+ WRX  timer_1~IN
+#debug_left bool timer_1~IN
+ LDX  main_clock_time
+#debug time main_clock_time
+ WRX  timer_1~PT
+#debug_left time timer_1~PT
+ LEAX timer_1
+ CAL  TON_L0
+#srcline 64 ;  timer_2(IN := NOT(timer_2_done), PT := subs_clock_time);
+ LDX  timer_2_done
+#debug bool timer_2_done
+ NEG
+ WRX  timer_2~IN
+#debug_left bool timer_2~IN
+ LDX  subs_clock_time
+#debug time subs_clock_time
+ WRX  timer_2~PT
+#debug_left time timer_2~PT
+ LEAX timer_2
+ CAL  TON_L0
+#srcline 66 ;  IF stop THEN
+ LDX  stop
+#debug bool stop
+ JMC  prgZakladac_L7
+#srcline 67 ;     zakladac_state := -1;
+ LD   int -1
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 68 ;     zakladac_substate := 0;
+ LD   int 0
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 69 ;  END_IF
+prgZakladac_L7:
+#srcline 71 ;  IF pohyb_dokoncen AND timer_1_done THEN
+ LDX  pohyb_dokoncen
+#debug bool pohyb_dokoncen
+ LDX  timer_1_done
+#debug bool timer_1_done
+ AND
+ JMC  prgZakladac_L9
+#srcline 72 ;    startMotoru := 0;
+ LD   bool 0       ; false
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 73 ;    zakladac_panel_var_holder(state := zakladac_state, subState := zakladac_substate);
+ LDX  zakladac_state
+#debug int zakladac_state
+ EXTW 
+ WRX  zakladac_panel_var_holder~state
+#debug_left int zakladac_panel_var_holder~state
+ LDX  zakladac_substate
+#debug int zakladac_substate
+ EXTW 
+ WRX  zakladac_panel_var_holder~subState
+#debug_left int zakladac_panel_var_holder~subState
+ LEAX zakladac_panel_var_holder
+ CAL  zakladacPanelVarHolder_L0
+#srcline 74 ;    timer_1_done := FALSE;
+ LD   bool 0       ; false
+ WRX  timer_1_done
+#debug_left bool timer_1_done
+#srcline 75 ;    CASE zakladac_state OF
+ LDX  zakladac_state
+#debug int zakladac_state
+ EXTW 
+ WRY  P0__st__
+ LD   -1
+ EXTW 
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L12
+#srcline 76 ;         -1:
+#srcline 77 ;            zakladac_status := 'IDLE';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_0
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 78 ;           IF start AND NOT(stop) THEN
+ LDX  start
+#debug bool start
+ LDX  stop
+#debug bool stop
+ NEG
+ AND
+ JMC  prgZakladac_L13
+#srcline 79 ;              zakladac_state := 0;
+ LD   int 0
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 80 ;              zakladac_substate := 0;
+ LD   int 0
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 81 ;              start := 0;
+ LD   bool 0       ; false
+ WRX  start
+#debug_left bool start
+#srcline 82 ;              RETURN;
+ JMP  prgZakladac_RET
+#srcline 83 ;           END_IF
+prgZakladac_L13:
+#srcline 84 ;         0:
+ JMP  prgZakladac_L11
+prgZakladac_L12:
+ LD   0
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L15
+#srcline 85 ;            zakladac_status := 'RESETING...';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_1
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 86 ;           // reset horizontalne do vychozi pozice
+#srcline 87 ;            poziceMotoru_hor_0 := 1;
+ LD   bool -1      ; true
+ WR   bool poziceMotoru_hor_0
+#debug_left bool poziceMotoru_hor_0
+#srcline 88 ;            poziceMotoru_hor_1 := 0;
+ LD   bool 0       ; false
+ WR   bool poziceMotoru_hor_1
+#debug_left bool poziceMotoru_hor_1
+#srcline 89 ;            poziceMotoru_hor_2 := 1;
+ LD   bool -1      ; true
+ WR   bool poziceMotoru_hor_2
+#debug_left bool poziceMotoru_hor_2
+#srcline 90 ;            poziceMotoru_hor_3 := 0;
+ LD   bool 0       ; false
+ WR   bool poziceMotoru_hor_3
+#debug_left bool poziceMotoru_hor_3
+#srcline 91 ;            vyberMotoru := 0;
+ LD   bool 0       ; false
+ WR   bool vyberMotoru
+#debug_left bool vyberMotoru
+#srcline 92 ;            current_slot := 5;
+ LD   int 5
+ WRX  current_slot
+#debug_left int current_slot
+#srcline 93 ;            zakladac_state := 1;
+ LD   int 1
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 95 ;            // reset celisti - otevøení a posun nahoru
+#srcline 96 ;            celistiChapadlo := 0;
+ LD   bool 0       ; false
+ WR   bool celistiChapadlo
+#debug_left bool celistiChapadlo
+#srcline 97 ;            posuvChapadlo_ver := 0;
+ LD   bool 0       ; false
+ WR   bool posuvChapadlo_ver
+#debug_left bool posuvChapadlo_ver
+#srcline 98 ;            searching_index := 0;
+ LD   int 0
+ WRX  searching_index
+#debug_left int searching_index
+#srcline 100 ;            last_scanned_color := - 1;
+ LD   int -1
+ WRX  last_scanned_color
+#debug_left int last_scanned_color
+#srcline 101 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L15:
+ LD   1
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L16
+#srcline 102 ;         1:
+#srcline 103 ;            zakladac_status := 'MOVE HOR. TO ZERO (RUN)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_2
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 104 ;            startMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 105 ;            zakladac_state := 2;
+ LD   int 2
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 106 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L16:
+ LD   2
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L17
+#srcline 107 ;         2:
+#srcline 108 ;            zakladac_status := 'MOVE VER. TO ZERO (SETUP)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_3
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 109 ;            vyberMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool vyberMotoru
+#debug_left bool vyberMotoru
+#srcline 110 ;            poziceMotoru_ver_0 := 0;
+ LD   bool 0       ; false
+ WR   bool poziceMotoru_ver_0
+#debug_left bool poziceMotoru_ver_0
+#srcline 111 ;            poziceMotoru_ver_1 := 0;
+ LD   bool 0       ; false
+ WR   bool poziceMotoru_ver_1
+#debug_left bool poziceMotoru_ver_1
+#srcline 112 ;            poziceMotoru_ver_2 := 0;
+ LD   bool 0       ; false
+ WR   bool poziceMotoru_ver_2
+#debug_left bool poziceMotoru_ver_2
+#srcline 113 ;            poziceMotoru_ver_3 := 0;
+ LD   bool 0       ; false
+ WR   bool poziceMotoru_ver_3
+#debug_left bool poziceMotoru_ver_3
+#srcline 114 ;            zakladac_state := 3;
+ LD   int 3
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 115 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L17:
+ LD   3
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L18
+#srcline 116 ;         3: // reset vertikalne do vychozi pozice
+#srcline 117 ;            zakladac_status := 'MOVE VER. TO ZERO (RUN)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_4
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 118 ;           IF vertikalniManipulacePovolena THEN
+ LD   bool vertikalniManipulacePovolena
+#debug bool vertikalniManipulacePovolena
+ JMC  prgZakladac_L19
+#srcline 119 ;            startMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 120 ;            zakladac_state := 4;
+ LD   int 4
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 121 ;            zakladac_substate := 0;
+ LD   int 0
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 122 ;           END_IF
+prgZakladac_L19:
+#srcline 123 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L18:
+ LD   4
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L21
+#srcline 124 ;         4:
+#srcline 125 ;            zakladac_status := 'CHECKING MATERIAL TO PICK UP';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_5
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 126 ;            IF materialJe THEN
+ LD   bool materialJe
+#debug bool materialJe
+ JMC  prgZakladac_L22
+#srcline 127 ;                zakladac_state := 5;
+ LD   int 5
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 128 ;                zakladac_substate := 0;
+ LD   int 0
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 129 ;            ELSE
+ JMP  prgZakladac_L23
+prgZakladac_L22:
+#srcline 130 ;                CASE zakladac_substate OF
+ LDX  zakladac_substate
+#debug int zakladac_substate
+ EXTW 
+ WRY  P1__st__
+ LD   0
+ LDY  P1__st__
+ EQ  
+ JMC  prgZakladac_L25
+#srcline 131 ;                     0:
+#srcline 132 ;                      zakladac_status := 'MOVING TO NEXT SLOT (SETUP)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_6
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 133 ;                      current_slot := current_slot + 1;
+ LDX  current_slot
+#debug int current_slot
+ EXTW 
+ LD   int 1
+ ADD
+ EXTW
+ WRX  current_slot
+#debug_left int current_slot
+#srcline 134 ;                      IF current_slot >= 5 THEN
+ LDX  current_slot
+#debug int current_slot
+ EXTW 
+ LD   int 5
+ LTS
+ NEG
+ JMC  prgZakladac_L26
+#srcline 135 ;                         current_slot := 0;
+ LD   int 0
+ WRX  current_slot
+#debug_left int current_slot
+#srcline 136 ;                         searching_index := searching_index + 1;
+ LDX  searching_index
+#debug int searching_index
+ EXTW 
+ LD   int 1
+ ADD
+ EXTW
+ WRX  searching_index
+#debug_left int searching_index
+#srcline 137 ;                         IF searching_index > 3 THEN
+ LDX  searching_index
+#debug int searching_index
+ EXTW 
+ LD   int 3
+ GTS
+ JMC  prgZakladac_L28
+#srcline 138 ;                            stop := 1;
+ LD   bool -1      ; true
+ WRX  stop
+#debug_left bool stop
+#srcline 139 ;                            searching_index := 0;
+ LD   int 0
+ WRX  searching_index
+#debug_left int searching_index
+#srcline 140 ;                         END_IF
+prgZakladac_L28:
+#srcline 141 ;                      END_IF
+prgZakladac_L26:
+#srcline 142 ;                      intEncoder(inputInt := current_slot,
+ LDX  current_slot
+#debug int current_slot
+ EXTW 
+ WRX  intEncoder~inputInt
+#debug_left int intEncoder~inputInt
+#srcline 143 ;                                          out0 => poziceMotoru_hor_0,
+#srcline 144 ;                                          out1 => poziceMotoru_hor_1,
+#srcline 145 ;                                          out2 => poziceMotoru_hor_2,
+#srcline 146 ;                                          out3 => poziceMotoru_hor_3
+#srcline 147 ;                      );
+ LEAX intEncoder
+ CAL  zakladacEncodeInt_L0
+; output assigment 
+ LDX  intEncoder~out0
+#debug bool intEncoder~out0
+ WR   bool poziceMotoru_hor_0
+#debug_left bool poziceMotoru_hor_0
+ LDX  intEncoder~out1
+#debug bool intEncoder~out1
+ WR   bool poziceMotoru_hor_1
+#debug_left bool poziceMotoru_hor_1
+ LDX  intEncoder~out2
+#debug bool intEncoder~out2
+ WR   bool poziceMotoru_hor_2
+#debug_left bool poziceMotoru_hor_2
+ LDX  intEncoder~out3
+#debug bool intEncoder~out3
+ WR   bool poziceMotoru_hor_3
+#debug_left bool poziceMotoru_hor_3
+#srcline 148 ;                      vyberMotoru := 0;
+ LD   bool 0       ; false
+ WR   bool vyberMotoru
+#debug_left bool vyberMotoru
+#srcline 149 ;                      zakladac_substate := 1;
+ LD   int 1
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 150 ;                     ;
+ JMP  prgZakladac_L24
+prgZakladac_L25:
+ LD   1
+ LDY  P1__st__
+ EQ  
+ JMC  prgZakladac_L30
+#srcline 151 ;                     1:
+#srcline 152 ;                      zakladac_status := 'MOVING TO NEXT SLOT (RUN)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_7
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 153 ;                       zakladac_substate := 0;
+ LD   int 0
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 154 ;                       startMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 155 ;                     ;
+ JMP  prgZakladac_L24
+prgZakladac_L30:
+prgZakladac_L24:
+#srcline 157 ;            END_IF
+prgZakladac_L23:
+#srcline 158 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L21:
+ LD   5
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L31
+#srcline 159 ;         5:
+#srcline 160 ;            IF timer_2_done THEN
+ LDX  timer_2_done
+#debug bool timer_2_done
+ JMC  prgZakladac_L32
+#srcline 161 ;              timer_2_done := FALSE;
+ LD   bool 0       ; false
+ WRX  timer_2_done
+#debug_left bool timer_2_done
+#srcline 162 ;              CASE zakladac_substate OF
+ LDX  zakladac_substate
+#debug int zakladac_substate
+ EXTW 
+ WRY  P2__st__
+ LD   0
+ LDY  P2__st__
+ EQ  
+ JMC  prgZakladac_L35
+#srcline 163 ;                   0:
+#srcline 164 ;                     zakladac_status := 'PICKING UP MATERIAL (LOWER ARM)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_8
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 165 ;                     celistiChapadlo := 0;
+ LD   bool 0       ; false
+ WR   bool celistiChapadlo
+#debug_left bool celistiChapadlo
+#srcline 166 ;                     posuvChapadlo_ver := 1;
+ LD   bool -1      ; true
+ WR   bool posuvChapadlo_ver
+#debug_left bool posuvChapadlo_ver
+#srcline 167 ;                     zakladac_substate := 1;
+ LD   int 1
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+ JMP  prgZakladac_L34
+prgZakladac_L35:
+ LD   1
+ LDY  P2__st__
+ EQ  
+ JMC  prgZakladac_L36
+#srcline 168 ;                   1:
+#srcline 169 ;                     zakladac_status := 'PICKING UP MATERIAL (GRAB)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_9
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 170 ;                     celistiChapadlo := 1;
+ LD   bool -1      ; true
+ WR   bool celistiChapadlo
+#debug_left bool celistiChapadlo
+#srcline 171 ;                     zakladac_substate := 2;
+ LD   int 2
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+ JMP  prgZakladac_L34
+prgZakladac_L36:
+ LD   2
+ LDY  P2__st__
+ EQ  
+ JMC  prgZakladac_L37
+#srcline 172 ;                   2:
+#srcline 173 ;                     zakladac_status := 'PICKING UP MATERIAL (RAISE ARM)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_10
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 174 ;                     posuvChapadlo_ver := 0;
+ LD   bool 0       ; false
+ WR   bool posuvChapadlo_ver
+#debug_left bool posuvChapadlo_ver
+#srcline 175 ;                     zakladac_substate := 0;
+ LD   int 0
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 176 ;                     zakladac_state := 6;
+ LD   int 6
+ WRX  zakladac_state
+#debug_left int zakladac_state
+ JMP  prgZakladac_L34
+prgZakladac_L37:
+prgZakladac_L34:
+#srcline 178 ;            END_IF
+prgZakladac_L32:
+#srcline 179 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L31:
+ LD   6
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L38
+#srcline 180 ;         6:
+#srcline 181 ;            zakladac_status := 'MOVE OVER THE SENSOR HOR. (SETUP)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_11
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 182 ;            poziceMotoru_hor_0 := 1;
+ LD   bool -1      ; true
+ WR   bool poziceMotoru_hor_0
+#debug_left bool poziceMotoru_hor_0
+#srcline 183 ;            poziceMotoru_hor_1 := 0;
+ LD   bool 0       ; false
+ WR   bool poziceMotoru_hor_1
+#debug_left bool poziceMotoru_hor_1
+#srcline 184 ;            poziceMotoru_hor_2 := 1;
+ LD   bool -1      ; true
+ WR   bool poziceMotoru_hor_2
+#debug_left bool poziceMotoru_hor_2
+#srcline 185 ;            poziceMotoru_hor_3 := 0;
+ LD   bool 0       ; false
+ WR   bool poziceMotoru_hor_3
+#debug_left bool poziceMotoru_hor_3
+#srcline 186 ;            vyberMotoru := 0;
+ LD   bool 0       ; false
+ WR   bool vyberMotoru
+#debug_left bool vyberMotoru
+#srcline 187 ;            current_slot := 5;
+ LD   int 5
+ WRX  current_slot
+#debug_left int current_slot
+#srcline 188 ;            zakladac_state := 7;
+ LD   int 7
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 189 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L38:
+ LD   7
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L39
+#srcline 190 ;         7:
+#srcline 191 ;            zakladac_status := 'MOVE OVER THE SENSOR HOR. (RUN)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_12
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 192 ;            startMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 193 ;            current_slot := 5;
+ LD   int 5
+ WRX  current_slot
+#debug_left int current_slot
+#srcline 194 ;            zakladac_state := 8;
+ LD   int 8
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 195 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L39:
+ LD   8
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L40
+#srcline 196 ;         8:
+#srcline 197 ;            zakladac_status := 'MOVE OVER THE SENSOR VER. (SETUP)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_13
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 198 ;            poziceMotoru_ver_0 := 1;
+ LD   bool -1      ; true
+ WR   bool poziceMotoru_ver_0
+#debug_left bool poziceMotoru_ver_0
+#srcline 199 ;            poziceMotoru_ver_1 := 1;
+ LD   bool -1      ; true
+ WR   bool poziceMotoru_ver_1
+#debug_left bool poziceMotoru_ver_1
+#srcline 200 ;            poziceMotoru_ver_2 := 0;
+ LD   bool 0       ; false
+ WR   bool poziceMotoru_ver_2
+#debug_left bool poziceMotoru_ver_2
+#srcline 201 ;            poziceMotoru_ver_3 := 0;
+ LD   bool 0       ; false
+ WR   bool poziceMotoru_ver_3
+#debug_left bool poziceMotoru_ver_3
+#srcline 202 ;            vyberMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool vyberMotoru
+#debug_left bool vyberMotoru
+#srcline 203 ;            zakladac_state := 9;
+ LD   int 9
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 204 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L40:
+ LD   9
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L41
+#srcline 205 ;         9:
+#srcline 206 ;           IF vertikalniManipulacePovolena THEN
+ LD   bool vertikalniManipulacePovolena
+#debug bool vertikalniManipulacePovolena
+ JMC  prgZakladac_L42
+#srcline 207 ;            zakladac_status := 'MOVE OVER THE SENSOR VER. (RUN)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_14
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 208 ;            startMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 209 ;            zakladac_state := 10;
+ LD   int 10
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 210 ;            zakladac_substate := 0;
+ LD   int 0
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 211 ;           END_IF
+prgZakladac_L42:
+#srcline 212 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L41:
+ LD   10
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L44
+#srcline 213 ;         10:
+#srcline 214 ;            IF timer_2_done THEN
+ LDX  timer_2_done
+#debug bool timer_2_done
+ JMC  prgZakladac_L45
+#srcline 215 ;              timer_2_done := FALSE;
+ LD   bool 0       ; false
+ WRX  timer_2_done
+#debug_left bool timer_2_done
+#srcline 216 ;              CASE zakladac_substate OF
+ LDX  zakladac_substate
+#debug int zakladac_substate
+ EXTW 
+ WRY  P3__st__
+ LD   0
+ LDY  P3__st__
+ EQ  
+ JMC  prgZakladac_L48
+#srcline 217 ;                   0: // posun dolu k èidlu
+#srcline 218 ;                      zakladac_status := 'LOWER THE ARM TO THE SENSOR';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_15
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 219 ;                      posuvChapadlo_ver := 1;
+ LD   bool -1      ; true
+ WR   bool posuvChapadlo_ver
+#debug_left bool posuvChapadlo_ver
+#srcline 220 ;                      zakladac_substate := 1;
+ LD   int 1
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 221 ;                      last_scanned_color := - 1;
+ LD   int -1
+ WRX  last_scanned_color
+#debug_left int last_scanned_color
+#srcline 222 ;                   ;
+ JMP  prgZakladac_L47
+prgZakladac_L48:
+ LD   1
+ LDY  P3__st__
+ EQ  
+ JMC  prgZakladac_L49
+#srcline 223 ;                   1: // wait 2 seconds
+#srcline 224 ;                      zakladac_substate := 2;
+ LD   int 2
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 225 ;                   ;
+ JMP  prgZakladac_L47
+prgZakladac_L49:
+ LD   2
+ LDY  P3__st__
+ EQ  
+ JMC  prgZakladac_L50
+#srcline 226 ;                   2: // sken barvy
+#srcline 227 ;                      zakladac_status := 'SCANNING COLOR...';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_16
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 228 ;                      last_scanned_color := 0;
+ LD   int 0
+ WRX  last_scanned_color
+#debug_left int last_scanned_color
+#srcline 229 ;                      IF modraBarva THEN
+ LD   bool modraBarva
+#debug bool modraBarva
+ JMC  prgZakladac_L51
+#srcline 230 ;                         last_scanned_color := 1;
+ LD   int 1
+ WRX  last_scanned_color
+#debug_left int last_scanned_color
+#srcline 231 ;                      END_IF
+prgZakladac_L51:
+#srcline 232 ;                      IF cervenaBarva THEN
+ LD   bool cervenaBarva
+#debug bool cervenaBarva
+ JMC  prgZakladac_L53
+#srcline 233 ;                         last_scanned_color := 2;
+ LD   int 2
+ WRX  last_scanned_color
+#debug_left int last_scanned_color
+#srcline 234 ;                      END_IF
+prgZakladac_L53:
+#srcline 235 ;                      IF stribrnaBarva OR magnet THEN
+ LD   bool stribrnaBarva
+#debug bool stribrnaBarva
+ LD   bool magnet
+#debug bool magnet
+ OR  
+ JMC  prgZakladac_L55
+#srcline 236 ;                         last_scanned_color := 3;
+ LD   int 3
+ WRX  last_scanned_color
+#debug_left int last_scanned_color
+#srcline 237 ;                      END_IF
+prgZakladac_L55:
+#srcline 238 ;                      IF zelenaBarva THEN
+ LD   bool zelenaBarva
+#debug bool zelenaBarva
+ JMC  prgZakladac_L57
+#srcline 239 ;                         last_scanned_color := 4;
+ LD   int 4
+ WRX  last_scanned_color
+#debug_left int last_scanned_color
+#srcline 240 ;                      END_IF
+prgZakladac_L57:
+#srcline 241 ;                      zakladac_substate := 3;
+ LD   int 3
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 242 ;                   ;
+ JMP  prgZakladac_L47
+prgZakladac_L50:
+ LD   3
+ LDY  P3__st__
+ EQ  
+ JMC  prgZakladac_L59
+#srcline 243 ;                   3: // posun zpet nahoru od èidla
+#srcline 244 ;                      zakladac_status := 'RAISE THE ARM FROM THE SENSOR';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_17
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 245 ;                      posuvChapadlo_ver := 0;
+ LD   bool 0       ; false
+ WR   bool posuvChapadlo_ver
+#debug_left bool posuvChapadlo_ver
+#srcline 246 ;                      zakladac_substate := 0;
+ LD   int 0
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 247 ;                      zakladac_state := 11;
+ LD   int 11
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 248 ;                   ;
+ JMP  prgZakladac_L47
+prgZakladac_L59:
+prgZakladac_L47:
+#srcline 250 ;            END_IF
+prgZakladac_L45:
+#srcline 251 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L44:
+ LD   11
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L60
+#srcline 252 ;         11:
+#srcline 253 ;            zakladac_status := 'ENCODE COLOR TO VER. ADDRESS AND SET';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_18
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 254 ;            getVerticalAddressFromColor(color := last_scanned_color, addr => barva_patro_addr);
+ LDX  last_scanned_color
+#debug int last_scanned_color
+ EXTW 
+ WRX  getVerticalAddressFromColor~color
+#debug_left int getVerticalAddressFromColor~color
+ LEAX getVerticalAddressFromColor
+ CAL  zakladacGetVerticalAddrFromColor_L0
+; output assigment 
+ LDX  getVerticalAddressFromColor~addr
+#debug int getVerticalAddressFromColor~addr
+ WRX  barva_patro_addr
+#debug_left int barva_patro_addr
+#srcline 255 ;            intEncoder(inputInt := barva_patro_addr,
+ LDX  barva_patro_addr
+#debug int barva_patro_addr
+ EXTW 
+ WRX  intEncoder~inputInt
+#debug_left int intEncoder~inputInt
+#srcline 256 ;                out0 => poziceMotoru_ver_0,
+#srcline 257 ;                out1 => poziceMotoru_ver_1,
+#srcline 258 ;                out2 => poziceMotoru_ver_2,
+#srcline 259 ;                out3 => poziceMotoru_ver_3
+#srcline 260 ;            );
+ LEAX intEncoder
+ CAL  zakladacEncodeInt_L0
+; output assigment 
+ LDX  intEncoder~out0
+#debug bool intEncoder~out0
+ WR   bool poziceMotoru_ver_0
+#debug_left bool poziceMotoru_ver_0
+ LDX  intEncoder~out1
+#debug bool intEncoder~out1
+ WR   bool poziceMotoru_ver_1
+#debug_left bool poziceMotoru_ver_1
+ LDX  intEncoder~out2
+#debug bool intEncoder~out2
+ WR   bool poziceMotoru_ver_2
+#debug_left bool poziceMotoru_ver_2
+ LDX  intEncoder~out3
+#debug bool intEncoder~out3
+ WR   bool poziceMotoru_ver_3
+#debug_left bool poziceMotoru_ver_3
+#srcline 261 ;             zakladac_state := 12;
+ LD   int 12
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 262 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L60:
+ LD   12
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L61
+#srcline 263 ;         12:
+#srcline 264 ;           zakladac_status := 'MOVE VER. TO THE ENCODED ADDRESS';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_19
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 265 ;           IF vertikalniManipulacePovolena THEN
+ LD   bool vertikalniManipulacePovolena
+#debug bool vertikalniManipulacePovolena
+ JMC  prgZakladac_L62
+#srcline 266 ;            vyberMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool vyberMotoru
+#debug_left bool vyberMotoru
+#srcline 267 ;            startMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 268 ;            zakladac_state := 13;
+ LD   int 13
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 269 ;           END_IF
+prgZakladac_L62:
+#srcline 270 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L61:
+ LD   13
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L64
+#srcline 271 ;         13:
+#srcline 272 ;            zakladac_status := 'FIND EMPTY SLOT TO PLACE THE MATERIAL';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_20
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 273 ;            IF NOT(materialJe) AND current_slot < 4 THEN
+ LD   bool materialJe
+#debug bool materialJe
+ NEG
+ LDX  current_slot
+#debug int current_slot
+ EXTW 
+ LD   int 4
+ LTS
+ AND
+ JMC  prgZakladac_L65
+#srcline 274 ;               zakladac_state := 15;
+ LD   int 15
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 275 ;               zakladac_substate := 0;
+ LD   int 0
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 276 ;            ELSE
+ JMP  prgZakladac_L66
+prgZakladac_L65:
+#srcline 277 ;              zakladac_status := 'MOVE TO THE NEXT SLOT (SETUP)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_21
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 278 ;              current_slot := current_slot + 1;
+ LDX  current_slot
+#debug int current_slot
+ EXTW 
+ LD   int 1
+ ADD
+ EXTW
+ WRX  current_slot
+#debug_left int current_slot
+#srcline 279 ;              IF current_slot >= 5 THEN
+ LDX  current_slot
+#debug int current_slot
+ EXTW 
+ LD   int 5
+ LTS
+ NEG
+ JMC  prgZakladac_L67
+#srcline 280 ;                 current_slot := 0;
+ LD   int 0
+ WRX  current_slot
+#debug_left int current_slot
+#srcline 281 ;              END_IF
+prgZakladac_L67:
+#srcline 282 ;              intEncoder(inputInt := current_slot,
+ LDX  current_slot
+#debug int current_slot
+ EXTW 
+ WRX  intEncoder~inputInt
+#debug_left int intEncoder~inputInt
+#srcline 283 ;                                  out0 => poziceMotoru_hor_0,
+#srcline 284 ;                                  out1 => poziceMotoru_hor_1,
+#srcline 285 ;                                  out2 => poziceMotoru_hor_2,
+#srcline 286 ;                                  out3 => poziceMotoru_hor_3
+#srcline 287 ;              );
+ LEAX intEncoder
+ CAL  zakladacEncodeInt_L0
+; output assigment 
+ LDX  intEncoder~out0
+#debug bool intEncoder~out0
+ WR   bool poziceMotoru_hor_0
+#debug_left bool poziceMotoru_hor_0
+ LDX  intEncoder~out1
+#debug bool intEncoder~out1
+ WR   bool poziceMotoru_hor_1
+#debug_left bool poziceMotoru_hor_1
+ LDX  intEncoder~out2
+#debug bool intEncoder~out2
+ WR   bool poziceMotoru_hor_2
+#debug_left bool poziceMotoru_hor_2
+ LDX  intEncoder~out3
+#debug bool intEncoder~out3
+ WR   bool poziceMotoru_hor_3
+#debug_left bool poziceMotoru_hor_3
+#srcline 288 ;              vyberMotoru := 0;
+ LD   bool 0       ; false
+ WR   bool vyberMotoru
+#debug_left bool vyberMotoru
+#srcline 289 ;              zakladac_state := 14;
+ LD   int 14
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 290 ;            END_IF
+prgZakladac_L66:
+#srcline 291 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L64:
+ LD   14
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L69
+#srcline 292 ;         14:
+#srcline 293 ;            zakladac_status := 'MOVE TO THE NEXT SLOT (RUN)';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_22
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 294 ;            startMotoru := 1;
+ LD   bool -1      ; true
+ WR   bool startMotoru
+#debug_left bool startMotoru
+#srcline 295 ;            zakladac_state := 13;
+ LD   int 13
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 296 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L69:
+ LD   15
+ LDY  P0__st__
+ EQ  
+ JMC  prgZakladac_L70
+#srcline 297 ;         15:
+#srcline 298 ;            zakladac_status := 'EMPTY SLOT FOUND - PUT DOWN MATERIAL';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_23
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 299 ;            IF timer_2_done THEN
+ LDX  timer_2_done
+#debug bool timer_2_done
+ JMC  prgZakladac_L71
+#srcline 300 ;              timer_2_done := FALSE;
+ LD   bool 0       ; false
+ WRX  timer_2_done
+#debug_left bool timer_2_done
+#srcline 301 ;              CASE zakladac_substate OF
+ LDX  zakladac_substate
+#debug int zakladac_substate
+ EXTW 
+ WRY  P4__st__
+ LD   0
+ LDY  P4__st__
+ EQ  
+ JMC  prgZakladac_L74
+#srcline 302 ;                   0:
+#srcline 303 ;                    zakladac_status := 'LOWER THE ARM';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_24
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 304 ;                    celistiChapadlo := 1;
+ LD   bool -1      ; true
+ WR   bool celistiChapadlo
+#debug_left bool celistiChapadlo
+#srcline 305 ;                    posuvChapadlo_ver := 1;
+ LD   bool -1      ; true
+ WR   bool posuvChapadlo_ver
+#debug_left bool posuvChapadlo_ver
+#srcline 306 ;                    zakladac_substate := 1;
+ LD   int 1
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 307 ;                   ;
+ JMP  prgZakladac_L73
+prgZakladac_L74:
+ LD   1
+ LDY  P4__st__
+ EQ  
+ JMC  prgZakladac_L75
+#srcline 308 ;                   1:
+#srcline 309 ;                    zakladac_status := 'RELEASE THE MATERIAL AND RAISE THE ARM';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_25
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 310 ;                    celistiChapadlo := 0;
+ LD   bool 0       ; false
+ WR   bool celistiChapadlo
+#debug_left bool celistiChapadlo
+#srcline 311 ;                    posuvChapadlo_ver := 0;
+ LD   bool 0       ; false
+ WR   bool posuvChapadlo_ver
+#debug_left bool posuvChapadlo_ver
+#srcline 312 ;                    zakladac_substate := 0;
+ LD   int 0
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 313 ;                    zakladac_state := 0;
+ LD   int 0
+ WRX  zakladac_state
+#debug_left int zakladac_state
+#srcline 314 ;                   ;
+ JMP  prgZakladac_L73
+prgZakladac_L75:
+prgZakladac_L73:
+#srcline 316 ;            END_IF
+prgZakladac_L71:
+#srcline 317 ;         ;
+ JMP  prgZakladac_L11
+prgZakladac_L70:
+prgZakladac_L11:
+#srcline 320 ;  END_IF
+prgZakladac_L9:
+#srcline 321 ;END_PROGRAM
+prgZakladac_RET:
+ ULNK
+RET
+E     61
+
+; Initialize - variables
+P     61
+prgZakladac__InstanceInit__:
+ LINK 0
+ LD   int -1
+ WRX  zakladac_state
+ LD   int 0
+ WRX  zakladac_substate
+ LD   int 0
+ WRX  current_slot
+ LD   int -1
+ WRX  last_scanned_color
+ LEAX getVerticalAddressFromColor
+ CAL  zakladacGetVerticalAddrFromColor__InstanceInit__
+ LD   time 200
+ WRX  main_clock_time
+ LD   time 700
+ WRX  subs_clock_time
+ LD   int 0
+ WRX  searching_index
+ LD   bool -1   ; true
+ WRX  automatic_mode
+ LD   bool 0   ; false
+ WRX  manual_mode_next_step
+ ULNK
+RET
+E     61
+; End initialize - variables
+#endpou 
+
+
+
+ 
+
+#srcfile ''

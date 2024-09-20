@@ -1,0 +1,22 @@
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\ZAKLADACSIN.MCF'
+ 
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\ZAKLADACSIN.MCF'
+
+; ***** RESOURCE - CPM
+#reg prgZakladac Zakladac
+#srcline 4 ;    PROGRAM Zakladac WITH FreeWheeling : prgZakladac ();
+P     0
+ LEA  Zakladac
+ CAL  prgZakladac_L0
+E     0
+
+; Initialize - program
+P     58
+ LEA  Zakladac
+ CAL  prgZakladac__InstanceInit__
+E     58
+
+
+ 
+
+#srcfile ''

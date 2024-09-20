@@ -1,0 +1,129 @@
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\ZAKLADACGETVERTICALADDRFROMCOLOR.ST'
+
+#defpou zakladacGetVerticalAddrFromColor
+  int color,
+  int addr,
+  int modraBarva_key,
+  int cervenaBarva_key,
+  int stribrnaBarva_key,
+  int zelenaBarva_key,
+  int modraBarva_addr,
+  int cervenaBarva_addr,
+  int stribrnaBarva_addr,
+  int zelenaBarva_addr
+
+ 
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\ZAKLADACGETVERTICALADDRFROMCOLOR.ST'
+#pou zakladacGetVerticalAddrFromColor
+#srcline 1 ;FUNCTION_BLOCK zakladacGetVerticalAddrFromColor
+P     61
+zakladacGetVerticalAddrFromColor_L0:
+ LINK 0
+#srcline 20 ;  addr := 0;
+ LD   int 0
+ WRX  addr
+#debug_left int addr
+#srcline 22 ;  IF color = modraBarva_key THEN
+ LDX  color
+#debug int color
+ EXTW 
+ LDX  modraBarva_key
+#debug int modraBarva_key
+ EXTW 
+ EQ
+ JMC  zakladacGetVerticalAddrFromColor_L1
+#srcline 23 ;     addr := modraBarva_addr;
+ LDX  modraBarva_addr
+#debug int modraBarva_addr
+ EXTW 
+ WRX  addr
+#debug_left int addr
+#srcline 24 ;  END_IF
+zakladacGetVerticalAddrFromColor_L1:
+#srcline 25 ;  IF color = cervenaBarva_key THEN
+ LDX  color
+#debug int color
+ EXTW 
+ LDX  cervenaBarva_key
+#debug int cervenaBarva_key
+ EXTW 
+ EQ
+ JMC  zakladacGetVerticalAddrFromColor_L3
+#srcline 26 ;     addr := cervenaBarva_addr;
+ LDX  cervenaBarva_addr
+#debug int cervenaBarva_addr
+ EXTW 
+ WRX  addr
+#debug_left int addr
+#srcline 27 ;  END_IF
+zakladacGetVerticalAddrFromColor_L3:
+#srcline 28 ;  IF color = stribrnaBarva_key THEN
+ LDX  color
+#debug int color
+ EXTW 
+ LDX  stribrnaBarva_key
+#debug int stribrnaBarva_key
+ EXTW 
+ EQ
+ JMC  zakladacGetVerticalAddrFromColor_L5
+#srcline 29 ;     addr := stribrnaBarva_addr;
+ LDX  stribrnaBarva_addr
+#debug int stribrnaBarva_addr
+ EXTW 
+ WRX  addr
+#debug_left int addr
+#srcline 30 ;  END_IF
+zakladacGetVerticalAddrFromColor_L5:
+#srcline 31 ;  IF color = zelenaBarva_key THEN
+ LDX  color
+#debug int color
+ EXTW 
+ LDX  zelenaBarva_key
+#debug int zelenaBarva_key
+ EXTW 
+ EQ
+ JMC  zakladacGetVerticalAddrFromColor_L7
+#srcline 32 ;     addr := zelenaBarva_addr;
+ LDX  zelenaBarva_addr
+#debug int zelenaBarva_addr
+ EXTW 
+ WRX  addr
+#debug_left int addr
+#srcline 33 ;  END_IF
+zakladacGetVerticalAddrFromColor_L7:
+#srcline 35 ;END_FUNCTION_BLOCK
+ ULNK
+RET
+E     61
+
+; Initialize - variables
+P     61
+zakladacGetVerticalAddrFromColor__InstanceInit__:
+ LINK 0
+ LD   int 1
+ WRX  modraBarva_key
+ LD   int 2
+ WRX  cervenaBarva_key
+ LD   int 3
+ WRX  stribrnaBarva_key
+ LD   int 4
+ WRX  zelenaBarva_key
+ LD   int 2
+ WRX  modraBarva_addr
+ LD   int 1
+ WRX  cervenaBarva_addr
+ LD   int 3
+ WRX  stribrnaBarva_addr
+ LD   int 0
+ WRX  zelenaBarva_addr
+ ULNK
+RET
+E     61
+; End initialize - variables
+#endpou 
+
+
+
+ 
+
+#srcfile ''

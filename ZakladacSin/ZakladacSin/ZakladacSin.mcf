@@ -1,0 +1,6 @@
+CONFIGURATION ZakladacSin
+  RESOURCE CPM
+    TASK FreeWheeling(Number := 0);
+    PROGRAM Zakladac WITH FreeWheeling : prgZakladac ();
+  END_RESOURCE
+END_CONFIGURATION
