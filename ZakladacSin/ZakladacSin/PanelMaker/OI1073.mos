@@ -1,1 +1,219 @@
-#ERROR W'PanelMaker tool has to be run'
+;*******************************************************************************
+;Warning
+;File is automatically regenerated and all manual changes will be lost.
+
+#ifndef _DeklarPT_
+  #error F'File DeklarPT.mos is not in project files list or is not above file OI1073.mos!'
+#endif
+
+
+#table byte OI1073_beginText_Table = 0
+#def   OI1073_beginText  __indx(OI1073_beginText_Table)
+#def   OI1073_Disp1_Table_Indx 	OI1073_beginText + 1	;Disp1
+
+
+#def   OI1073_START_Flow_Indx 	 OI1073_beginText + 2	;START
+#def   OI1073__S8_Table_Indx_MinMax 	OI1073_beginText + 3
+#def   OI1073__S7_Table_Indx_MinMax 	OI1073_beginText + 4
+#def   OI1073__S6_Table_Indx_MinMax 	OI1073_beginText + 5
+#def   OI1073__S12_Table_Indx_MinMax 	OI1073_beginText + 6
+#def   OI1073__S11_Table_Indx_MinMax 	OI1073_beginText + 7
+#def   OI1073__S10_Table_Indx_MinMax 	OI1073_beginText + 8
+#def   OI1073_LastTable_Index     OI1073_beginText + 9
+
+
+#reg word OI1073_NumTextPT
+#reg word OI1073_NumTextOldPT
+#reg bit  OI1073_NewText
+
+#ifndef CALL_TER14
+  #struct TIDStruct_PM
+          word _NumText,
+          word _MinText,
+          word _MaxText,
+          byte _EnableBits,
+          byte _SizeDisp,
+          byte _KeybTer,
+          byte _InterTer[128]
+
+  #def CALL_TER14     ter 14
+  #def CALL_TEROI1073 ter  7
+#endif
+
+#reg TIDStruct_PM OI1073
+#reg byte         OI1073_SIMKey
+#reg byte         OI1073_KeybPT
+#reg byte OI1073_InterPT
+
+
+#if _PLCTYPE_ < CP7001
+  #error F'Tables with definition for display use functions for higher series of PLC.'
+#endif
+
+#table _TTS_PM_D80_V6 OI1073_Disp1_Table_Indx, OI1073_Disp1_Table = 
+          1,14,80,6,
+            'Tecomat             ',
+            'VV:VV:VV            ',
+            '20VV-VV-VV          ',
+            '                    ',
+	__offset(%S8), __IECtypeID(%S8),__sizeof(%S8), __typeID(%S8),20,readOnly + dispSignDec + LeadZero, 2 des 0, 0,
+	__offset(%S7), __IECtypeID(%S7),__sizeof(%S7), __typeID(%S7),23,readOnly + dispSignDec + LeadZero, 2 des 0, 0,
+	__offset(%S6), __IECtypeID(%S6),__sizeof(%S6), __typeID(%S6),26,readOnly + dispSignDec + LeadZero, 2 des 0, 0,
+	__offset(%S12), __IECtypeID(%S12),__sizeof(%S12), __typeID(%S12),42,readOnly + dispSignDec + LeadZero, 2 des 0, 0,
+	__offset(%S11), __IECtypeID(%S11),__sizeof(%S11), __typeID(%S11),45,readOnly + dispSignDec + LeadZero, 2 des 0, 0,
+	__offset(%S10), __IECtypeID(%S10),__sizeof(%S10), __typeID(%S10),48,readOnly + dispSignDec + LeadZero, 2 des 0, 0
+
+#table byte OI1073_START_Flow_Indx, OI1073_START_Flow = 
+            OI1073_Disp1_Table_Indx, (OI1073_Disp1_Table_Indx)/256,
+            OI1073_Disp1_Table_Indx, (OI1073_Disp1_Table_Indx)/256,
+            OI1073_Disp1_Table_Indx, (OI1073_Disp1_Table_Indx)/256,
+            enableList + enableEdit
+
+
+
+
+
+#table byte OI1073_LastTable_Index, OI1073_LastTable = 0
+
+#table  word OI1073_CKey = 
+        0
+
+#table word OI1073_UpKey = 
+        0
+
+#table word OI1073_DownKey = 
+        0
+
+P 60
+OI1073_init:
+  LD  80
+  WR  OI1073._SizeDisp
+  LD  OI1073_START_Flow_Indx
+  WR  OI1073._NumText
+
+  RET
+E 60
+
+P 63
+  CAL OI1073_init
+E 63
+
+P 62
+  CAL OI1073_init
+E 62
+
+#ifndef OI1073_UserKeyb
+  #reg byte OI1073_UserKeyb
+#endif
+P 0
+  LD  80
+  LD  OI1073._SizeDisp
+  EQ 
+  CAC OI1073_init
+  LD  OI1073_Keyb
+  EQ  0
+  JMD Receive_OI1073_SIMKey
+  LD  OI1073_Keyb
+  WR  OI1073_UserKeyb
+  WR  OI1073._KeybTer
+  WR  OI1073_KeybPT
+  JMP TerHandle_OI1073
+Receive_OI1073_SIMKey:
+  LD  OI1073_SIMKey
+  EQ  0
+  JMD EndReceive_OI1073_SIMKey
+  LD  OI1073_SIMKey
+  WR  OI1073._KeybTer
+  WR  OI1073_UserKeyb
+  WR  OI1073_KeybPT
+  RES OI1073_SIMKey
+EndReceive_OI1073_SIMKey:
+
+TerHandle_OI1073:
+  LD  __indx(OI1073._NumText)
+  LD  __indx(OI1073_VideoRam)
+  CALL_TEROI1073
+  LD  OI1073_NumTextPT
+  LD  OI1073_NumTextOldPT
+  EQ
+  WRC OI1073_NewText
+  LD  OI1073_NumTextPT
+  WR  OI1073_NumTextOldPT
+
+  ;if variable edit, block move witk keyb UP, Down and C
+  LD  OI1073._InterTer
+  GT  2
+  LD  OI1073._InterTer
+  EQ  7
+  NEG
+  AND
+  JMD OI1073_KeybBlock
+  #ifdef OI1073_DownKey
+    LD  OI1073_KeybPT
+    EQ  $19
+    JMC OI1073_EndDown
+    LD  OI1073._NumText
+    EQ  OI1073_NumTextPT
+    JMC OI1073_EndDown
+    LD  OI1073._NumText
+    LD  OI1073_beginText+1
+    SUB
+    LTB OI1073_DownKey
+    JMC OI1073_EndDown
+    WR  OI1073._NumText
+  #endif
+OI1073_EndDown:
+
+  #ifdef OI1073_UpKey
+    LD  OI1073_KeybPT
+    EQ  $18
+    JMC OI1073_EndUp
+    LD  OI1073._NumText
+    EQ  OI1073_NumTextPT
+    JMC OI1073_EndUp
+    LD  OI1073._NumText
+    LD  OI1073_beginText+1
+    SUB
+    LTB OI1073_UpKey
+    JMC OI1073_EndUp
+    WR  OI1073._NumText
+  #endif
+OI1073_EndUp:
+
+  #ifdef OI1073_CKey
+    LD  OI1073_KeybPT
+    EQ  $7F
+    LD  OI1073_InterPT
+    EQ  0
+    LD  OI1073_InterPT
+    EQ  7
+    OR
+    AND
+    JMC OI1073_KonecC
+    LD  OI1073._NumText
+    LD  OI1073_beginText+1
+    SUB
+    LTB OI1073_CKey
+    JMC OI1073_KonecC
+    WR  OI1073._NumText
+  #endif
+OI1073_KonecC:
+OI1073_KeybBlock:
+
+
+
+
+  LD  0
+  WR  OI1073_KeybPT
+  LD  OI1073._InterTer
+  WR  OI1073_InterPT
+  LD  OI1073._NumText
+  WR  OI1073_NumTextPT
+E 0
+
+
+;*******************************************************************************
+;Last changes : 20.09.2024 16:03:55
+;Generated by MOSAIC
+;© 2001-2019 Teco a.s.
+;Version : 1.4

@@ -3,10 +3,10 @@ Version="xPRO","4.3.00"
 [/desktop]
 
 [dockinfo]
-centralpc=55626260,1,0,0
-leftpane=55619728,0,1,1,286,1
-bottompane=55591764,1,209
-rightpane=55594044,0,167,0
+centralpc=56411144,1,0,0
+leftpane=56406068,0,1,1,286,1
+bottompane=56373420,0,166
+rightpane=56375700,0,167,0
 [/dockinfo]
 
 [closedtextpaneleditors]
@@ -35,9 +35,11 @@ maskhistory=""
 [/txtextsyneditor]
 
 [closedtextsyneditors]
-txsyned="zakladacGetVerticalAddrFromColor.ST",1,1,1,1,1,1,1139514433,31132505,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-txsyned="SYSGEN\ZakladacSin.hwc",156,57,1,1,1,1,3808136964,31132504,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-txsyned="zakladacEncodeInt.ST",88,1,1,1,1,1,974356859,31132505,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+txsyned="ZakladacSin.mak",1,1,1,1,1,1,3201787434,31132516,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+txsyned="zakladacGetVerticalAddrFromColor.ST",1,1,1,1,1,1,3201860697,31132516,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+txsyned="zakladacPanelVarHolder.ST",4,16,1,1,1,1,3201873524,31132516,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+txsyned="zakladacEncodeInt.ST",1,1,1,1,1,1,3201836444,31132516,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+txsyned="SYSGEN\ZakladacSin.hwc",162,1,1,1,1,1,3511721554,31132516,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 txsyned="ZakladacSin.mcf",4,57,1,1,1,1,473643932,31132504,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 [/closedtextsyneditors]
 
@@ -109,15 +111,15 @@ nodeplus="PlcIde"
 [/prjmngr]
 
 [msgwin2]
-window=55591764,1,0,0,179,1622,39,869,179,1276,0,0,1
+window=56373420,1,0,0,136,1238,39,653,136,1276,0,0,1
 [/msgwin2]
 
 [msgwin1]
-window=55591764,1,0,0,179,1622,39,869,179,1276,0,0,0
+window=56373420,1,0,0,136,1238,39,653,136,1276,0,0,0
 [/msgwin1]
 
 [breakswin]
-window=55591764,1,0,0,179,1622,39,869,179,1276,0,0,2
+window=56373420,1,0,0,136,1238,39,653,136,1276,0,0,2
 hdrwidth0=200
 hdrwidth1=30
 hdrwidth2=80
@@ -155,7 +157,7 @@ font="Courier New",1,0,10,-13,-2147483640,0,0
 [/memwin2]
 
 [watch2win]
-window=55591764,1,0,0,179,1622,39,869,179,1276,0,0,3
+window=56373420,1,0,0,136,1238,39,653,136,1276,0,0,3
 hdrnamew=240,60,0
 font="Courier New",10
 hiresreadability=0
@@ -163,7 +165,7 @@ defbank="Bank1"
 toolbvis=1
 alignnumbers=0
 showanalyserr=0
-accsvisible=0
+accsvisible=1
 accsw=152
 mem1w=192
 mem1visible=0
@@ -176,7 +178,7 @@ lastfile=""
 listwidth=121
 findhistory=""
 replacehistory=""
-window=0,0,234,234,753,1440,496,295,753,1440,0,0,-1
+window=0,0,112,79,753,1440,112,79,753,1440,0,0,-1
 [/weblc]
 
 [evalmodifdlg]
@@ -185,19 +187,19 @@ valobj="0","2"
 [/evalmodifdlg]
 
 [paneltexted]
-editor="XClip-Panel",1,0,1,1,1,1,5149714,1693968,228279076,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+editor="XClip-Panel",1,0,1,1,1,1,5149714,1693968,218727216,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 window=0,0,0,94,313,483,313,483,313,483,0,0,-1
 font="Lucida Console",11
 [/paneltexted]
 
 [ctrlswin]
-window=55619728,1,0,0,918,278,948,42,948,278,0,0,0
+window=56406068,1,0,0,702,278,948,278,832,278,0,0,0
 [/ctrlswin]
 
 [prjfileswin]
-window=55619728,1,0,0,918,278,948,100,948,278,0,0,1
+window=56406068,1,0,0,702,278,948,278,832,278,0,0,1
 filesheight=409
-relatedheight=464
+relatedheight=248
 relatedcnt=4
 relfile0="Sysgen\ZakladacSin.map"
 relfile1="panelZakladac.pam"
@@ -206,24 +208,24 @@ relfile3="SendRoot\TecoApi.pub"
 [/prjfileswin]
 
 [Datalogger]
-window=55626260,0,0,0,705,1741,187,313,735,1749,0,0,0
+window=56411144,0,0,0,532,1357,532,97,735,1552,0,0,0
 [/Datalogger]
 
 [CFC_Editors]
 [/CFC_Editors]
 
 [PanelSIM_1]
-window=0,0,0,0,196,352,196,352,196,352,0,0,-1
+window=0,0,979,290,196,352,196,352,196,352,0,0,-1
 [/PanelSIM_1]
 
 [FormRegMngr1]
-window=0,0,695,273,317,233,317,233,317,233,0,0,-1
+window=56406068,1,0,0,702,278,732,286,317,278,0,0,5
 [/FormRegMngr1]
 
 [PlcNetManager]
 SortItems=1
 SortPlcs=1
-window=55619728,0,0,0,918,278,948,286,948,278,0,0,4
+window=56406068,1,0,0,702,278,732,286,832,278,0,0,4
 [/PlcNetManager]
 
 [SelectPLC]
@@ -231,28 +233,18 @@ IOSetupColW="200,190,72,72,72,72,64,140,"
 [/SelectPLC]
 
 [textsyneditor]
-editor="prgZakladac.ST",1,0,0,107,44,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1
-window=55626260,1,0,0,705,1622,948,1920,948,1749,0,0,1
+editor="prgZakladac.ST",1,0,0,298,28,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1
+window=56411144,1,0,0,702,1238,732,1536,832,1552,0,0,1
 localparams=0,1,1,1,1,30,0,80,1,2,1,0,0
 font="Courier New",10
 relay=0,0,0,0,0,"",0,0
-inspectorctx="Zakladac"
-debugparams=1,0,1
-[/textsyneditor]
-
-[textsyneditor]
-editor="zakladacPanelVarHolder.ST",1,0,0,4,16,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1
-window=55626260,1,0,0,705,1622,948,1920,735,1749,0,0,3
-localparams=0,1,1,1,1,30,0,80,1,2,1,0,0
-font="Courier New",10
-relay=0,0,0,0,0,"",0,0
-inspectorctx="Zakladac"
+inspectorctx=""
 debugparams=1,0,1
 [/textsyneditor]
 
 [paneltexted]
-editor="panelZakladac.pam",0,1,13,79,1,1,5149714,1693968,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-window=55626260,1,0,0,705,1622,948,1920,735,1749,0,0,2
+editor="panelZakladac.pam",0,1,7,78,1,1,5149714,1693968,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+window=56411144,1,0,0,702,1238,732,1536,735,1552,0,0,2
 font="Lucida Console",11
 [/paneltexted]
 
