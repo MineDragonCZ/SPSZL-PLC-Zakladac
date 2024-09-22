@@ -1,4 +1,4 @@
-#srcfile 'C:\MOSAICAPP\SPSZL-PLC-ZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\PRGZAKLADAC.ST'
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\PRGZAKLADAC.ST'
 
 #defpou prgZakladac
   int zakladac_state,
@@ -26,7 +26,7 @@
   bool manual_mode_next_step_input_last
 
  
-#srcfile 'C:\MOSAICAPP\SPSZL-PLC-ZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\PRGZAKLADAC.ST'
+#srcfile 'F:\MOSAICAPP\SINZAKLADAC\ZAKLADACSIN\ZAKLADACSIN\PRGZAKLADAC.ST'
 #pou prgZakladac
 #srcline 1 ;PROGRAM	prgZakladac
 
@@ -109,8 +109,9 @@
 #data byte _str_prgZakladac_24 = 
   'L','O','W','E','R',$09,'T','H','E',$09,'A','R','M',0
 #data byte _str_prgZakladac_25 = 
-  'R','E','L','E','A','S','E',$09,'T','H','E',$09,'M','A','T','E','R','I','A','L',
-  ' ','A','N','D',' ','R','A','I','S','E',' ','T','H','E',' ','A','R','M',0
+  'R','E','L','E','A','S','E',$09,'T','H','E',$09,'M','A','T','E','R','I','A','L',0
+#data byte _str_prgZakladac_26 = 
+  'R','A','I','S','E',' ','T','H','E',' ','A','R','M',0
 P     61
 prgZakladac_L0:
  LINK __SizeOf(prgZakladac__temp__)
@@ -1424,7 +1425,7 @@ prgZakladac_L78:
  EQ  
  JMC  prgZakladac_L79
 #srcline 319 ;									 1:
-#srcline 320 ;										zakladac_status	:= 'RELEASE	THE	MATERIAL AND RAISE THE ARM';
+#srcline 320 ;										zakladac_status	:= 'RELEASE	THE	MATERIAL';
  LD   0   ; null string
  LEAX zakladac_status
  WRI  
@@ -1439,31 +1440,54 @@ prgZakladac_L78:
  LD   bool 0       ; false
  WR   bool celistiChapadlo
 #debug_left bool celistiChapadlo
-#srcline 322 ;										posuvChapadlo_ver	:= 0;
+#srcline 322 ;										zakladac_substate	:= 2;
+ LD   int 2
+ WRX  zakladac_substate
+#debug_left int zakladac_substate
+#srcline 323 ;									 ;
+ JMP  prgZakladac_L77
+prgZakladac_L79:
+ LD   2
+ LDY  P4__st__
+ EQ  
+ JMC  prgZakladac_L80
+#srcline 324 ;									 2:
+#srcline 325 ;										zakladac_status	:= 'RAISE THE ARM';
+ LD   0   ; null string
+ LEAX zakladac_status
+ WRI  
+ LEAX zakladac_status
+ LD   80
+ DST    ; Level 1
+ LEA  _str_prgZakladac_26
+ SCON 
+#debug_left string zakladac_status
+ PDST   ; Level 1
+#srcline 326 ;										posuvChapadlo_ver	:= 0;
  LD   bool 0       ; false
  WR   bool posuvChapadlo_ver
 #debug_left bool posuvChapadlo_ver
-#srcline 323 ;										zakladac_substate	:= 0;
+#srcline 327 ;										zakladac_substate	:= 0;
  LD   int 0
  WRX  zakladac_substate
 #debug_left int zakladac_substate
-#srcline 324 ;										zakladac_state :=	0;
+#srcline 328 ;										zakladac_state :=	0;
  LD   int 0
  WRX  zakladac_state
 #debug_left int zakladac_state
-#srcline 325 ;									 ;
+#srcline 329 ;									 ;
  JMP  prgZakladac_L77
-prgZakladac_L79:
+prgZakladac_L80:
 prgZakladac_L77:
-#srcline 327 ;						END_IF
+#srcline 331 ;						END_IF
 prgZakladac_L75:
-#srcline 328 ;				 ;
+#srcline 332 ;				 ;
  JMP  prgZakladac_L15
 prgZakladac_L74:
 prgZakladac_L15:
-#srcline 331 ;	END_IF
+#srcline 334 ;	END_IF
 prgZakladac_L13:
-#srcline 332 ;END_PROGRAM
+#srcline 335 ;END_PROGRAM
 prgZakladac_RET:
  ULNK
 RET
