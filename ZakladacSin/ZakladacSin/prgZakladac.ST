@@ -329,7 +329,6 @@ PROGRAM	prgZakladac
 							END_CASE;
 						END_IF
 				 ;
-
 		END_CASE;
 	END_IF
 END_PROGRAM
