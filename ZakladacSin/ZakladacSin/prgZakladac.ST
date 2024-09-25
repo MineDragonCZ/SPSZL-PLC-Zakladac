@@ -78,9 +78,8 @@ PROGRAM	prgZakladac
 		 zakladac_substate :=	0;
 		 stop := false;
 	END_IF
-
+	startMotoru	:= 0;
 	IF pohyb_dokoncen	AND	timer_1_done THEN
-		startMotoru	:= 0;
 		zakladac_panel_var_holder(state	:= zakladac_state, subState	:= zakladac_substate);
 		timer_1_done :=	FALSE;
 		CASE zakladac_state	OF

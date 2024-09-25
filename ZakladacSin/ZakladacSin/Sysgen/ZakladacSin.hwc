@@ -159,7 +159,7 @@
                                   $00,$00,$00,$00,
                                   $00,$00,$00,$00,
                                   $00,$00,$00,$00
-;#module TModulE1 1, 1, 0, $0, 24, 12, __offset(r1_p0_DI), __offset(r1_p0_CNT_OUT1), __indx (_r1_p0_Table)
+#module TModulE1 1, 1, 0, $0, 24, 12, __offset(r1_p0_DI), __offset(r1_p0_CNT_OUT1), __indx (_r1_p0_Table)
 ;----------------------------------------------------------------------
 ;Rack : 1 ; Position : 1 ; 	 Type of unit : OS-1401; TXN 114 01
 #struct _TTS_OS1401
@@ -168,7 +168,7 @@
         USINT EDO1
 #table _TTS_OS1401 _r1_p1_Table = 1401,$00,$00,
                                   $80,$80
-;#module TModulE1 1, 1, 1, $0, 0, 2, 0, __offset(r1_p1_DO), __indx (_r1_p1_Table)
+#module TModulE1 1, 1, 1, $0, 0, 2, 0, __offset(r1_p1_DO), __indx (_r1_p1_Table)
 
 ;......................................................................
 

@@ -323,7 +323,6 @@ PROGRAM	prgZakladac
 									 ;
 									 2:
 										zakladac_status	:= 'RAISE THE ARM';
-										celistiChapadlo	:= 0;
 										posuvChapadlo_ver	:= 0;
 										zakladac_substate	:= 0;
 										zakladac_state :=	0;
