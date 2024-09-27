@@ -4,6 +4,15 @@ PROGRAM	prgZakladac
 		 zakladac_substate:	INT	:= 0;
 
 		 current_slot: INT :=	0;
+		 current_floor: INT := 0;
+		 
+		 slots : ARRAY [1..4, 1..5] OF BOOL := [
+           0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0
+     ];
+     hasMaterialInArm : BOOL := false;
 
 
 		 last_scanned_color: INT :=	-	1;
@@ -40,11 +49,13 @@ PROGRAM	prgZakladac
 		 zakladac_panel_var_holder : zakladacPanelVarHolder;
 
 		 searching_index : INT :=	0;
+		 isFirstRun : BOOL := true;
 
 		 automatic_mode	:	BOOL :=	1;
 		 manual_mode_next_step : BOOL	:= 0;
 		 manual_mode_next_step_input : BOOL := 0;
 		 manual_mode_next_step_input_last : BOOL := 0;
+		 
 	END_VAR
 	
 	IF manual_mode_next_step_input AND NOT(manual_mode_next_step_input_last) THEN
@@ -78,9 +89,8 @@ PROGRAM	prgZakladac
 		 zakladac_substate :=	0;
 		 stop := false;
 	END_IF
-
+	startMotoru	:= 0;
 	IF pohyb_dokoncen	AND	timer_1_done THEN
-		startMotoru	:= 0;
 		zakladac_panel_var_holder(state	:= zakladac_state, subState	:= zakladac_substate);
 		timer_1_done :=	FALSE;
 		CASE zakladac_state	OF
@@ -107,6 +117,8 @@ PROGRAM	prgZakladac
 						celistiChapadlo	:= 0;
 						posuvChapadlo_ver	:= 0;
 						searching_index	:= 0;
+						
+						hasMaterialInArm := false;
 
 						last_scanned_color :=	-	1;
 				 ;
@@ -130,25 +142,24 @@ PROGRAM	prgZakladac
 						startMotoru	:= 1;
 						zakladac_state :=	4;
 						zakladac_substate	:= 0;
+						current_floor := 0;
 					 END_IF
 				 ;
 				 4:
 						zakladac_status	:= 'CHECKING MATERIAL	TO PICK	UP';
-						IF materialJe	THEN
+						IF materialJe	AND (searching_index > 1 OR NOT(isFirstRun)) THEN
 								zakladac_state :=	5;
 								zakladac_substate	:= 0;
 						ELSE
+    				    IF current_slot < 5 THEN
+    				       slots[current_floor + 1, current_slot + 1] := materialJe;
+    				    END_IF
 								CASE zakladac_substate OF
 										 0:
 											zakladac_status	:= 'MOVING TO	NEXT SLOT	(SETUP)';
 											current_slot :=	current_slot + 1;
 											IF current_slot	>= 5 THEN
 												 current_slot	:= 0;
-												 searching_index :=	searching_index	+	1;
-												 IF	searching_index	>	3	THEN
-														stop :=	1;
-														searching_index	:= 0;
-												 END_IF
 											END_IF
 											intEncoder(inputInt	:= current_slot,
 																					out0 =>	poziceMotoru_hor_0,
@@ -163,11 +174,19 @@ PROGRAM	prgZakladac
 											zakladac_status	:= 'MOVING TO	NEXT SLOT	(RUN)';
 											 zakladac_substate :=	0;
 											 startMotoru :=	1;
+											 IF current_slot = 0 THEN
+												 searching_index :=	searching_index	+	1;
+												 IF	searching_index	>	3	THEN
+														stop :=	1;
+														searching_index	:= 0;
+												 END_IF
+											 END_IF
 										 ;
 								END_CASE;
 						END_IF
 				 ;
 				 5:
+				    isFirstRun := false;
 						IF timer_2_done	THEN
 							timer_2_done :=	FALSE;
 							CASE zakladac_substate OF
@@ -179,11 +198,17 @@ PROGRAM	prgZakladac
 									 1:
 										 zakladac_status :=	'PICKING UP	MATERIAL (GRAB)';
 										 celistiChapadlo :=	1;
+										 hasMaterialInArm := true;
 										 zakladac_substate :=	2;
 									 2:
 										 zakladac_status :=	'PICKING UP	MATERIAL (RAISE	ARM)';
 										 posuvChapadlo_ver :=	0;
 										 zakladac_substate :=	0;
+										
+        				     IF current_slot < 5 THEN
+        				        slots[current_floor + 1, current_slot + 1] := false;
+        				     END_IF
+        				    
 										 zakladac_state	:= 6;
 							END_CASE;
 						END_IF
@@ -269,6 +294,7 @@ PROGRAM	prgZakladac
 								out2 =>	poziceMotoru_ver_2,
 								out3 =>	poziceMotoru_ver_3
 						);
+						current_floor := barva_patro_addr;
 						 zakladac_state	:= 12;
 				 ;
 				 12:
@@ -276,11 +302,15 @@ PROGRAM	prgZakladac
 					 IF	vertikalniManipulacePovolena THEN
 						vyberMotoru	:= 1;
 						startMotoru	:= 1;
+						current_slot := 5;
 						zakladac_state :=	13;
 					 END_IF
 				 ;
 				 13:
 						zakladac_status	:= 'FIND EMPTY SLOT	TO PLACE THE MATERIAL';
+				    IF current_slot < 5 THEN
+				       slots[current_floor + 1, current_slot + 1] := materialJe;
+				    END_IF
 						IF NOT(materialJe) AND current_slot	<	4	THEN
 							 zakladac_state	:= 15;
 							 zakladac_substate :=	0;
@@ -319,6 +349,10 @@ PROGRAM	prgZakladac
 									 1:
 										zakladac_status	:= 'RELEASE	THE	MATERIAL';
 										celistiChapadlo	:= 0;
+										hasMaterialInArm := false;
+        				    IF current_slot < 5 THEN
+        				       slots[current_floor + 1, current_slot + 1] := true;
+        				    END_IF
 										zakladac_substate	:= 2;
 									 ;
 									 2:
@@ -330,7 +364,6 @@ PROGRAM	prgZakladac
 							END_CASE;
 						END_IF
 				 ;
-
 		END_CASE;
 	END_IF
 END_PROGRAM
