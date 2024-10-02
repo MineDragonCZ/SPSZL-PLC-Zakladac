@@ -22,6 +22,6 @@
 	<Item Name="Zakladac.hasMaterialInArm" Pos="030000EF" Type="0" />
 	<Item Name="Zakladac.start" Pos="030000F2" Type="0" />
 	<Item Name="Zakladac.stop" Pos="030000F2" Type="1" />
-	<Item Name="Zakladac.automatic_mode" Pos="0300018D" Type="1" />
-	<Item Name="Zakladac.manual_mode_next_step" Pos="0300018D" Type="2" />
+	<Item Name="Zakladac.automatic_mode" Pos="030001A0" Type="1" />
+	<Item Name="Zakladac.manual_mode_next_step" Pos="030001A0" Type="4" />
 </Variables>

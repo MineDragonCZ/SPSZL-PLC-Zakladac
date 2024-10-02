@@ -171,11 +171,13 @@ VAR_GLOBAL
   chapadloHorniPoloha  AT r0_p3_DI.DI4;
   chapadloRozevrene    AT r0_p3_DI.DI6;
   chapadloSevrene      AT r0_p3_DI.DI7;
+  modraLed             AT r0_p3_DO.DO4;
   pohybDokoncen_hor    AT r0_p3_DI.DI1;
   pohybDokoncen_ver    AT r0_p3_DI.DI3;
   posuvChapadlo_ver    AT r0_p3_DO.DO0;
   pripravenKPohybu_hor AT r0_p3_DI.DI0;
   pripravenKPohybu_ver AT r0_p3_DI.DI2;
+  zelenaLed            AT r0_p3_DO.DO5;
 END_VAR
 (* ********************************************************************** *)
 (* ---------------------------------------------------------------------- *)
@@ -188,10 +190,14 @@ VAR_GLOBAL
   r1_p0_CNT_OUT1       AT %Y20  : TCNTF_OUT;
   r1_p0_CNT_OUT2       AT %Y26  : TCNTF_OUT;
 (* alias *)
+  buttonStart          AT r1_p0_DI.DI10;
+  buttonStep           AT r1_p0_DI.DI9;
+  buttonStop           AT r1_p0_DI.DI7;
   cervenaBarva         AT r1_p0_DI.DI1;
   magnet               AT r1_p0_DI.DI4;
   materialJe           AT r1_p0_DI.DI5;
   modraBarva           AT r1_p0_DI.DI0;
+  spinacAutomat        AT r1_p0_DI.DI11;
   stribrnaBarva        AT r1_p0_DI.DI2;
   vertikalniManipulacePovolena AT r1_p0_DI.DI6;
   zelenaBarva          AT r1_p0_DI.DI3;

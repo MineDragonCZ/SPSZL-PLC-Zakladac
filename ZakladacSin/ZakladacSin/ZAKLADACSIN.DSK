@@ -3,13 +3,14 @@ Version="xPRO","4.3.00"
 [/desktop]
 
 [dockinfo]
-centralpc=29672456,1,0,0
-leftpane=29667380,0,1,0,0,1
-bottompane=29634732,0,166
-rightpane=29637012,0,167,0
+centralpc=55559176,1,0,0
+leftpane=55554820,0,1,1,167,1
+bottompane=55522848,0,0
+rightpane=55525108,0,167,0
 [/dockinfo]
 
 [closedtextpaneleditors]
+txpaned="panelZakladac.pam",5,66,39,27880840,8,6,643290077,31132541,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 [/closedtextpaneleditors]
 
 [txtextsyneditor]
@@ -35,6 +36,7 @@ maskhistory=""
 [/txtextsyneditor]
 
 [closedtextsyneditors]
+txsyned="prgZakladac.ST",118,21,1,1,1,1,2408250640,31134922,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 txsyned="zakladacEncodeInt.ST",1,1,1,1,1,1,3201836444,31132516,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 txsyned="zakladacPanelVarHolder.ST",1,1,1,1,1,1,3201873524,31132516,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 txsyned="zakladacGetVerticalAddrFromColor.ST",1,1,1,1,1,1,3201860697,31132516,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -113,15 +115,15 @@ nodeplus="PlcDoc"
 [/prjmngr]
 
 [msgwin2]
-window=29634732,1,0,0,136,1524,39,653,136,1276,0,0,1
+window=55522848,1,0,0,136,1357,39,653,136,1276,0,0,1
 [/msgwin2]
 
 [msgwin1]
-window=29634732,1,0,0,136,1524,39,653,136,1276,0,0,0
+window=55522848,1,0,0,136,1357,39,653,136,1276,0,0,0
 [/msgwin1]
 
 [breakswin]
-window=29634732,1,0,0,136,1524,39,653,136,1276,0,0,2
+window=55522848,1,0,0,136,1357,39,653,136,1276,0,0,2
 hdrwidth0=200
 hdrwidth1=30
 hdrwidth2=80
@@ -159,7 +161,7 @@ font="Courier New",1,0,10,-13,-2147483640,0,0
 [/memwin2]
 
 [watch2win]
-window=29634732,1,0,0,136,1524,39,653,136,1276,0,0,3
+window=55522848,1,0,0,136,1357,39,653,136,1276,0,0,3
 hdrnamew=240,60,0
 font="Courier New",10
 hiresreadability=0
@@ -189,17 +191,17 @@ valobj="0","2"
 [/evalmodifdlg]
 
 [paneltexted]
-editor="XClip-Panel",1,0,1,1,1,1,5149714,1693968,218727216,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+editor="XClip-Panel",1,0,1,1,1,1,5149714,1693968,218727072,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 window=0,0,0,94,313,483,313,483,313,483,0,0,-1
 font="Lucida Console",11
 [/paneltexted]
 
 [ctrlswin]
-window=29667380,1,0,0,702,159,948,159,832,159,0,0,0
+window=55554820,1,0,0,702,159,948,159,832,159,0,0,0
 [/ctrlswin]
 
 [prjfileswin]
-window=29667380,1,0,0,702,159,948,159,832,159,0,0,1
+window=55554820,1,0,0,702,159,948,159,832,159,0,0,1
 filesheight=409
 relatedheight=218
 relatedcnt=4
@@ -210,7 +212,7 @@ relfile3="SendRoot\TecoApi.pub"
 [/prjfileswin]
 
 [Datalogger]
-window=29672456,0,0,0,532,1357,532,97,735,1552,0,0,0
+window=55559176,0,0,0,532,1357,532,97,735,1552,0,0,0
 [/Datalogger]
 
 [CFC_Editors]
@@ -221,13 +223,13 @@ window=0,0,979,290,196,352,196,352,196,352,0,0,-1
 [/PanelSIM_1]
 
 [FormRegMngr1]
-window=29667380,1,0,0,702,159,732,167,317,159,0,0,5
+window=55554820,1,0,0,702,159,732,167,317,159,0,0,5
 [/FormRegMngr1]
 
 [PlcNetManager]
 SortItems=1
 SortPlcs=1
-window=29667380,1,0,0,702,159,732,167,832,159,0,0,4
+window=55554820,1,0,0,702,159,732,167,832,159,0,0,4
 [/PlcNetManager]
 
 [SelectPLC]
@@ -235,24 +237,8 @@ IOSetupColW="200,190,174,72,72,72,64,140,"
 [/SelectPLC]
 
 [FormDesign1]
-window=29672456,1,0,0,702,1524,732,1536,732,1365,0,0,2
+window=55559176,0,0,0,698,1357,732,1536,732,1365,0,0,1
 [/FormDesign1]
-
-[textsyneditor]
-editor="prgZakladac.ST",1,0,0,89,51,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1
-window=29672456,1,0,0,702,1524,732,1536,832,1552,0,0,1
-localparams=0,1,1,1,1,30,0,80,1,2,1,0,0
-font="Courier New",10
-relay=0,0,0,0,0,"",0,0
-inspectorctx="Zakladac"
-debugparams=1,0,1
-[/textsyneditor]
-
-[paneltexted]
-editor="panelZakladac.pam",0,1,5,66,1,1,5149714,1693968,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-window=29672456,1,0,0,702,1524,732,1536,732,1365,0,0,3
-font="Lucida Console",11
-[/paneltexted]
 
 [inspectors]
 [/inspectors]

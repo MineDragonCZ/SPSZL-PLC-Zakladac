@@ -34,6 +34,9 @@ PROGRAM	prgZakladac
 		 timer_1_done: BOOL;
 		 timer_2:	TON;
 		 timer_2_done: BOOL;
+		 
+		 timer_startBtn : TON;
+		 timer_startBtn_time : TIME := t#1s;
 
 
 		 intEncoder: zakladacEncodeInt;
@@ -52,11 +55,28 @@ PROGRAM	prgZakladac
 		 isFirstRun : BOOL := true;
 
 		 automatic_mode	:	BOOL :=	1;
+		 automatic_mode_switch_state : BOOL := 0;
+		 automatic_mode_switch_state_last : BOOL := 0;
 		 manual_mode_next_step : BOOL	:= 0;
 		 manual_mode_next_step_input : BOOL := 0;
 		 manual_mode_next_step_input_last : BOOL := 0;
 		 
+		 stopped : BOOL := false;
+		 
 	END_VAR
+	
+	start := buttonStart;
+	stop := buttonStop;
+	automatic_mode_switch_state := spinacAutomat;
+	manual_mode_next_step_input := buttonStep;
+	
+	modraLed := NOT(automatic_mode) AND zakladac_state >= 0;
+	
+	
+	IF automatic_mode_switch_state AND NOT(automatic_mode_switch_state_last) THEN
+	   automatic_mode := NOT(automatic_mode);
+	END_IF
+	automatic_mode_switch_state_last := automatic_mode_switch_state;
 	
 	IF manual_mode_next_step_input AND NOT(manual_mode_next_step_input_last) THEN
 	   manual_mode_next_step := true;
@@ -83,26 +103,38 @@ PROGRAM	prgZakladac
 	END_IF
 	timer_1(IN :=	NOT(timer_1_done), PT	:= main_clock_time);
 	timer_2(IN :=	NOT(timer_2_done), PT	:= subs_clock_time);
+	
+	IF zakladac_state <= -1 OR stopped THEN
+     timer_startBtn(IN := NOT(timer_startBtn.Q), PT := timer_startBtn_time);
+    	IF timer_startBtn.Q THEN
+    	   zelenaLed := NOT(zelenaLed);
+      END_IF
+  ELSE
+      zelenaLed := true;
+  END_IF
+  
 
 	IF stop	THEN
-		 zakladac_state	:= -1;
-		 zakladac_substate :=	0;
-		 isFirstRun := true;
+	   stopped := true;
 		 stop := false;
 	END_IF
 	startMotoru	:= 0;
-	IF pohyb_dokoncen	AND	timer_1_done THEN
+	IF zakladac_state = -1 OR stopped THEN
+			zakladac_status	:= 'IDLE';
+		 IF	start	AND	NOT(stop)	THEN
+				start	:= 0;
+				stopped := false;
+				IF zakladac_state = -1 THEN
+				   zakladac_state := 0;
+				   isFirstRun := true;
+	      END_IF
+		 END_IF
+	END_IF
+	
+	IF pohyb_dokoncen	AND NOT(stopped) AND	timer_1_done THEN
 		zakladac_panel_var_holder(state	:= zakladac_state, subState	:= zakladac_substate);
 		timer_1_done :=	FALSE;
 		CASE zakladac_state	OF
-				 -1:
-						zakladac_status	:= 'IDLE';
-					 IF	start	AND	NOT(stop)	THEN
-							zakladac_state :=	0;
-							zakladac_substate	:= 0;
-							start	:= 0;
-							RETURN;
-					 END_IF
 				 0:
 						zakladac_status	:= 'RESETING...';
 					 //	reset	horizontalne do	vychozi	pozice
@@ -148,6 +180,10 @@ PROGRAM	prgZakladac
 				 ;
 				 4:
 						zakladac_status	:= 'CHECKING MATERIAL	TO PICK	UP';
+						IF NOT(materialJe) AND (searching_index > 1 AND NOT(isFirstRun)) THEN
+      						stopped := true;
+      						zakladac_state := -1;
+						END_IF
 						IF materialJe	AND (searching_index > 1 OR NOT(isFirstRun)) THEN
 								zakladac_state :=	5;
 								zakladac_substate	:= 0;
@@ -175,15 +211,11 @@ PROGRAM	prgZakladac
 											zakladac_status	:= 'MOVING TO	NEXT SLOT	(RUN)';
 											 zakladac_substate :=	0;
 											 startMotoru :=	1;
-											 IF current_slot = 0 THEN
-												 searching_index :=	searching_index	+	1;
-												 IF	searching_index	>	3	THEN
-														stop :=	1;
-														searching_index	:= 0;
-												 END_IF
-											 END_IF
 										 ;
 								END_CASE;
+						END_IF
+						IF current_slot = 4 AND zakladac_substate = 0 THEN
+						   searching_index := searching_index + 1;
 						END_IF
 				 ;
 				 5:

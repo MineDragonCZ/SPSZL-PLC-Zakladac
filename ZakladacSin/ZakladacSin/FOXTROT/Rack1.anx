@@ -17,3 +17,7 @@
 1;1;|0;|;|0;DO.DO9;poziceMotoru_ver_1;
 1;1;|0;|;|0;DO.DO10;poziceMotoru_ver_2;
 1;1;|0;|;|0;DO.DO11;poziceMotoru_ver_3;
+1;0;|0;|;|0;DI.DI10;buttonStart;
+1;0;|0;|;|0;DI.DI7;buttonStop;
+1;0;|0;|;|0;DI.DI9;buttonStep;
+1;0;|0;|;|0;DI.DI11;spinacAutomat;
