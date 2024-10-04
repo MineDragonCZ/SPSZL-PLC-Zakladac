@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="windows-1250" ?>
-<web version="8.1" propfont="true" foot="© 2007 - 2020 Teco a.s." dwMode="1" MaxUid="25030">
+<web version="8.1" propfont="true" foot="© 2007 - 2020 Teco a.s." dwMode="1" MaxUid="25031">
 	<panels></panels>
 	<Grid Enable="1" X="5" Y="5" />
 	<globalset newdim="1" />
 	<group caption="" Uid="24975">
-		<page caption="Index" name="PAGE1.XML" ajax="true" pause="1000" default="true" Uid="24974" ucid="1727420961" width="575" height="165">
+		<page caption="Index" name="PAGE1.XML" ajax="true" pause="1000" default="true" Uid="24974" ucid="1727937517" width="466" height="184">
 			<object caption="" X="10" Y="5" xoff="3" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="24980">
 				<image optcap="" variable="Zakladac.slots[1,1]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
@@ -68,29 +68,20 @@
 			<object caption="" X="4" Y="5" xoff="6" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25021">
 				<image optcap="" variable="Zakladac.hasMaterialInArm" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
-			<object caption="" X="44" Y="5" xoff="1" yoff="3" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25022" hint="start">
-				<image optcap="" variable="Zakladac.start" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+			<object caption="" X="44" Y="5" xoff="1" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25022" hint="start">
+				<image optcap="" variable="Zakladac.stopped" type="BOOL" on="LED_GR_2.PNG" off="LED_GR_4.PNG" />
 			</object>
-			<object caption="" X="49" Y="5" xoff="1" yoff="3" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25023" hint="stop">
-				<image optcap="" variable="Zakladac.stop" type="BOOL" on="LED_RE_4.PNG" off="LED_RE_2.PNG" />
-			</object>
-			<object caption="" X="57" Y="5" xoff="7" yoff="3" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25024" hint="automatic">
+			<object caption="" X="52" Y="5" xoff="7" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25024" hint="automatic">
 				<image optcap="" variable="Zakladac.automatic_mode" type="BOOL" on="LED_CY_4.PNG" off="LED_CY_2.PNG" />
 			</object>
-			<object caption="" X="67" Y="5" xoff="7" yoff="3" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25025" hint="step">
-				<image optcap="" variable="Zakladac.manual_mode_next_step" type="BOOL" on="LED_BL_4.PNG" off="LED_BL_2.PNG" />
-			</object>
-			<object caption="Start" X="44" Y="9" xoff="6" yoff="6" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25026">
+			<object caption="Running" X="43" Y="9" xoff="4" yoff="6" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25026">
 				<label />
 			</object>
-			<object caption="Stop" X="49" Y="9" xoff="6" yoff="6" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25027">
+			<object caption="Automatic" X="51" Y="9" xoff="0" yoff="6" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25028">
 				<label />
 			</object>
-			<object caption="Automatic" X="56" Y="9" xoff="0" yoff="6" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25028">
-				<label />
-			</object>
-			<object caption="Krok" X="68" Y="9" xoff="4" yoff="6" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25029">
-				<label />
+			<object caption="" X="41" Y="16" xoff="5" yoff="0" level="0" readonly="false" front="0" back="15790320" strong="false" italic="false" size="13" transparent="false" visneg="false" Uid="25030">
+				<block dynamic="true" width="64" height="64" border="true" color="1" variable="Zakladac.barva_patro_addr" type="INT" />
 			</object>
 		</page>
 	</group>

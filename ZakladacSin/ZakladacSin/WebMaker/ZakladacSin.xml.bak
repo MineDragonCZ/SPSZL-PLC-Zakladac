@@ -4,80 +4,80 @@
 	<Grid Enable="1" X="5" Y="5" />
 	<globalset newdim="1" />
 	<group caption="" Uid="24975">
-		<page caption="Index" name="PAGE1.XML" ajax="true" pause="1000" default="true" Uid="24974" ucid="1727420918" width="575" height="165">
+		<page caption="Index" name="PAGE1.XML" ajax="true" pause="1000" default="true" Uid="24974" ucid="1727420961" width="575" height="165">
 			<object caption="" X="10" Y="5" xoff="3" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="24980">
-				<image optcap="" variable="Zakladac.slots[1, 1]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[1,1]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="14" Y="5" xoff="1" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="24981">
-				<image optcap="" variable="Zakladac.slots[1, 2]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[1,2]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="17" Y="5" xoff="7" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="24983">
-				<image optcap="" variable="Zakladac.slots[1, 3]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[1,3]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="21" Y="5" xoff="5" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="24984">
-				<image optcap="" variable="Zakladac.slots[1, 4]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[1,4]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="25" Y="5" xoff="3" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="24985">
-				<image optcap="" variable="Zakladac.slots[1, 5]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[1,5]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="10" Y="9" xoff="3" yoff="1" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25006">
-				<image optcap="" variable="Zakladac.slots[2, 1]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[2,1]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="14" Y="9" xoff="1" yoff="1" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25007">
-				<image optcap="" variable="Zakladac.slots[2, 2]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[2,2]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="17" Y="9" xoff="7" yoff="1" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25008">
-				<image optcap="" variable="Zakladac.slots[2, 3]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[2,3]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="21" Y="9" xoff="5" yoff="1" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25009">
-				<image optcap="" variable="Zakladac.slots[2, 4]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[2,4]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="25" Y="9" xoff="3" yoff="1" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25010">
-				<image optcap="" variable="Zakladac.slots[2, 5]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[2,5]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="10" Y="12" xoff="3" yoff="7" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25011">
-				<image optcap="" variable="Zakladac.slots[3, 1]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[3,1]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="14" Y="12" xoff="1" yoff="7" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25012">
-				<image optcap="" variable="Zakladac.slots[3, 2]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[3,2]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="17" Y="12" xoff="7" yoff="7" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25013">
-				<image optcap="" variable="Zakladac.slots[3, 3]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[3,3]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="21" Y="12" xoff="5" yoff="7" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25014">
-				<image optcap="" variable="Zakladac.slots[3, 4]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[3,4]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="25" Y="12" xoff="3" yoff="7" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25015">
-				<image optcap="" variable="Zakladac.slots[3, 5]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[3,5]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="10" Y="16" xoff="3" yoff="5" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25016">
-				<image optcap="" variable="Zakladac.slots[4, 1]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[4,1]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="14" Y="16" xoff="1" yoff="5" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25017">
-				<image optcap="" variable="Zakladac.slots[4, 2]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[4,2]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="17" Y="16" xoff="7" yoff="5" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25018">
-				<image optcap="" variable="Zakladac.slots[4, 3]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[4,3]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="21" Y="16" xoff="5" yoff="5" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25019">
-				<image optcap="" variable="Zakladac.slots[4, 4]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[4,4]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="25" Y="16" xoff="3" yoff="5" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25020">
-				<image optcap="" variable="Zakladac.slots[4, 5]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
+				<image optcap="" variable="Zakladac.slots[4,5]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
 			<object caption="" X="4" Y="5" xoff="6" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25021">
 				<image optcap="" variable="Zakladac.hasMaterialInArm" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
-			<object caption="" X="44" Y="5" xoff="1" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25022" hint="start">
+			<object caption="" X="44" Y="5" xoff="1" yoff="3" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25022" hint="start">
 				<image optcap="" variable="Zakladac.start" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>
-			<object caption="" X="49" Y="5" xoff="1" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25023" hint="stop">
+			<object caption="" X="49" Y="5" xoff="1" yoff="3" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25023" hint="stop">
 				<image optcap="" variable="Zakladac.stop" type="BOOL" on="LED_RE_4.PNG" off="LED_RE_2.PNG" />
 			</object>
-			<object caption="" X="57" Y="5" xoff="7" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25024" hint="automatic">
+			<object caption="" X="57" Y="5" xoff="7" yoff="3" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25024" hint="automatic">
 				<image optcap="" variable="Zakladac.automatic_mode" type="BOOL" on="LED_CY_4.PNG" off="LED_CY_2.PNG" />
 			</object>
-			<object caption="" X="67" Y="5" xoff="7" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25025" hint="step">
+			<object caption="" X="67" Y="5" xoff="7" yoff="3" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25025" hint="step">
 				<image optcap="" variable="Zakladac.manual_mode_next_step" type="BOOL" on="LED_BL_4.PNG" off="LED_BL_2.PNG" />
 			</object>
 			<object caption="Start" X="44" Y="9" xoff="6" yoff="6" level="0" readonly="false" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="25026">

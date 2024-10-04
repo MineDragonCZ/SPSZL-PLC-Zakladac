@@ -42,7 +42,7 @@ PROGRAM	prgZakladac
 		 intEncoder: zakladacEncodeInt;
 		 getVerticalAddressFromColor:	zakladacGetVerticalAddrFromColor;
 
-		 main_clock_time:	TIME :=	T#200ms;
+		 main_clock_time:	TIME :=	T#150ms;
 		 subs_clock_time:	TIME :=	T#700ms;
 
 
@@ -180,43 +180,41 @@ PROGRAM	prgZakladac
 				 ;
 				 4:
 						zakladac_status	:= 'CHECKING MATERIAL	TO PICK	UP';
-						IF NOT(materialJe) AND (searching_index > 1 AND NOT(isFirstRun)) THEN
-      						stopped := true;
-      						zakladac_state := -1;
-						END_IF
-						IF materialJe	AND (searching_index > 1 OR NOT(isFirstRun)) THEN
-								zakladac_state :=	5;
-								zakladac_substate	:= 0;
+						IF NOT(materialJe) AND ((searching_index > 2 AND isFirstRun) OR (searching_index > 1 AND NOT(isFirstRun))) THEN
+      						zakladac_state := 20;
 						ELSE
-    				    IF current_slot < 5 THEN
-    				       slots[current_floor + 1, current_slot + 1] := materialJe;
-    				    END_IF
-								CASE zakladac_substate OF
-										 0:
-											zakladac_status	:= 'MOVING TO	NEXT SLOT	(SETUP)';
-											current_slot :=	current_slot + 1;
-											IF current_slot	>= 5 THEN
-												 current_slot	:= 0;
-											END_IF
-											intEncoder(inputInt	:= current_slot,
-																					out0 =>	poziceMotoru_hor_0,
-																					out1 =>	poziceMotoru_hor_1,
-																					out2 =>	poziceMotoru_hor_2,
-																					out3 =>	poziceMotoru_hor_3
-											);
-											vyberMotoru	:= 0;
-											zakladac_substate	:= 1;
-										 ;
-										 1:
-											zakladac_status	:= 'MOVING TO	NEXT SLOT	(RUN)';
-											 zakladac_substate :=	0;
-											 startMotoru :=	1;
-										 ;
-								END_CASE;
-						END_IF
-						IF current_slot = 4 AND zakladac_substate = 0 THEN
-						   searching_index := searching_index + 1;
-						END_IF
+  						IF materialJe	AND zakladac_substate = 0 AND (searching_index > 1 OR NOT(isFirstRun)) THEN
+  								zakladac_state :=	5;
+  								zakladac_substate	:= 0;
+  						ELSE
+  								CASE zakladac_substate OF
+  										 0:
+            				    IF current_slot < 5 THEN
+            				       slots[current_floor + 1, current_slot + 1] := materialJe;
+            				    END_IF
+  											zakladac_status	:= 'MOVING TO	NEXT SLOT	(SETUP)';
+  											current_slot :=	current_slot + 1;
+  											IF current_slot	>= 5 THEN
+                           searching_index := searching_index + 1;
+											     current_slot	:= 0;
+  											END_IF
+  											intEncoder(inputInt	:= current_slot,
+  																					out0 =>	poziceMotoru_hor_0,
+  																					out1 =>	poziceMotoru_hor_1,
+  																					out2 =>	poziceMotoru_hor_2,
+  																					out3 =>	poziceMotoru_hor_3
+  											);
+  											vyberMotoru	:= 0;
+  											zakladac_substate	:= 1;
+  										 ;
+  										 1:
+  											zakladac_status	:= 'MOVING TO	NEXT SLOT	(RUN)';
+  											 zakladac_substate :=	0;
+  											 startMotoru :=	1;
+  										 ;
+  								END_CASE;
+  						END_IF
+					  END_IF
 				 ;
 				 5:
 				    isFirstRun := false;
@@ -289,10 +287,7 @@ PROGRAM	prgZakladac
 											zakladac_substate	:= 1;
 											last_scanned_color :=	-	1;
 									 ;
-									 1:	// wait	2	seconds
-											zakladac_substate	:= 2;
-									 ;
-									 2:	// sken	barvy
+									 1:	// sken	barvy
 											zakladac_status	:= 'SCANNING COLOR...';
 											last_scanned_color :=	0;
 											IF modraBarva	THEN
@@ -307,9 +302,9 @@ PROGRAM	prgZakladac
 											IF zelenaBarva THEN
 												 last_scanned_color	:= 4;
 											END_IF
-											zakladac_substate	:= 3;
+											zakladac_substate	:= 2;
 									 ;
-									 3:	// posun zpet	nahoru od	èidla
+									 2:	// posun zpet	nahoru od	èidla
 											zakladac_status	:= 'RAISE	THE	ARM	FROM THE SENSOR';
 											posuvChapadlo_ver	:= 0;
 											zakladac_substate	:= 0;
@@ -396,6 +391,24 @@ PROGRAM	prgZakladac
 									 ;
 							END_CASE;
 						END_IF
+				 ;
+				 // dock
+				 20:
+						zakladac_status	:= 'DOCKING...';
+					 //	reset	horizontalne do	vychozi	pozice
+						poziceMotoru_hor_0 :=	1;
+						poziceMotoru_hor_1 :=	0;
+						poziceMotoru_hor_2 :=	1;
+						poziceMotoru_hor_3 :=	0;
+						vyberMotoru	:= 0;
+						current_slot :=	5;
+						zakladac_state :=	21;
+				 ;
+				 21:
+						zakladac_status	:= 'DOCKING... MOVE HOR.	TO ZERO	(RUN)';
+						startMotoru	:= 1;
+						zakladac_state :=	-1;
+						stopped := true;
 				 ;
 		END_CASE;
 	END_IF

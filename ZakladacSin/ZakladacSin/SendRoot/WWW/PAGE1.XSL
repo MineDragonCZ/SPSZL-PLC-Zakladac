@@ -15,18 +15,18 @@
 <title>
 <xsl:value-of select="/PAGE/@TITLE" />
 Index</title>
-<script src="PAGE1.JS?U=1727420961" language="JavaScript" charset="utf-8" />
+<script src="PAGE1.JS?U=1727937517" language="JavaScript" charset="utf-8" />
 <style type="text/css">.mono {font-family: Verdana, Arial, FreeSans, sans-serif;}</style>
 </head>
 <body onload="GetXML('PAGE1.XML'); FunWatchDog();">
-<xsl:if test="1727420961 != ACCESS/@UCID">
+<xsl:if test="1727937517 != ACCESS/@UCID">
 <xsl:attribute name="onload">
 null;
 </xsl:attribute>
 <div id="cachewarning" style="text-align: left;"></div>
 <script src="REFCLR.JS" language="JavaScript" charset="utf-8"></script>
 </xsl:if>
-<xsl:if test="1727420961 = ACCESS/@UCID">
+<xsl:if test="1727937517 = ACCESS/@UCID">
 <table cellpadding="0" cellspacing="0">
 <tr style="height: 40px;">
 <!--logo-->
@@ -182,50 +182,21 @@ Index</span>
 <xsl:if test="INPUT[21]/@VALUE != 0">
 <div id="INPUT21" style="position: absolute; top: 35px; left: 30px; z-index: 21; background-image: url(IMAGES/LED_GR_4.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
 </xsl:if>
-<form style="position: absolute; top: 35px; left: 345px; z-index: 22;">
 <xsl:if test="INPUT[22]/@VALUE = 0">
-<input id="INPUT22h" type="hidden" name="{INPUT[22]/@NAME}" value="1" />
-<div title="start" id="INPUT22" class="imgsub" onclick="PostXML22()" style="background-image: url(IMAGES/LED_GR_2.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
+<div title="start" id="INPUT22" style="position: absolute; top: 35px; left: 345px; z-index: 22; background-image: url(IMAGES/LED_GR_4.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
 </xsl:if>
 <xsl:if test="INPUT[22]/@VALUE != 0">
-<input id="INPUT22h" type="hidden" name="{INPUT[22]/@NAME}" value="0" />
-<div title="start" id="INPUT22" class="imgsub" onclick="PostXML22()" style="background-image: url(IMAGES/LED_GR_4.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
+<div title="start" id="INPUT22" style="position: absolute; top: 35px; left: 345px; z-index: 22; background-image: url(IMAGES/LED_GR_2.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
 </xsl:if>
-</form>
-<form style="position: absolute; top: 35px; left: 385px; z-index: 23;">
 <xsl:if test="INPUT[23]/@VALUE = 0">
-<input id="INPUT23h" type="hidden" name="{INPUT[23]/@NAME}" value="1" />
-<div title="stop" id="INPUT23" class="imgsub" onclick="PostXML23()" style="background-image: url(IMAGES/LED_RE_2.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
+<div title="automatic" id="INPUT23" style="position: absolute; top: 35px; left: 415px; z-index: 23; background-image: url(IMAGES/LED_CY_2.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
 </xsl:if>
 <xsl:if test="INPUT[23]/@VALUE != 0">
-<input id="INPUT23h" type="hidden" name="{INPUT[23]/@NAME}" value="0" />
-<div title="stop" id="INPUT23" class="imgsub" onclick="PostXML23()" style="background-image: url(IMAGES/LED_RE_4.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
+<div title="automatic" id="INPUT23" style="position: absolute; top: 35px; left: 415px; z-index: 23; background-image: url(IMAGES/LED_CY_4.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
 </xsl:if>
-</form>
-<form style="position: absolute; top: 35px; left: 455px; z-index: 24;">
-<xsl:if test="INPUT[24]/@VALUE = 0">
-<input id="INPUT24h" type="hidden" name="{INPUT[24]/@NAME}" value="1" />
-<div title="automatic" id="INPUT24" class="imgsub" onclick="PostXML24()" style="background-image: url(IMAGES/LED_CY_2.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
-</xsl:if>
-<xsl:if test="INPUT[24]/@VALUE != 0">
-<input id="INPUT24h" type="hidden" name="{INPUT[24]/@NAME}" value="0" />
-<div title="automatic" id="INPUT24" class="imgsub" onclick="PostXML24()" style="background-image: url(IMAGES/LED_CY_4.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
-</xsl:if>
-</form>
-<form style="position: absolute; top: 35px; left: 535px; z-index: 25;">
-<xsl:if test="INPUT[25]/@VALUE = 0">
-<input id="INPUT25h" type="hidden" name="{INPUT[25]/@NAME}" value="1" />
-<div title="step" id="INPUT25" class="imgsub" onclick="PostXML25()" style="background-image: url(IMAGES/LED_BL_2.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
-</xsl:if>
-<xsl:if test="INPUT[25]/@VALUE != 0">
-<input id="INPUT25h" type="hidden" name="{INPUT[25]/@NAME}" value="0" />
-<div title="step" id="INPUT25" class="imgsub" onclick="PostXML25()" style="background-image: url(IMAGES/LED_BL_4.PNG); line-height: 40px; height: 40px; width: 40px;"></div>
-</xsl:if>
-</form>
-<div style="position: absolute; top: 70px; left: 350px; z-index: 26;">Start</div>
-<div style="position: absolute; top: 70px; left: 390px; z-index: 27;">Stop</div>
-<div style="position: absolute; top: 70px; left: 440px; z-index: 28;">Automatic</div>
-<div style="position: absolute; top: 70px; left: 540px; z-index: 29;">Krok</div>
+<div style="position: absolute; top: 70px; left: 340px; z-index: 24;">Running</div>
+<div style="position: absolute; top: 70px; left: 400px; z-index: 25;">Automatic</div>
+<div id="INPUT24" style="position: absolute; top: 120px; left: 325px; z-index: 26;height: 62px; width: 62px; border: 1px solid #000000; background-color: #F0F0F0;"></div>
 </div>
 </td>
 </tr>

@@ -45,7 +45,7 @@ if(xmlhttpGET.status != 200){
 alert('Problem retrieving XML data ' + xmlhttpGET.statusText + '(' + xmlhttpGET.status + ')');
 document.location.reload(true)
 return;}
-var access = xmlhttpGET.responseXML.documentElement.getElementsByTagName('ACCESS')[0]; if(!access || access.getAttribute('UCID') != 1727420961) {document.location.reload(true); return;}
+var access = xmlhttpGET.responseXML.documentElement.getElementsByTagName('ACCESS')[0]; if(!access || access.getAttribute('UCID') != 1727937517) {document.location.reload(true); return;}
 var pd = '';
 var x=xmlhttpGET.responseXML.documentElement.getElementsByTagName('INPUT');
 if(x[0]) {
@@ -176,81 +176,19 @@ SetBg('INPUT21', 'LED_GR_2.PNG');
 SetBg('INPUT21', 'LED_GR_4.PNG');
 }
 var Input22 = document.getElementById('INPUT22');
-var Input22h = document.getElementById('INPUT22h');
-if(Input22h) { vz = x[21].getAttribute('VALUE') == '0'; iz = Input22h.value == '0';
-if(vz == iz) {
-if(vz) {
-Input22h.value = '1';
-Input22.style.backgroundImage = 'url("IMAGES/LED_GR_2.PNG")';
-if(Input22.getAttribute('value') != null) {Input22.value = '';} else {}
-} else {
-Input22h.value = '0';
-Input22.style.backgroundImage = 'url("IMAGES/LED_GR_4.PNG")';
-if(Input22.getAttribute('value') != null) {Input22.value = '';
-} else {}
-}}} else {
 if(x[21].getAttribute('VALUE') == '0') {
-SetBg('INPUT22', 'LED_GR_2.PNG');
-} else {
 SetBg('INPUT22', 'LED_GR_4.PNG');
-}}
+} else {
+SetBg('INPUT22', 'LED_GR_2.PNG');
+}
 var Input23 = document.getElementById('INPUT23');
-var Input23h = document.getElementById('INPUT23h');
-if(Input23h) { vz = x[22].getAttribute('VALUE') == '0'; iz = Input23h.value == '0';
-if(vz == iz) {
-if(vz) {
-Input23h.value = '1';
-Input23.style.backgroundImage = 'url("IMAGES/LED_RE_2.PNG")';
-if(Input23.getAttribute('value') != null) {Input23.value = '';} else {}
-} else {
-Input23h.value = '0';
-Input23.style.backgroundImage = 'url("IMAGES/LED_RE_4.PNG")';
-if(Input23.getAttribute('value') != null) {Input23.value = '';
-} else {}
-}}} else {
 if(x[22].getAttribute('VALUE') == '0') {
-SetBg('INPUT23', 'LED_RE_2.PNG');
+SetBg('INPUT23', 'LED_CY_2.PNG');
 } else {
-SetBg('INPUT23', 'LED_RE_4.PNG');
-}}
+SetBg('INPUT23', 'LED_CY_4.PNG');
+}
 var Input24 = document.getElementById('INPUT24');
-var Input24h = document.getElementById('INPUT24h');
-if(Input24h) { vz = x[23].getAttribute('VALUE') == '0'; iz = Input24h.value == '0';
-if(vz == iz) {
-if(vz) {
-Input24h.value = '1';
-Input24.style.backgroundImage = 'url("IMAGES/LED_CY_2.PNG")';
-if(Input24.getAttribute('value') != null) {Input24.value = '';} else {}
-} else {
-Input24h.value = '0';
-Input24.style.backgroundImage = 'url("IMAGES/LED_CY_4.PNG")';
-if(Input24.getAttribute('value') != null) {Input24.value = '';
-} else {}
-}}} else {
-if(x[23].getAttribute('VALUE') == '0') {
-SetBg('INPUT24', 'LED_CY_2.PNG');
-} else {
-SetBg('INPUT24', 'LED_CY_4.PNG');
-}}
-var Input25 = document.getElementById('INPUT25');
-var Input25h = document.getElementById('INPUT25h');
-if(Input25h) { vz = x[24].getAttribute('VALUE') == '0'; iz = Input25h.value == '0';
-if(vz == iz) {
-if(vz) {
-Input25h.value = '1';
-Input25.style.backgroundImage = 'url("IMAGES/LED_BL_2.PNG")';
-if(Input25.getAttribute('value') != null) {Input25.value = '';} else {}
-} else {
-Input25h.value = '0';
-Input25.style.backgroundImage = 'url("IMAGES/LED_BL_4.PNG")';
-if(Input25.getAttribute('value') != null) {Input25.value = '';
-} else {}
-}}} else {
-if(x[24].getAttribute('VALUE') == '0') {
-SetBg('INPUT25', 'LED_BL_2.PNG');
-} else {
-SetBg('INPUT25', 'LED_BL_4.PNG');
-}}
+if(Input24) {Input24.style.backgroundColor = GetColor(x[23].getAttribute('VALUE'));}
 } else {document.location.reload(true); return;}
 } catch(err) {console.log(err.message)}
 if(pd!=''){setTimeout("GetXML('PAGE1.XML','"+pd+"')",1);}else{setTimeout("GetXML('PAGE1.XML')",1000);}}
@@ -263,22 +201,6 @@ document.location.reload(true);
 setTimeout("FunWatchDog()", 20000);
 }
 
-function PostXML22() {
-var Input22h = document.getElementById('INPUT22h');
-PostXML('PAGE1.XML', encodeURIComponent(Input22h.name+'='+Input22h.value));
-}
-function PostXML23() {
-var Input23h = document.getElementById('INPUT23h');
-PostXML('PAGE1.XML', encodeURIComponent(Input23h.name+'='+Input23h.value));
-}
-function PostXML24() {
-var Input24h = document.getElementById('INPUT24h');
-PostXML('PAGE1.XML', encodeURIComponent(Input24h.name+'='+Input24h.value));
-}
-function PostXML25() {
-var Input25h = document.getElementById('INPUT25h');
-PostXML('PAGE1.XML', encodeURIComponent(Input25h.name+'='+Input25h.value));
-}
 
 function PostGlobal() {
 }

@@ -1,15 +1,15 @@
 [Settings]
-Show=0
+Show=1
 Ask=0
 PicturesPath=C:\Program Files (x86)\Teco\Mosaic 2024.1\Images\TECO\LED
 [TimeStamps]
-CompileTD=1727873818
-SaveTD=1727420982
+CompileTD=1728022887
+SaveTD=1727937686
 [FormDesign1]
 DockPos=1
 StayOnTop=0
 CanDock=0
-Height=698
+Height=702
 Width=1357
 Top=0
 Left=0
