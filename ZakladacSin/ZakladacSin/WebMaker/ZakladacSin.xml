@@ -4,7 +4,7 @@
 	<Grid Enable="1" X="5" Y="5" />
 	<globalset newdim="1" />
 	<group caption="" Uid="24975">
-		<page caption="Index" name="PAGE1.XML" ajax="true" pause="1000" default="true" Uid="24974" ucid="1727937517" width="466" height="184">
+		<page caption="Index" name="PAGE1.XML" ajax="true" pause="1000" default="true" Uid="24974" ucid="1729685722" width="466" height="184">
 			<object caption="" X="10" Y="5" xoff="3" yoff="3" level="0" readonly="true" front="0" back="16777215" strong="false" italic="false" size="13" transparent="true" visneg="false" Uid="24980">
 				<image optcap="" variable="Zakladac.slots[1,1]" type="BOOL" on="LED_GR_4.PNG" off="LED_GR_2.PNG" />
 			</object>

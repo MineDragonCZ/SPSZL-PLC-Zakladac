@@ -1,5 +1,6 @@
 PROGRAM	prgZakladac
 	VAR
+	   initZakladac : BOOL := true;
 		 zakladac_state: INT :=	-1;
 		 zakladac_substate:	INT	:= 0;
 
@@ -42,7 +43,7 @@ PROGRAM	prgZakladac
 		 intEncoder: zakladacEncodeInt;
 		 getVerticalAddressFromColor:	zakladacGetVerticalAddrFromColor;
 
-		 main_clock_time:	TIME :=	T#150ms;
+		 main_clock_time:	TIME :=	T#200ms;
 		 subs_clock_time:	TIME :=	T#700ms;
 
 
@@ -64,6 +65,7 @@ PROGRAM	prgZakladac
 		 stopped : BOOL := false;
 		 
 	END_VAR
+	startMotoru	:= 0;
 	
 	start := buttonStart;
 	stop := buttonStop;
@@ -104,6 +106,39 @@ PROGRAM	prgZakladac
 	timer_1(IN :=	NOT(timer_1_done), PT	:= main_clock_time);
 	timer_2(IN :=	NOT(timer_2_done), PT	:= subs_clock_time);
 	
+	// INIT AND MOVE TO HOME
+	IF initZakladac AND timer_1_done THEN
+	   CASE zakladac_substate OF
+				 0:
+						poziceMotoru_hor_0 :=	1;
+						poziceMotoru_hor_1 :=	1;
+						poziceMotoru_hor_2 :=	1;
+						poziceMotoru_hor_3 :=	1;
+						vyberMotoru	:= 0;
+						zakladac_substate :=	1;
+				 ;
+				 1:
+						startMotoru	:= 1;
+						zakladac_substate :=	2;
+				 ;
+				 2:
+						vyberMotoru	:= 1;
+						poziceMotoru_ver_0 :=	1;
+						poziceMotoru_ver_1 :=	1;
+						poziceMotoru_ver_2 :=	1;
+						poziceMotoru_ver_3 :=	1;
+						zakladac_substate :=	3;
+				 ;
+				 3:	
+					 IF	vertikalniManipulacePovolena THEN
+						startMotoru	:= 1;
+						zakladac_substate	:= 0;
+						initZakladac := false;
+					 END_IF
+				 ;
+	   END_CASE;
+	END_IF
+	
 	IF zakladac_state <= -1 OR stopped THEN
      timer_startBtn(IN := NOT(timer_startBtn.Q), PT := timer_startBtn_time);
     	IF timer_startBtn.Q THEN
@@ -118,7 +153,6 @@ PROGRAM	prgZakladac
 	   stopped := true;
 		 stop := false;
 	END_IF
-	startMotoru	:= 0;
 	IF zakladac_state = -1 OR stopped THEN
 			zakladac_status	:= 'IDLE';
 		 IF	start	AND	NOT(stop)	THEN
